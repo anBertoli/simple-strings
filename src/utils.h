@@ -1,10 +1,10 @@
 
-#ifndef STR_INTERNAL_H
-#define STR_INTERNAL_H
+#ifndef SS_UTILS_H
+#define SS_UTILS_H
 
 #include <stdio.h>
 #include <strings.h>
-#include "ss_string.h"
+#include "string.h"
 
 static void str_debug(str *s, int mem) {
     if (s->buf == NULL) {
@@ -16,6 +16,7 @@ static void str_debug(str *s, int mem) {
         s->len, s->cap, s->buf, s->buf
     );
     if (!mem) return;
+
     for (int i = 0; i < s->cap+1; i++) {
         printf("%p --> %c\n",  s->buf+i,  s->buf[i]);
     }

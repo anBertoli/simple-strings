@@ -1,6 +1,7 @@
 #include <stdlib.h>
 #include <strings.h>
-#include "ss_internal.h"
+#include "string.h"
+#include "utils.h"
 
 /*
  * Build a new str copying the provided init string of length len (excluding the null

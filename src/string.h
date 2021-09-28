@@ -1,6 +1,6 @@
 
-#ifndef STR_STRINGS_H
-#define STR_STRINGS_H
+#ifndef SS_STRING_H
+#define SS_STRING_H
 #define END_STRING '\0'
 #define END_ITER (str *)1
 

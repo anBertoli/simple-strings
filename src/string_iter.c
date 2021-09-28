@@ -1,6 +1,7 @@
 #include <stdlib.h>
 #include <strings.h>
-#include "ss_string.h"
+#include "string.h"
+#include "utils.h"
 
 
 /*

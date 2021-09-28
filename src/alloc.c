@@ -1,7 +1,8 @@
 #include <strings.h>
 #include <stdlib.h>
 #include <stdio.h>
-#include "ss_internal.h"
+#include "string.h"
+#include "utils.h"
 
 /*
  * If STR_ALLOC_EXIT is defined (usually through the compiler flags), failures in
