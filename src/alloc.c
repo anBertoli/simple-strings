@@ -1,6 +1,5 @@
 #include <strings.h>
 #include <stdlib.h>
-#include <stdio.h>
 #include "string.h"
 #include "utils.h"
 
@@ -12,6 +11,7 @@
  */
 
 #ifdef STR_ALLOC_EXIT
+#include <stdio.h>
 
 void *_malloc(size_t size) {
     void *ptr = malloc(size);
