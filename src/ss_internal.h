@@ -1,0 +1,41 @@
+
+#ifndef STR_INTERNAL_H
+#define STR_INTERNAL_H
+
+#include <stdio.h>
+#include <strings.h>
+#include "ss_string.h"
+
+static void str_debug(str *s, int mem) {
+    if (s->buf == NULL) {
+        printf("str {NULL}\n");
+        return;
+    }
+    printf(
+        "str {len = %d, cap = %d, buf_ptr = %p ('%s')}\n",
+        s->len, s->cap, s->buf, s->buf
+    );
+    if (!mem) return;
+    for (int i = 0; i < s->cap+1; i++) {
+        printf("%p --> %c\n",  s->buf+i,  s->buf[i]);
+    }
+}
+
+static void str_iter_debug(str_iter *s, int mem) {
+    if (s->buf == NULL) {
+        printf("str_iter {NULL}\n");
+        return;
+    }
+    printf(
+        "str_iter {buf = %p ('%s'), ptr = %p ('%s'), del = %p ('%s')}\n",
+        s->buf, s->buf, s->ptr, s->ptr, s->del, s->del
+    );
+    if (!mem) return;
+
+    int len = strlen(s->buf);
+    for (int i = 0; i < len + 1; i++) {
+        printf("%p --> %c\n",  s->buf+i,  s->buf[i]);
+    }
+}
+
+#endif
