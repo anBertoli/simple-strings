@@ -31,13 +31,17 @@ void _test_strings(const char *desc, const char *want, const char *got, const ch
     printf("  %s\t%s\n", equal ? "✅" : "❌", desc);
     if (!equal) {
         num_failed++;
-        printf("\t\twant: %s, got: %s,", want, got);
+        printf("\t\twant: '%s', got: '%s',", want, got);
         printf("%s, line %d\n", filename, line);
     }
 }
 
 void _test_group(const char *desc) {
     printf("\n  ======= %s =======\n", desc);
+}
+
+void _test_subgroup(const char *desc) {
+    printf("\n\t--- %s --- \n", desc);
 }
 
 int _test_report(void) {

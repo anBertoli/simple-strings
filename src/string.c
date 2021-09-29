@@ -192,7 +192,6 @@ str *str_trim_left(str *s, const char *cutset) {
     size_t last = s->len - 1;
 
     while ((start <= last) && strchr(cutset, s->buf[start])) start++;
-
     size_t len = start > last ? 0 : (last - start + 1);
     if (start != 0) {
         memmove(s->buf, s->buf + start, len);
@@ -213,8 +212,11 @@ str *str_trim_left(str *s, const char *cutset) {
 str *str_trim_right(str *s, const char *cutset) {
     size_t last = s->len - 1;
 
-    while ((last >= 0) && strchr(cutset, s->buf[last])) last--;
-    size_t len = last < 0 ? 0 : last + 1;
+    while ((last >= 0) && strchr(cutset, s->buf[last])) {
+        if (last == 0) break; // avoid overflow
+        last--;
+    }
+    size_t len = last == 0 ? 0 : last + 1;
 
     s->buf[len] = END_STRING;
     s->len = len;
@@ -234,21 +236,21 @@ void str_clear(str *s) {
 }
 
 /*
- * Grow the allocated space for the string. The operation doesn't change the
- * stored string itself, both in the content and the length. It only grows the
+ * Changes the allocated space for the string. The operation doesn't change the
+ * stored string itself, both in the content and the length. It only changes the
  * available (allocated) space beyond the string len. The function is useful
  * to reserve more space earlier in order to avoid frequent reallocations
  * later. If the passed cap argument is smaller than the actual already
  * allocated space, the function returns s without any modification.
  */
-str *str_grow(str *s, size_t cap) {
-    if (s->cap <= cap) return s;
+str *str_grow(str *s, size_t free_space) {
+    size_t new_cap = s->len + free_space;
 
-    char *new_buf = _realloc(s->buf, sizeof(char) * cap + 1);
+    char *new_buf = _realloc(s->buf, sizeof(char) * new_cap + 1);
     if (new_buf == NULL) return NULL;
 
     s->buf = new_buf;
-    s->cap = cap;
+    s->cap = new_cap;
     return s;
 }
 
@@ -260,12 +262,7 @@ str *str_grow(str *s, size_t cap) {
  * of allocated space.
  */
 str *str_shrink(str *s) {
-    char *new_buf = _realloc(s->buf, sizeof(char) * s->len + 1);
-    if (new_buf == NULL) return NULL;
-
-    s->buf = new_buf;
-    s->cap = s->len;
-    return s;
+    return str_grow(s, 0);
 }
 
 /*
