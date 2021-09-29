@@ -226,13 +226,3 @@ void str_iter_free(str_iter *s_iter) {
     s_iter->del = NULL;
     free(s_iter);
 }
-
-
-
-
-
-
-
-
-
-
