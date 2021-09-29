@@ -326,35 +326,35 @@ void test_str_iter_next(void) {
 
     test_subgroup("split in words");
     str_iter *s_iter = str_split_raw("Ehy how are you?", " ");
-    test_iter_tokens(
+    test_tokens_iter(
         "should split in words", s_iter, 4,
         (char *[]){"Ehy", "how", "are", "you?"}
     );
 
     test_subgroup("missing delimiter");
     s_iter = str_split_raw("Ehy how are you?", "_");
-    test_iter_tokens(
+    test_tokens_iter(
         "should return the entire string", s_iter, 1,
         (char *[]){"Ehy how are you?"}
     );
 
     test_subgroup("empty delimiter");
     s_iter = str_split_raw("Ehy how are you?", "");
-    test_iter_tokens(
+    test_tokens_iter(
         "should return the entire string", s_iter, 1,
         (char *[]){"Ehy how are you?"}
     );
 
     test_subgroup("multiple consecutive delimiters");
     s_iter = str_split_raw("   Ehy    how   are   you?   ", " ");
-    test_iter_tokens(
+    test_tokens_iter(
         "shouldn't return empty tokens", s_iter, 4,
         (char *[]){"Ehy", "how", "are", "you?"}
     );
 
     test_subgroup("only consecutive delimiters");
     s_iter = str_split_raw("       ", " ");
-    test_iter_tokens(
+    test_tokens_iter(
         "should return no tokens", s_iter, 0,
         (char *[]){}
     );
