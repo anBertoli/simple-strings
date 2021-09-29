@@ -36,6 +36,17 @@ void _test_strings(const char *desc, const char *want, const char *got, const ch
     }
 }
 
+void _test_success(const char *desc, const char *filename, const int line) {
+    num_tests++;
+    printf("  %s\t%s\n", "✅", desc);
+}
+
+void _test_failure(const char *desc, const char *filename, const int line) {
+    num_tests++;
+    num_failed++;
+    printf("  %s\t%s\n", "❌", desc);
+}
+
 void _test_group(const char *desc) {
     printf("\n  ======= %s =======\n", desc);
 }

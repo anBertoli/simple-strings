@@ -1,5 +1,7 @@
+#include <stdlib.h>
 #include "../src/string.h"
 #include "../src/utils.h"
+#include "tests.h"
 #include "utils.h"
 
 void test_str_new_raw_len(void) {
@@ -299,39 +301,108 @@ void test_shrink(void) {
     str_free(s1);
 }
 
-void test_free(void) {
-    test_group("test str_free");
-
-    str *s1 = str_new_raw("ehy you");
-    str_free(s1);
-    test_equal("should erase the len", 0, s1->len);
-    test_equal("should erase the cap", 0, s1->cap);
-    test_cond("shouldn't change the string buffer to NULL", NULL == s1->buf);
-    str_free(s1);
-}
-
 void test_str_split_raw(void) {
     test_group("test str_split_raw");
+
+    str_iter *s_iter = str_split_raw("Ehy how are you?", " ");
+    test_cond("should point to the start", s_iter->buf == s_iter->ptr);
+    test_strings("should have copied the del", " ", s_iter->del);
+    str_iter_free(s_iter);
 }
 
 void test_str_split(void) {
     test_group("test str_split");
+
+    str *s = str_new_raw("Ehy how are you?");
+    str_iter *s_iter = str_split(s, "?|!");
+    test_cond("should point to the start", s_iter->buf == s_iter->ptr);
+    test_strings("should have copied the del", "?|!", s_iter->del);
+    str_iter_free(s_iter);
 }
+
 
 void test_str_iter_next(void) {
     test_group("test str_iter_next");
+
+    test_subgroup("split in words");
+    str_iter *s_iter = str_split_raw("Ehy how are you?", " ");
+    test_iter_tokens(
+        "should split in words", s_iter, 4,
+        (char *[]){"Ehy", "how", "are", "you?"}
+    );
+
+    test_subgroup("missing delimiter");
+    s_iter = str_split_raw("Ehy how are you?", "_");
+    test_iter_tokens(
+        "should return the entire string", s_iter, 1,
+        (char *[]){"Ehy how are you?"}
+    );
+
+    test_subgroup("empty delimiter");
+    s_iter = str_split_raw("Ehy how are you?", "");
+    test_iter_tokens(
+        "should return the entire string", s_iter, 1,
+        (char *[]){"Ehy how are you?"}
+    );
+
+    test_subgroup("multiple consecutive delimiters");
+    s_iter = str_split_raw("   Ehy    how   are   you?   ", " ");
+    test_iter_tokens(
+        "shouldn't return empty tokens", s_iter, 4,
+        (char *[]){"Ehy", "how", "are", "you?"}
+    );
+
+    test_subgroup("only consecutive delimiters");
+    s_iter = str_split_raw("       ", " ");
+    test_iter_tokens(
+        "should return no tokens", s_iter, 0,
+        (char *[]){}
+    );
 }
 
 void test_str_collect_iter(void) {
     test_group("test str_collect_iter");
-}
+    int n_tokens;
 
-void test_str_collect_from_raw(void) {
-    test_group("test str_collect_from_raw");
-}
+    test_subgroup("split in words");
+    str_iter *s_iter = str_split_raw("Ehy how are you?", " ");
+    str **tokens = str_collect_iter(s_iter, &n_tokens);
+    test_tokens_list(
+        "should split in words", tokens, n_tokens,
+        (char *[]){"Ehy", "how", "are", "you?"}, 4
+    );
 
-void test_str_iter_free(void) {
-    test_group("test str_iter_free");
+    test_subgroup("missing delimiter");
+    s_iter = str_split_raw("Ehy how are you?", "_");
+    tokens = str_collect_iter(s_iter, &n_tokens);
+    test_tokens_list(
+        "should return the entire string", tokens, n_tokens,
+        (char *[]){"Ehy how are you?"}, 1
+    );
+
+    test_subgroup("empty delimiter");
+    s_iter = str_split_raw("Ehy how are you?", "");
+    tokens = str_collect_iter(s_iter, &n_tokens);
+    test_tokens_list(
+        "should return the entire string", tokens, n_tokens,
+        (char *[]){"Ehy how are you?"}, 1
+    );
+
+    test_subgroup("multiple consecutive delimiters");
+    s_iter = str_split_raw("   Ehy    how   are   you?   ", " ");
+    tokens = str_collect_iter(s_iter, &n_tokens);
+    test_tokens_list(
+        "shouldn't return empty tokens", tokens, n_tokens,
+        (char *[]){"Ehy", "how", "are", "you?"}, 4
+    );
+
+    test_subgroup("only consecutive delimiters");
+    s_iter = str_split_raw("      ", " ");
+    tokens = str_collect_iter(s_iter, &n_tokens);
+    test_tokens_list(
+    "shouldn't return empty tokens", tokens, n_tokens,
+    (char *[]){}, 0
+    );
 }
 
 
@@ -347,14 +418,11 @@ int main(void) {
     test_clear();
     test_grow();
     test_shrink();
-    test_free();
 
     test_str_split_raw();
     test_str_split();
     test_str_iter_next();
     test_str_collect_iter();
-    test_str_collect_from_raw();
-    test_str_iter_free();
 
     return test_report();
 }

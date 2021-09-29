@@ -59,7 +59,10 @@ str_iter *str_split(str *s, const char *del) {
  * starts at the end of the previous delimiter (or the start of the original string)
  * and ends at the start of the next delimiter. Those substrings are heap allocated
  * and must be freed after use (wth str_free). If no more delimiters are present, the
- * remaining part of the string is returned.
+ * remaining part of the string is returned. If the iterator contains an empty delimiter
+ * the entire string is returned. Multiple consecutive delimiters are treated as one
+ * delimiter, and in general no empty string are returned from this function. If the
+ * delimiter is not found in the string, the entire string is returned.
  *
  * When the iterator is exhausted str_iter_next returns END_ITER. The caller can test
  * for this condition to stop the iteration. When END_ITER is returned, str_iter_next
@@ -77,11 +80,18 @@ str *str_iter_next(str_iter *s_iter) {
         return END_ITER;
     }
 
+    // Guard against empty delimiter.
+    if (strcmp(s_iter->del, "") == 0) {
+        str *s = str_new_raw_len(s_iter->ptr, strlen(s_iter->ptr));
+        str_shrink(s);
+        if (s == NULL) return NULL;
+        s_iter->ptr = NULL; // flag for the last next call
+        return s;
+    }
+
     while (1) {
         char *end = strstr(s_iter->ptr, s_iter->del);
         if (end == NULL) {
-            // No delimiter found. Return the
-            // rest and 'close' the iterator.
             size_t len = strlen(s_iter->ptr);
             if (len == 0) {
                 // Delimiter at the end, don't
@@ -91,6 +101,7 @@ str *str_iter_next(str_iter *s_iter) {
             }
 
             str *s = str_new_raw_len(s_iter->ptr, len);
+            str_shrink(s);
             if (s == NULL) return NULL;
             s_iter->ptr = NULL; // flag for the last next call
             return s;
@@ -108,6 +119,7 @@ str *str_iter_next(str_iter *s_iter) {
         if (s == NULL) return NULL;
 
         s_iter->ptr = end + strlen(s_iter->del);
+        str_shrink(s);
         return s;
     }
 }
@@ -163,7 +175,7 @@ str **str_collect_iter(str_iter *s_iter, int *n_str) {
  * Returns a list of heap allocated strings (str**) of length n_str in case of success or
  * NULL in case of allocation failures.
  */
-str **str_collect_from_raw(const char *raw_str, const char  *del, int *n_str) {
+str **str_collect_from_row(const char *raw_str, const char  *del, int *n_str) {
     str_iter *s_iter = str_split_raw(raw_str, del);
     if (s_iter == NULL) return NULL;
 
