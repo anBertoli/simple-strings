@@ -139,7 +139,7 @@ str **str_collect_iter(str_iter *s_iter, int *n_str) {
         // with steps of length 20.
         if (i % 20 == 0) {
             str **new_str_array = _realloc(str_array, sizeof(str*) * (i + 20));
-            if (new_str_array != NULL) str_array = new_str_array
+            if (new_str_array != NULL) str_array = new_str_array;
             else {
                 free(str_array);
                 return NULL;

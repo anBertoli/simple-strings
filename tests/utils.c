@@ -1,5 +1,6 @@
 #include <stdbool.h>
 #include <stdio.h>
+#include <strings.h>
 
 static int num_tests = 0;
 static int num_failed = 0;
@@ -15,7 +16,6 @@ void _test_cond(const char *desc, const bool cond, const char *filename, const i
 
 void _test_equal(const char *desc, const int want, const int got, const char *filename, const int line) {
     num_tests++;
-
     bool equal = want == got;
     printf("  %s\t%s\n", equal ? "✅" : "❌", desc);
     if (!equal) {
@@ -25,13 +25,27 @@ void _test_equal(const char *desc, const int want, const int got, const char *fi
     }
 }
 
+void _test_strings(const char *desc, const char *want, const char *got, const char *filename, const int line) {
+    num_tests++;
+    bool equal = strcmp(got, want) == 0;
+    printf("  %s\t%s\n", equal ? "✅" : "❌", desc);
+    if (!equal) {
+        num_failed++;
+        printf("\t\twant: %s, got: %s,", want, got);
+        printf("%s, line %d\n", filename, line);
+    }
+}
+
 void _test_group(const char *desc) {
     printf("\n  ======= %s =======\n", desc);
 }
 
 int _test_report(void) {
-    printf("\n  ======= Tests Report =======\n");
+    printf("\n  ======= Tests Report =======\n\n");
     printf("  Tests: %d, passed: %d, failed: %d\n", num_tests, num_tests - num_failed, num_failed);
-    printf("  There are some failed tests.\n\n");
+    if (num_failed)
+        printf("  ❌ There are some failed tests.\n\n");
+    else
+        printf("  ✅ All tests passed.\n\n");
     return num_failed ? 1 : 0;
 }

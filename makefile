@@ -31,7 +31,7 @@ install-headers:
 	@echo "Header file installed."
 
 test:
-	@gcc tests/tests.c tests/utils.c -o tests/tests
+	@gcc tests/tests.c tests/utils.c src/alloc.c src/string.c src/string_iter.c -o tests/tests
 	@./tests/tests
 	@rm -f ./tests/tests
 
