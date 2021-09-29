@@ -59,6 +59,7 @@ str *str_iter_next(str_iter *s_iter);
 
 str **str_collect_iter(str_iter *s_iter, int *n_str);
 str **str_collect_from_row(const char *raw_str, const char  *del, int *n_str);
+str **str_collect_from_str(str *s, const char  *del, int *n_str);
 
 void str_iter_free(str_iter *s_iter);
 

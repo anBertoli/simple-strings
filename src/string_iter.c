@@ -191,6 +191,29 @@ str **str_collect_from_row(const char *raw_str, const char  *del, int *n_str) {
 }
 
 /*
+ * Return all the substrings generated from splitting the s string argument with
+ * the delimiter string. The function is useful when the caller doesn't want/need
+ * to create a string iterator and collect substrings manually.
+ *
+ * Returns a list of heap allocated strings (str**) of length n_str in case of success or
+ * NULL in case of allocation failures.
+ */
+str **str_collect_from_str(str *s, const char  *del, int *n_str) {
+    str_iter *s_iter = str_split(s, del);
+    if (s_iter == NULL) return NULL;
+
+    str ** substrings = str_collect_iter(s_iter, n_str);
+    if (substrings == NULL) {
+        // If an error occurred the iterator wasn't
+        // freed automatically during the iteration.
+        str_iter_free(s_iter);
+        return NULL;
+    }
+
+    return substrings;
+}
+
+/*
  * Deallocate the memory used by a string iterator. The string iterator can't be
  * used after being freed. It's a no-op if the pointed struct was already freed.
  */
