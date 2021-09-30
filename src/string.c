@@ -3,6 +3,9 @@
 #include "string.h"
 #include "utils.h"
 
+
+// TODO: add str_new_raw_len_cap
+
 /*
  * Build a new string copying the provided init string of length len (the len argument
  * doesn't include the null terminator). If the length of the init string is greater than
@@ -18,8 +21,7 @@
  *
  * IMPORTANT
  * The str struct must not be manipulated by the caller, the fields are updated by the
- * functions of this library. The only field that can be accessed in read-only mode
- * is the buf field, which contains the actual string (char *).
+ * functions of this library and they must be considered read-only.
  */
 str *str_new_raw_len(const char *init, const size_t len) {
     size_t cap = len * 2;
@@ -55,8 +57,7 @@ str *str_new_raw_len(const char *init, const size_t len) {
  *
  * IMPORTANT
  * The str struct must not be manipulated by the caller, the fields are updated by the
- * functions of this library. The only field that can be accessed in read-only mode
- * is the buf field, which contains the actual string (char *).
+ * functions of this library and they must be considered read-only.
  */
 str *str_new_raw(const char *init) {
     return (init == NULL)
@@ -73,8 +74,7 @@ str *str_new_raw(const char *init) {
  *
  * IMPORTANT
  * The str struct must not be manipulated by the caller, the fields are updated by the
- * functions of this library. The only field that can be accessed in read-only mode
- * is the buf field, which contains the actual string (char *).
+ * functions of this library and they must be considered read-only.
  */
 str *str_new_empty() {
     return str_new_raw_len("", 0);
