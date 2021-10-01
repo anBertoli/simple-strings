@@ -1,7 +1,7 @@
 #include <stdlib.h>
 #include <strings.h>
 #include "string.h"
-#include "internal.h"
+#include "internal/debug.h"
 
 
 /*

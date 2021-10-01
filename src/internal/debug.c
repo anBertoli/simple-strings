@@ -1,12 +1,8 @@
-
-#ifndef SS_UTILS_H
-#define SS_UTILS_H
-
 #include <stdio.h>
 #include <strings.h>
-#include "string.h"
+#include "../string.h"
 
-static void str_debug(str *s, int mem) {
+void str_debug(str *s, int mem) {
     if (s->buf == NULL) {
         printf("str {NULL}\n");
         return;
@@ -26,7 +22,7 @@ static void str_debug(str *s, int mem) {
     }
 }
 
-static void str_iter_debug(str_iter *s, int mem) {
+void str_iter_debug(str_iter *s, int mem) {
     if (s->buf == NULL) {
         printf("str_iter {NULL}\n");
         return;
@@ -42,5 +38,3 @@ static void str_iter_debug(str_iter *s, int mem) {
         printf("%p --> %c\n",  s->buf+i,  s->buf[i]);
     }
 }
-
-#endif

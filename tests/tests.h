@@ -1,52 +1,26 @@
-#include "utils.h"
+#include <stdbool.h>
 
-void test_tokens_iter(const char *desc, str_iter *s_iter, int n_tokens, char **tokens) {
-    for (int i = 0; ; i++) {
-        str *s_next = str_iter_next(s_iter);
-        if (s_next == END_ITER) break;
-        if (s_next == NULL) exit(1);
+#define test_cond(desc, cond) _test_cond(desc, cond, __FILE__, __LINE__)
+#define test_equal(desc, want, got) _test_equal(desc, want, got, __FILE__, __LINE__)
+#define test_strings(desc, want, got) _test_strings(desc, want, got, __FILE__, __LINE__)
+#define test_success(desc) _test_success(desc, __FILE__, __LINE__)
+#define test_failure(desc) _test_failure(desc, __FILE__, __LINE__)
 
-        if (i+1 > n_tokens) {
-            test_failure("should have the correct number of words");
-            return;
-        }
 
-        if (strcmp(tokens[i], s_next->buf) != 0) {
-            test_failure(desc);
-            return;
-        }
-        if (strlen(tokens[i]) != s_next->len || s_next->cap != s_next->len) {
-            test_failure("should have len = cap = length of token");
-            return;
-        }
-    }
+#define test_report() _test_report()
+#define test_group(desc) _test_group(desc)
+#define test_subgroup(desc) _test_subgroup(desc)
 
-    test_success("should have the correct number of words");
-    test_success("should have len = cap = length of word");
-    test_success(desc);
-}
+void _test_cond(const char *desc, const bool cond, const char *filename, const int line);
+void _test_equal(const char *desc, const int want, const int got, const char *filename, const int line);
+void _test_strings(const char *desc, const char *want, const char *got, const char *filename, const int line);
+void _test_success(const char *desc, const char *filename, const int line);
+void _test_failure(const char *desc, const char *filename, const int line);
 
-void test_tokens_list(const char *desc, str **str_list, int n_list, char **wanted_list, int n_wanted) {
-    if (n_list != n_wanted) {
-        test_failure("should have the correct number of words");
-        return;
-    }
 
-    for (int i = 0; i < n_list; i++) {
-        if (strcmp(wanted_list[i], str_list[i]->buf) != 0) {
-            test_failure(desc);
-            return;
-        }
-        if (
-            strlen(wanted_list[i]) != str_list[i]->len ||
-            str_list[i]->cap != str_list[i]->len
-        ) {
-            test_failure("should have len = cap = length of token");
-            return;
-        }
-    }
+void _test_group(const char *desc);
+void _test_subgroup(const char *desc);
+int _test_report(void);
 
-    test_success("should have the correct number of words");
-    test_success("should have len = cap = length of word");
-    test_success(desc);
-}
+void test_tokens_iter(const char *desc, str_iter *s_iter, int n_tokens, char **tokens);
+void test_tokens_list(const char *desc, str **str_list, int n_list, char **wanted_list, int n_wanted);

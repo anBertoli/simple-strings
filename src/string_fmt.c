@@ -2,7 +2,7 @@
 #include <strings.h>
 #include <stdarg.h>
 #include "string.h"
-#include "internal.h"
+#include "internal/debug.h"
 
 /*
  * Internal function, formats a string using the usual C formatting directive and

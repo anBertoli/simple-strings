@@ -1,66 +1,56 @@
-#include <stdbool.h>
-#include <stdio.h>
+#include <stdlib.h>
 #include <strings.h>
+#include "../src/string.h"
+#include "tests.h"
 
-static int num_tests = 0;
-static int num_failed = 0;
 
-void _test_cond(const char *desc, const bool cond, const char *filename, const int line) {
-    num_tests++;
-    printf("  %s\t%s\n", cond ? "✅" : "❌", desc);
-    if (!cond) {
-        num_failed++;
-        printf("\t\t%s, line %d\n", filename, line);
+void test_tokens_iter(const char *desc, str_iter *s_iter, int n_tokens, char **tokens) {
+    for (int i = 0; ; i++) {
+        str *s_next = str_iter_next(s_iter);
+        if (s_next == END_ITER) break;
+        if (s_next == NULL) exit(1);
+
+        if (i+1 > n_tokens) {
+            test_failure("should have the correct number of words");
+            return;
+        }
+
+        if (strcmp(tokens[i], s_next->buf) != 0) {
+            test_failure(desc);
+            return;
+        }
+        if (strlen(tokens[i]) != s_next->len || s_next->cap != s_next->len) {
+            test_failure("should have len = cap = length of token");
+            return;
+        }
     }
+
+    test_success("should have the correct number of words");
+    test_success("should have len = cap = length of word");
+    test_success(desc);
 }
 
-void _test_equal(const char *desc, const int want, const int got, const char *filename, const int line) {
-    num_tests++;
-    bool equal = want == got;
-    printf("  %s\t%s\n", equal ? "✅" : "❌", desc);
-    if (!equal) {
-        num_failed++;
-        printf("\t\twant: %d, got: %d,", want, got);
-        printf("%s, line %d\n", filename, line);
+void test_tokens_list(const char *desc, str **str_list, int n_list, char **wanted_list, int n_wanted) {
+    if (n_list != n_wanted) {
+        test_failure("should have the correct number of words");
+        return;
     }
-}
 
-void _test_strings(const char *desc, const char *want, const char *got, const char *filename, const int line) {
-    num_tests++;
-    bool equal = strcmp(got, want) == 0;
-    printf("  %s\t%s\n", equal ? "✅" : "❌", desc);
-    if (!equal) {
-        num_failed++;
-        printf("\t\twant: '%s', got: '%s',", want, got);
-        printf("%s, line %d\n", filename, line);
+    for (int i = 0; i < n_list; i++) {
+        if (strcmp(wanted_list[i], str_list[i]->buf) != 0) {
+            test_failure(desc);
+            return;
+        }
+        if (
+                strlen(wanted_list[i]) != str_list[i]->len ||
+                str_list[i]->cap != str_list[i]->len
+                ) {
+            test_failure("should have len = cap = length of token");
+            return;
+        }
     }
-}
 
-void _test_success(const char *desc, const char *filename, const int line) {
-    num_tests++;
-    printf("  %s\t%s\n", "✅", desc);
-}
-
-void _test_failure(const char *desc, const char *filename, const int line) {
-    num_tests++;
-    num_failed++;
-    printf("  %s\t%s\n", "❌", desc);
-}
-
-void _test_group(const char *desc) {
-    printf("\n  ======= %s =======\n", desc);
-}
-
-void _test_subgroup(const char *desc) {
-    printf("\n\t--- %s --- \n", desc);
-}
-
-int _test_report(void) {
-    printf("\n  ======= Tests Report =======\n\n");
-    printf("  Tests: %d, passed: %d, failed: %d\n", num_tests, num_tests - num_failed, num_failed);
-    if (num_failed)
-        printf("  ❌ There are some failed tests.\n\n");
-    else
-        printf("  ✅ All tests passed.\n\n");
-    return num_failed ? 1 : 0;
+    test_success("should have the correct number of words");
+    test_success("should have len = cap = length of word");
+    test_success(desc);
 }

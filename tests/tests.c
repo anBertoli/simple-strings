@@ -1,8 +1,8 @@
 #include <stdlib.h>
+#include <strings.h>
 #include "../src/string.h"
-#include "../src/internal.h"
+#include "../src/internal/debug.h"
 #include "tests.h"
-#include "utils.h"
 
 /*
  * String manipulation tests.

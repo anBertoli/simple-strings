@@ -14,9 +14,9 @@ install: static-lib install-static-lib install-headers
 static-lib:
 	@mkdir -p lib
 	@rm -f lib/*
-	@gcc -c src/alloc.c src/string.c src/string_iter.c src/string_fmt.c
+	@gcc -c src/alloc.c src/string.c src/string_iter.c src/string_fmt.c src/internal/debug.c
 	@mv *.o lib/
-	@ar rcs lib/libss.a lib/alloc.o lib/string.o lib/string_iter.o lib/string_fmt.o
+	@ar rcs lib/libss.a lib/alloc.o lib/string.o lib/string_iter.o lib/string_fmt.o lib/debug.o
 	@rm -f lib/*.o
 
 install-static-lib: static-lib
@@ -28,7 +28,7 @@ install-headers:
 	@echo "Copied ss_string.h header to $(PREFIX)/include/ss.h"
 
 test:
-	@gcc tests/tests.c tests/utils.c src/alloc.c src/string.c src/string_iter.c src/string_fmt.c -o tests/tests
+	@gcc tests/tests.c tests/utils.c tests/framework.c src/alloc.c src/string.c src/string_iter.c src/string_fmt.c src/internal/debug.c -o tests/tests
 	@./tests/tests
 	@rm -f ./tests/tests
 
