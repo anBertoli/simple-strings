@@ -1,10 +1,51 @@
 #include <stdlib.h>
 #include <strings.h>
 #include "string.h"
-#include "utils.h"
+#include "internal.h"
 
 
-// TODO: add str_new_raw_len_cap
+/*
+ * Build a new string copying the provided init string of length len (the len argument
+ * doesn't include the null terminator) and making space for cap bytes. If the length
+ * of the init string is greater than len, the exceeding bytes are discarded. If cap
+ * < len, len is adjusted to be equal to cap. The caller is responsible for providing the
+ * correct length, cap and a valid init string. The string is heap allocated and a pointer
+ * to it is returned. The str must be freed after use with the provided str_free function.
+ *
+ * Useful shorthands are str_new_raw_len and str_new_raw functions, which are more
+ * ergonomic and easier to use.
+ *
+ * Returns the newly generated string or NULL if the allocation fails.
+ *
+ * IMPORTANT
+ * The str struct must not be manipulated by the caller, the fields are updated by the
+ * functions of this library and they must be considered read-only.
+ */
+str *str_new_raw_len_cap(const char *init, const size_t len, const size_t cap) {
+    size_t _len = len;
+    if (cap <= len) _len = cap;
+
+    char *buf = _malloc(sizeof(char) * cap + 1);
+    if (buf == NULL) {
+        return NULL;
+    }
+
+    memcpy(buf, init, _len);
+    buf[_len] = END_STRING;
+
+    str *s = _malloc(sizeof(str));
+    if (s == NULL) {
+        free(buf);
+        return NULL;
+    }
+    *s = (str){
+        .len = _len,
+        .cap = cap,
+        .buf = buf
+    };
+
+    return s;
+}
 
 /*
  * Build a new string copying the provided init string of length len (the len argument
@@ -12,6 +53,7 @@
  * len, the exceeding bytes are discarded. The caller is responsible for providing the
  * correct len length and a valid init string. The string is heap allocated and a pointer
  * to it is returned. The str must be freed after use with the provided str_free function.
+ * The str_new_raw_len function is a shorthand for str_new_raw_len_cap(init, len, len * 2).
  *
  * The returned string has length len, but (len * 2 + 1) bytes are allocated (defined the
  * cap number, +1 for the null terminator). This is often useful because we reduce the
@@ -24,34 +66,14 @@
  * functions of this library and they must be considered read-only.
  */
 str *str_new_raw_len(const char *init, const size_t len) {
-    size_t cap = len * 2;
-    char *buf = _malloc(sizeof(char) * cap + 1);
-    if (buf == NULL) {
-        return NULL;
-    }
-
-    memcpy(buf, init, len);
-    buf[len] = END_STRING;
-
-    str *s = _malloc(sizeof(str));
-    if (s == NULL) {
-        free(buf);
-        return NULL;
-    }
-    *s = (str){
-        .len = len,
-        .cap = cap,
-        .buf = buf
-    };
-
-    return s;
+    return str_new_raw_len_cap(init, len, len * 2);
 }
 
 /*
  * Build a new string copying the provided null terminated 'init' C string. The str_new_raw
- * function is a shorthand for str_new_raw_len(init, len), where len here is calculated with
- * strlen. If the init pointer is NULL a new empty string is built. The returned string must
- * be freed after use with the provided str_free function.
+ * function is a shorthand for str_new_raw_len(init, len), where len here is calculated
+ * with strlen. If the init pointer is NULL a new empty string is built. The returned
+ * string must be freed after use with the provided str_free function.
  *
  * Returns the newly generated string or NULL if the allocation fails.
  *
@@ -224,6 +246,18 @@ str *str_trim_right(str *s, const char *cutset) {
 }
 
 /*
+ * Cut the string at the provided length. The string is shortened to contain the
+ * first len bytes. The allocation space (cap) is left untouched. The bytes after
+ * the len-th one are not cleaned, they are just marked as 'unused'. If
+ * length > string length the function is a no-op.
+ */
+void str_cut(str *s, size_t len) {
+    if (len > s->len) return;
+    s->len = len;
+    s->buf[len] = END_STRING;
+}
+
+/*
  * Erase the string. The length of the string is set to 0 and a null terminator
  * is written in the first byte of the string buffer. The allocation space (cap)
  * is left untouched, so future string manipulations can be performed with fewer
@@ -243,7 +277,7 @@ void str_clear(str *s) {
  * later. If the passed cap argument is smaller than the actual already
  * allocated space, the function returns s without any modification.
  */
-str *str_grow(str *s, size_t free_space) {
+str *str_set_free_space(str *s, size_t free_space) {
     size_t new_cap = s->len + free_space;
 
     char *new_buf = _realloc(s->buf, sizeof(char) * new_cap + 1);
@@ -254,6 +288,15 @@ str *str_grow(str *s, size_t free_space) {
     return s;
 }
 
+/*
+ * Grow the allocated space (cap) by 'space' bytes. The operation doesn't change the
+ * stored string itself, both in the content and the length. It only changes the
+ * available (allocated) space beyond the string len. The function is useful
+ * to reserve more space earlier in order to avoid frequent reallocations
+ */
+str *str_grow(str *s, size_t space) {
+    return str_set_free_space(s, (s->cap - s->len) + space);
+}
 
 /*
  * Reduce the allocated space (cap) to contain exactly the current string. The
@@ -262,7 +305,7 @@ str *str_grow(str *s, size_t free_space) {
  * of allocated space.
  */
 str *str_shrink(str *s) {
-    return str_grow(s, 0);
+    return str_set_free_space(s, 0);
 }
 
 /*

@@ -23,6 +23,7 @@ typedef struct {
     char *buf;
 } str;
 
+str *str_new_raw_len_cap(const char *init, const size_t len, const size_t cap);
 str *str_new_raw_len(const char *init, const size_t len);
 str *str_new_raw(const char *init);
 str *str_new_empty();
@@ -36,9 +37,15 @@ str *str_trim(str *s, const char *cutset);
 str *str_trim_left(str *s, const char *cutset);
 str *str_trim_right(str *s, const char *cutset);
 
+void str_cut(str *s, size_t len);
 void str_clear(str *s);
-str *str_grow(str *s, size_t cap);
+
+str *str_set_free_space(str *s, size_t free_space);
+str *str_grow(str *s, size_t space);
 str *str_shrink(str *s);
+
+str *str_sprintf_concat(str *s, const char *format, ...);
+str *str_sprintf(const char *format, ...);
 
 void str_free(str *s);
 

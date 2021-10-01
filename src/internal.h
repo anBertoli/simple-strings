@@ -17,8 +17,12 @@ static void str_debug(str *s, int mem) {
     );
     if (!mem) return;
 
-    for (int i = 0; i < s->cap+1; i++) {
-        printf("%p --> %c\n",  s->buf+i,  s->buf[i]);
+    for (int i = 0; i < s->cap+1+10; i++) {
+        if (i == s->cap) {
+            printf("%p --> %c   (<-- ends here) \n",  s->buf+i,  s->buf[i]);
+        } else {
+            printf("%p --> %c\n",  s->buf+i,  s->buf[i]);
+        }
     }
 }
 
