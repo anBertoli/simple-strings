@@ -8,6 +8,8 @@
  * Internal function, formats a string using the usual C formatting directive and
  * concatenates the formatted string to the s string. The variadic arguments are
  * passed as a va_list type argument list.
+ *
+ * The returned string must be freed with the dedicated str_free function().
  */
 static str *str_sprintf_concat_va(str *s, const char *format, va_list arg_list) {
     size_t buf_len = sizeof(char) * strlen(format) * 2;
@@ -56,7 +58,7 @@ static str *str_sprintf_concat_va(str *s, const char *format, va_list arg_list) 
 
 /*
  * Format a string using the usual C formatting directive and concatenate the formatted string
- * to the s string.
+ * to the s string. The returned string must be freed with the dedicated str_free function().
  *
  * Returns the concatenated s string in case of success or NULL in case of allocations errors.
  */
@@ -70,6 +72,7 @@ str *str_sprintf_concat(str *s, const char *format, ...) {
 
 /*
  * Format a string using the usual C formatting directive and returns a formatted string.
+ * The returned string must be freed with the dedicated str_free function().
  *
  * Returns the concatenated s string in case of success or NULL in case of allocations errors.
  */

@@ -1,5 +1,4 @@
 
-
 ifeq ($(PREFIX),)
 	PREFIX := /usr/local
 endif
@@ -21,14 +20,12 @@ static-lib:
 	@rm -f lib/*.o
 
 install-static-lib: static-lib
-	@echo "Copying static library libss.a to $(PREFIX)/lib/libss.a"
 	@cp lib/libss.a $(PREFIX)/lib/
-	@echo "Done."
+	@echo "Copied static library libss.a to $(PREFIX)/lib/libss.a"
 
 install-headers:
-	@echo "Copying ss_string.h header to $(PREFIX)/include/ss.h"
 	@cp src/string.h $(PREFIX)/include/ss.h
-	@echo "Header file installed."
+	@echo "Copied ss_string.h header to $(PREFIX)/include/ss.h"
 
 test:
 	@gcc tests/tests.c tests/utils.c src/alloc.c src/string.c src/string_iter.c src/string_fmt.c -o tests/tests
@@ -38,6 +35,8 @@ test:
 uninstall:
 	@rm -f $(PREFIX)/include/ss.h
 	@rm -f $(PREFIX)/lib/libss.a
+	@echo "Removed ss_string.h header from $(PREFIX)/include/ss.h"
+	@echo "Removed static library libss.a from $(PREFIX)/lib/libss.a"
 
 clear:
 	@rm -rf lib
