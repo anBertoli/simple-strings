@@ -28,7 +28,17 @@ install-headers:
 	@echo "Copied ss_string.h header to $(PREFIX)/include/ss.h"
 
 test:
-	@gcc tests/tests.c tests/utils.c tests/framework.c src/alloc.c src/string.c src/string_iter.c src/string_fmt.c src/internal/debug.c -o tests/tests
+	@gcc \
+		tests/tests.c \
+		tests/utils.c \
+		tests/framework/framework.c \
+		src/alloc.c \
+		src/string.c \
+		src/string_iter.c \
+		src/string_fmt.c \
+		src/internal/debug.c \
+		-o tests/tests
+
 	@./tests/tests
 	@rm -f ./tests/tests
 

@@ -1,8 +1,8 @@
 
-#ifndef SS_UTILS_H
-#define SS_UTILS_H
+#ifndef SS_DEBUG_H
+#define SS_DEBUG_H
 
-void str_debug(str *s, int mem);
-void str_iter_debug(str_iter *s, int mem);
+void ss_debug(ss *s, int mem);
+void ss_iter_debug(ss_iter *s, int mem);
 
 #endif

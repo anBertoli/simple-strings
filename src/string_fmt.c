@@ -9,9 +9,9 @@
  * concatenates the formatted string to the s string. The variadic arguments are
  * passed as a va_list type argument list.
  *
- * The returned string must be freed with the dedicated str_free function().
+ * The returned string must be freed with the dedicated ss_free function().
  */
-static str *str_sprintf_concat_va(str *s, const char *format, va_list arg_list) {
+static ss *ss_sprintf_concat_va(ss *s, const char *format, va_list arg_list) {
     size_t buf_len = sizeof(char) * strlen(format) * 2;
     char *buf = _malloc(buf_len);
     if (buf == NULL) {
@@ -46,40 +46,40 @@ static str *str_sprintf_concat_va(str *s, const char *format, va_list arg_list) 
         buf = new_buf;
     }
 
-    // Finally, concat the str string with the formatted
+    // Finally, concat the ss string with the formatted
     // one, shrink the free space and return the former.
-    s = str_concat_raw_len(s, buf, n_written);
+    s = ss_concat_raw_len(s, buf, n_written);
     free(buf);
     if (s == NULL) return NULL;
-    s = str_shrink(s);
+    s = ss_shrink(s);
     if (s == NULL) return NULL;
     return s;
 }
 
 /*
  * Format a string using the usual C formatting directive and concatenate the formatted string
- * to the s string. The returned string must be freed with the dedicated str_free function().
+ * to the s string. The returned string must be freed with the dedicated ss_free function().
  *
  * Returns the concatenated s string in case of success or NULL in case of allocations errors.
  */
-str *str_sprintf_concat(str *s, const char *format, ...) {
+ss *ss_sprintf_concat(ss *s, const char *format, ...) {
     va_list arg_list;
     va_start(arg_list, format);
-    s = str_sprintf_concat_va(s, format, arg_list);
+    s = ss_sprintf_concat_va(s, format, arg_list);
     va_end(arg_list);
     return s;
 }
 
 /*
  * Format a string using the usual C formatting directive and returns a formatted string.
- * The returned string must be freed with the dedicated str_free function().
+ * The returned string must be freed with the dedicated ss_free function().
  *
  * Returns the concatenated s string in case of success or NULL in case of allocations errors.
  */
-str *str_sprintf(const char *format, ...) {
+ss *ss_sprintf(const char *format, ...) {
     va_list arg_list;
     va_start(arg_list, format);
-    str *s = str_sprintf_concat_va(str_new_empty(), format, arg_list);
+    ss *s = ss_sprintf_concat_va(ss_new_empty(), format, arg_list);
     va_end(arg_list);
     return s;
 }

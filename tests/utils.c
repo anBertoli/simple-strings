@@ -1,12 +1,13 @@
 #include <stdlib.h>
 #include <strings.h>
 #include "../src/string.h"
-#include "tests.h"
+#include "framework/framework.h"
+#include "utils.h"
 
 
-void test_tokens_iter(const char *desc, str_iter *s_iter, int n_tokens, char **tokens) {
+void test_tokens_iter(const char *desc, ss_iter *s_iter, int n_tokens, char **tokens) {
     for (int i = 0; ; i++) {
-        str *s_next = str_iter_next(s_iter);
+        ss *s_next = ss_iter_next(s_iter);
         if (s_next == END_ITER) break;
         if (s_next == NULL) exit(1);
 
@@ -30,7 +31,7 @@ void test_tokens_iter(const char *desc, str_iter *s_iter, int n_tokens, char **t
     test_success(desc);
 }
 
-void test_tokens_list(const char *desc, str **str_list, int n_list, char **wanted_list, int n_wanted) {
+void test_tokens_list(const char *desc, ss **str_list, int n_list, char **wanted_list, int n_wanted) {
     if (n_list != n_wanted) {
         test_failure("should have the correct number of words");
         return;

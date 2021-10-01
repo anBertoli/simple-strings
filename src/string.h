@@ -1,10 +1,10 @@
+#include <stdio.h>
 
 #ifndef SS_STRING_H
 #define SS_STRING_H
-#define END_STRING '\0'
-#define END_ITER (str *)1
 
-#include <stdio.h>
+#define END_STRING '\0'
+#define END_ITER (ss *)1
 
 /*
  * Memory allocation functions.
@@ -21,33 +21,33 @@ typedef struct {
     unsigned int len;
     unsigned int cap;
     char *buf;
-} str;
+} ss;
 
-str *str_new_raw_len_cap(const char *init, const size_t len, const size_t cap);
-str *str_new_raw_len(const char *init, const size_t len);
-str *str_new_raw(const char *init);
-str *str_new_empty();
-str *str_clone(str *s);
+ss *ss_new_raw_len_cap(const char *init, const size_t len, const size_t cap);
+ss *ss_new_raw_len(const char *init, const size_t len);
+ss *ss_new_raw(const char *init);
+ss *ss_new_empty();
+ss *ss_clone(ss *s);
 
-str *str_concat_raw_len(str *s1, const char *s2, const size_t s2_len);
-str *str_concat_raw(str *s1, const char *s2);
-str *str_concat_str(str *s1, str *s2);
+ss *ss_concat_raw_len(ss *s1, const char *s2, const size_t s2_len);
+ss *ss_concat_raw(ss *s1, const char *s2);
+ss *ss_concat_str(ss *s1, ss *s2);
 
-str *str_trim(str *s, const char *cutset);
-str *str_trim_left(str *s, const char *cutset);
-str *str_trim_right(str *s, const char *cutset);
+ss *ss_trim(ss *s, const char *cutset);
+ss *ss_trim_left(ss *s, const char *cutset);
+ss *ss_trim_right(ss *s, const char *cutset);
 
-void str_cut(str *s, size_t len);
-void str_clear(str *s);
+void ss_cut(ss *s, size_t len);
+void ss_clear(ss *s);
 
-str *str_set_free_space(str *s, size_t free_space);
-str *str_grow(str *s, size_t space);
-str *str_shrink(str *s);
+ss *ss_set_free_space(ss *s, size_t free_space);
+ss *ss_grow(ss *s, size_t space);
+ss *ss_shrink(ss *s);
 
-str *str_sprintf_concat(str *s, const char *format, ...);
-str *str_sprintf(const char *format, ...);
+ss *ss_sprintf_concat(ss *s, const char *format, ...);
+ss *ss_sprintf(const char *format, ...);
 
-void str_free(str *s);
+void ss_free(ss *s);
 
 /*
  * String iterator type and methods.
@@ -57,17 +57,17 @@ typedef struct {
     char *buf;
     char *ptr;
     char *del;
-} str_iter;
+} ss_iter;
 
-str_iter *str_split_raw(const char *s, const char *del);
-str_iter *str_split(str *s, const char *del);
+ss_iter *ss_split_raw(const char *s, const char *del);
+ss_iter *ss_split(ss *s, const char *del);
 
-str *str_iter_next(str_iter *s_iter);
+ss *ss_iter_next(ss_iter *s_iter);
 
-str **str_collect_iter(str_iter *s_iter, int *n_str);
-str **str_collect_from_row(const char *raw_str, const char  *del, int *n_str);
-str **str_collect_from_str(str *s, const char  *del, int *n_str);
+ss **ss_collect_iter(ss_iter *s_iter, int *n_str);
+ss **ss_collect_from_row(const char *raw_str, const char  *del, int *n_str);
+ss **ss_collect_from_str(ss *s, const char  *del, int *n_str);
 
-void str_iter_free(str_iter *s_iter);
+void ss_iter_free(ss_iter *s_iter);
 
 #endif

@@ -2,7 +2,7 @@
 #include <strings.h>
 #include "../string.h"
 
-void str_debug(str *s, int mem) {
+void ss_debug(ss *s, int mem) {
     if (s->buf == NULL) {
         printf("str {NULL}\n");
         return;
@@ -22,7 +22,7 @@ void str_debug(str *s, int mem) {
     }
 }
 
-void str_iter_debug(str_iter *s, int mem) {
+void ss_iter_debug(ss_iter *s, int mem) {
     if (s->buf == NULL) {
         printf("str_iter {NULL}\n");
         return;

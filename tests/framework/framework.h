@@ -6,7 +6,6 @@
 #define test_success(desc) _test_success(desc, __FILE__, __LINE__)
 #define test_failure(desc) _test_failure(desc, __FILE__, __LINE__)
 
-
 #define test_report() _test_report()
 #define test_group(desc) _test_group(desc)
 #define test_subgroup(desc) _test_subgroup(desc)
@@ -17,10 +16,6 @@ void _test_strings(const char *desc, const char *want, const char *got, const ch
 void _test_success(const char *desc, const char *filename, const int line);
 void _test_failure(const char *desc, const char *filename, const int line);
 
-
 void _test_group(const char *desc);
 void _test_subgroup(const char *desc);
 int _test_report(void);
-
-void test_tokens_iter(const char *desc, str_iter *s_iter, int n_tokens, char **tokens);
-void test_tokens_list(const char *desc, str **str_list, int n_list, char **wanted_list, int n_wanted);
