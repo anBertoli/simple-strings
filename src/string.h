@@ -30,9 +30,9 @@ ss *ss_new_raw(const char *init);
 ss *ss_new_empty(void);
 ss *ss_clone(ss *s);
 
-int ss_concat_raw_len(ss *s1, const char *s2, const size_t s2_len);
-int ss_concat_raw(ss *s1, const char *s2);
-int ss_concat_str(ss *s1, ss *s2);
+ss *ss_concat_raw_len(ss *s1, const char *s2, const size_t s2_len);
+ss *ss_concat_raw(ss *s1, const char *s2);
+ss *ss_concat_str(ss *s1, ss *s2);
 
 void ss_trim(ss *s, const char *cutset);
 void ss_trim_left(ss *s, const char *cutset);
@@ -41,15 +41,19 @@ void ss_trim_right(ss *s, const char *cutset);
 void ss_cut(ss *s, size_t len);
 void ss_clear(ss *s);
 
-int ss_set_free_space(ss *s, size_t free_space);
-int ss_grow(ss *s, size_t space);
-int ss_shrink(ss *s);
-
-int ss_sprintf_concat_va(ss *s, const char *format, va_list arg_list);
-int ss_sprintf_concat(ss *s, const char *format, ...);
-ss *ss_sprintf(const char *format, ...);
+ss *ss_set_free_space(ss *s, size_t free_space);
+ss *ss_grow(ss *s, size_t space);
+ss *ss_shrink(ss *s);
 
 void ss_free(ss *s);
+
+/*
+ * String formatting functions.
+ */
+
+ss *ss_sprintf_concat_va(ss *s, const char *format, va_list arg_list);
+ss *ss_sprintf_concat(ss *s, const char *format, ...);
+ss *ss_sprintf(const char *format, ...);
 
 /*
  * String iterator type and methods.

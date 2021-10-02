@@ -9,14 +9,15 @@
  * formatted string to the ss string s. The function accepts s va_list to
  * accommodate a variable number of arguments.
  *
- * Returns 1 if the function succeeded or 0 if the eventual reallocation fails. In
- * case of failure the s string is still valid and must be still freed.
+ * Returns the formatted and concatenated ss string s in case of success or NULL
+ * in case of allocations errors. In case of errors the ss string s is still valid
+ * and must be freed after use.
  */
-int ss_sprintf_concat_va(ss *s, const char *format, va_list arg_list) {
+ss *ss_sprintf_concat_va(ss *s, const char *format, va_list arg_list) {
     size_t buf_len = sizeof(char) * strlen(format) * 2;
     char *buf = _malloc(buf_len);
     if (buf == NULL) {
-        return 0;
+        return NULL;
     }
 
     int n_written;
@@ -28,7 +29,7 @@ int ss_sprintf_concat_va(ss *s, const char *format, va_list arg_list) {
         if (n_written < 0 ) {
             printf("ss_lib: vsnprintf() encoding error");
             free(buf);
-            return 0;
+            return NULL;
         }
 
         va_end(arg_list_copy);
@@ -42,19 +43,19 @@ int ss_sprintf_concat_va(ss *s, const char *format, va_list arg_list) {
         char *new_buf = _realloc(buf, buf_len);
         if (new_buf == NULL) {
             free(buf);
-            return 0;
+            return NULL;
         }
         buf = new_buf;
     }
 
     // Finally, concat the ss string with the formatted
     // one, shrink the free space and return the former.
-    int ok = ss_concat_raw_len(s, buf, n_written);
+    ss *s1 = ss_concat_raw_len(s, buf, n_written);
     free(buf);
-    if (!ok) return 0;
-    ok = ss_shrink(s);
-    if (!ok) return 0;
-    return 1;
+    if (s1 == NULL) return NULL;
+    ss *s2 = ss_shrink(s);
+    if (s2 == NULL) return NULL;
+    return s2;
 }
 
 /*
@@ -62,15 +63,16 @@ int ss_sprintf_concat_va(ss *s, const char *format, va_list arg_list) {
  * formatted string to the s string. The function is variadic exactly as sprintf,
  * printf, etc. functions.
  *
- * Returns 1 if the function succeeded or 0 if the eventual reallocation fails. In
- * case of failure the s string is still valid and must be still freed.
+ * Returns the formatted and concatenated ss string s in case of success or NULL
+ * in case of allocations errors. In case of errors the ss string s is still valid
+ * and must be freed after use.
  */
-int ss_sprintf_concat(ss *s, const char *format, ...) {
+ss *ss_sprintf_concat(ss *s, const char *format, ...) {
     va_list arg_list;
     va_start(arg_list, format);
-    int ok = ss_sprintf_concat_va(s, format, arg_list);
+    s = ss_sprintf_concat_va(s, format, arg_list);
     va_end(arg_list);
-    return ok;
+    return s;
 }
 
 /*
@@ -84,7 +86,11 @@ ss *ss_sprintf(const char *format, ...) {
     va_start(arg_list, format);
     ss *s = ss_new_empty();
     if (s == NULL) return 0;
-    int ok = ss_sprintf_concat_va(s, format, arg_list);
+    ss *s1 = ss_sprintf_concat_va(s, format, arg_list);
     va_end(arg_list);
-    return ok ? s : 0;
+    if (s1 == NULL) {
+        ss_free(s);
+        return NULL;
+    }
+    return s1;
 }

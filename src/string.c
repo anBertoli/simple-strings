@@ -127,10 +127,11 @@ ss *ss_clone(ss *s) {
  * will be reallocated in order to have a capacity (cap) of (2 * n) bytes, where n is
  * the resulting (concatenated) string length.
  *
- * Returns 1 if the function succeeded or 0 if the eventual reallocation fails. In
- * case of failure the s1 ss is still valid and must be still freed.
+ * Returns the concatenated string s1 if the function succeeded or NULL if the eventual
+ * reallocation fails. In case of failure the ss string s1 is still valid and must be
+ * freed after use.
  */
-int ss_concat_raw_len(ss *s1, const char *s2, const size_t s2_len) {
+ss *ss_concat_raw_len(ss *s1, const char *s2, const size_t s2_len) {
     size_t new_len = s1->len + s2_len;
 
     if (new_len > s1->cap) {
@@ -139,7 +140,7 @@ int ss_concat_raw_len(ss *s1, const char *s2, const size_t s2_len) {
         // case of failures.
         size_t new_cap = (sizeof(char) * new_len) * 2;
         char *new_buf = _realloc(s1->buf, new_cap + 1);
-        if (new_buf == NULL) return 0;
+        if (new_buf == NULL) return NULL;
 
         s1->buf = new_buf;
         s1->cap = new_cap;
@@ -151,7 +152,7 @@ int ss_concat_raw_len(ss *s1, const char *s2, const size_t s2_len) {
     s1->buf[new_len] = END_STRING;
     s1->len = new_len;
 
-    return 1;
+    return s1;
 }
 
 /*
@@ -159,10 +160,11 @@ int ss_concat_raw_len(ss *s1, const char *s2, const size_t s2_len) {
  * appended to s1, eventually growing the s1 string. Basically, it is a shorthand for
  * str_concat_raw(s1, s1, strlen(s2)).
  *
- * Returns 1 if the function succeeded or 0 if the eventual reallocation fails. In
- * case of failure the s1 ss is still valid and must be still freed.
+ * Returns the concatenated string s1 if the function succeeded or NULL if the eventual
+ * reallocation fails. In case of failure the ss string s1 is still valid and must be
+ * freed after use.
  */
-int ss_concat_raw(ss *s1, const char *s2) {
+ss *ss_concat_raw(ss *s1, const char *s2) {
     size_t init_len = (s2 == NULL) ? 0 : strlen(s2);
     return ss_concat_raw_len(s1, s2, init_len);
 }
@@ -172,10 +174,11 @@ int ss_concat_raw(ss *s1, const char *s2) {
  * s1, eventually growing the s1 string. Both strings are still valid after the
  * function call and must be freed separately.
  *
- * Returns 1 if the function succeeded or 0 if the eventual reallocation fails. In
- * case of failure the s1 ss is still valid and must be still freed.
+ * Returns the concatenated string s1 if the function succeeded or NULL if the eventual
+ * reallocation fails. In case of failure the ss string s1 is still valid and must be
+ * freed after use.
  */
-int ss_concat_str(ss *s1, ss *s2) {
+ss *ss_concat_str(ss *s1, ss *s2) {
     return ss_concat_raw_len(s1, s2->buf, s2->len);
 }
 
@@ -275,18 +278,19 @@ void ss_clear(ss *s) {
  * available (allocated) space beyond the string len. The function is useful to
  * reserve more space earlier in order to avoid frequent reallocations later.
  *
- * Returns 1 if the function succeeded or 0 if the eventual reallocation fails. In
- * case of failure the s string is still valid and must be freed after use.
+ * Returns the ss string s if the function succeeded or NULL if the eventual
+ * reallocation fails. In case of failure the ss string s is still valid and
+ * must be freed after use.
  */
-int ss_set_free_space(ss *s, size_t free_space) {
+ss *ss_set_free_space(ss *s, size_t free_space) {
     size_t new_cap = s->len + free_space;
 
     char *new_buf = _realloc(s->buf, sizeof(char) * new_cap + 1);
-    if (new_buf == NULL) return 0;
+    if (new_buf == NULL) return NULL;
 
     s->buf = new_buf;
     s->cap = new_cap;
-    return 1;
+    return s;
 }
 
 /*
@@ -295,10 +299,11 @@ int ss_set_free_space(ss *s, size_t free_space) {
  * only changes the available space beyond the string length. The function is useful
  * to reserve more space earlier in order to avoid frequent reallocations
  *
- * Returns 1 if the function succeeded or 0 if the eventual reallocation fails. In
- * case of failure the s string is still valid and must be freed after use.
+ * Returns the ss string s if the function succeeded or NULL if the eventual
+ * reallocation fails. In case of failure the ss string s is still valid and
+ * must be freed after use.
  */
-int ss_grow(ss *s, size_t space) {
+ss *ss_grow(ss *s, size_t space) {
     return ss_set_free_space(s, (s->cap - s->len) + space);
 }
 
@@ -307,8 +312,12 @@ int ss_grow(ss *s, size_t space) {
  * allocated string itself is left untouched. It is possible to combine a call
  * to ss_clear with a call to ss_shrink to drastically reduce the amount
  * of allocated space (the string will have 0 len and cap).
+ *
+ * Returns the ss string s if the function succeeded or NULL if the eventual
+ * reallocation fails. In case of failure the ss string s is still valid and
+ * must be freed after use.
  */
-int ss_shrink(ss *s) {
+ss *ss_shrink(ss *s) {
     return ss_set_free_space(s, 0);
 }
 

@@ -5,16 +5,26 @@ endif
 
 help:
 	@echo "\nUseful make commands"
-	@echo " - make install  :	builds and installs the static library and header files"
-	@echo " - make uninstall:	remove the static library and the header files from the system"
+	@echo " - make install  				builds and installs the static library and header files"
+	@echo " - make install-with-exit  		builds and installs the static library and header files with the exit option"
+	@echo " - make uninstall				remove the static library and the header files from the system"
 	@echo
 
 install: static-lib install-static-lib install-headers
+install-with-exit: static-lib-exit install-static-lib install-headers
 
 static-lib:
 	@mkdir -p lib
 	@rm -f lib/*
 	@gcc -c src/alloc.c src/string.c src/string_iter.c src/string_fmt.c src/internal/debug.c
+	@mv *.o lib/
+	@ar rcs lib/libss.a lib/alloc.o lib/string.o lib/string_iter.o lib/string_fmt.o lib/debug.o
+	@rm -f lib/*.o
+
+static-lib-exit:
+	@mkdir -p lib
+	@rm -f lib/*
+	@gcc -DSS_ALLOC_EXIT -c src/alloc.c src/string.c src/string_iter.c src/string_fmt.c src/internal/debug.c
 	@mv *.o lib/
 	@ar rcs lib/libss.a lib/alloc.o lib/string.o lib/string_iter.o lib/string_fmt.o lib/debug.o
 	@rm -f lib/*.o
@@ -28,7 +38,7 @@ install-headers:
 	@echo "Copied ss_string.h header to $(PREFIX)/include/ss.h"
 
 test:
-	@gcc \
+	@gcc -DSS_ALLOC_EXIT \
 		tests/tests.c \
 		tests/utils.c \
 		tests/framework/framework.c \
