@@ -1,7 +1,5 @@
 #include <strings.h>
 #include <stdlib.h>
-#include "string.h"
-#include "internal/debug.h"
 
 /*
  * If SS_ALLOC_EXIT is defined (usually through the compiler flags), failures in
@@ -11,6 +9,7 @@
  */
 
 #ifdef SS_ALLOC_EXIT
+
 #include <stdio.h>
 
 void *_malloc(size_t size) {

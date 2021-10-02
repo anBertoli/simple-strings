@@ -436,17 +436,20 @@ void test_ss_sprintf_concat(void) {
     test_group("test ss_sprintf_concat");
 
     test_subgroup("with empty string");
-    ss *s = ss_sprintf_concat(ss_new_empty(), "test=123 test=ehy");
+    ss *s = ss_new_empty();
+    ss_sprintf_concat(s, "test=123 test=ehy");
     test_strings("should have formatted the string", "test=123 test=ehy", s->buf);
     test_equal("should have correct len", 17, s->len);
     test_equal("should have correct len", 17, s->cap);
+    free(s);
 
     test_subgroup("formatting with arguments");
     s = ss_new_raw("ehy, ");
-    s = ss_sprintf_concat(s, "test=%d test=%s", 123, "success");
+    ss_sprintf_concat(s, "test=%d test=%s", 123, "success");
     test_strings("should have formatted the string", "ehy, test=123 test=success", s->buf);
     test_equal("should have correct len", 26, s->len);
     test_equal("should have correct len", 26, s->cap);
+    free(s);
 }
 
 /*
@@ -672,15 +675,15 @@ int main(void) {
     test_grow();
     test_shrink();
 
+    test_ss_sprintf();
+    test_ss_sprintf_concat();
+
     test_ss_split_raw();
     test_ss_split();
     test_ss_iter_next();
     test_ss_collect_iter();
     test_ss_collect_from_row();
     test_ss_collect_from_str();
-
-    test_ss_sprintf();
-    test_ss_sprintf_concat();
 
     return test_report();
 }

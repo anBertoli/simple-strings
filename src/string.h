@@ -1,7 +1,8 @@
-#include <stdio.h>
 
 #ifndef SS_STRING_H
 #define SS_STRING_H
+
+#include <stdio.h>
 
 #define END_STRING '\0'
 #define END_ITER (ss *)1
@@ -26,25 +27,26 @@ typedef struct {
 ss *ss_new_raw_len_cap(const char *init, const size_t len, const size_t cap);
 ss *ss_new_raw_len(const char *init, const size_t len);
 ss *ss_new_raw(const char *init);
-ss *ss_new_empty();
+ss *ss_new_empty(void);
 ss *ss_clone(ss *s);
 
-ss *ss_concat_raw_len(ss *s1, const char *s2, const size_t s2_len);
-ss *ss_concat_raw(ss *s1, const char *s2);
-ss *ss_concat_str(ss *s1, ss *s2);
+int ss_concat_raw_len(ss *s1, const char *s2, const size_t s2_len);
+int ss_concat_raw(ss *s1, const char *s2);
+int ss_concat_str(ss *s1, ss *s2);
 
-ss *ss_trim(ss *s, const char *cutset);
-ss *ss_trim_left(ss *s, const char *cutset);
-ss *ss_trim_right(ss *s, const char *cutset);
+void ss_trim(ss *s, const char *cutset);
+void ss_trim_left(ss *s, const char *cutset);
+void ss_trim_right(ss *s, const char *cutset);
 
 void ss_cut(ss *s, size_t len);
 void ss_clear(ss *s);
 
-ss *ss_set_free_space(ss *s, size_t free_space);
-ss *ss_grow(ss *s, size_t space);
-ss *ss_shrink(ss *s);
+int ss_set_free_space(ss *s, size_t free_space);
+int ss_grow(ss *s, size_t space);
+int ss_shrink(ss *s);
 
-ss *ss_sprintf_concat(ss *s, const char *format, ...);
+int ss_sprintf_concat_va(ss *s, const char *format, va_list arg_list);
+int ss_sprintf_concat(ss *s, const char *format, ...);
 ss *ss_sprintf(const char *format, ...);
 
 void ss_free(ss *s);

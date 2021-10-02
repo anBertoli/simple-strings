@@ -2,7 +2,6 @@
 #include <strings.h>
 #include "../src/string.h"
 #include "framework/framework.h"
-#include "utils.h"
 
 
 void test_tokens_iter(const char *desc, ss_iter *s_iter, int n_tokens, char **tokens) {

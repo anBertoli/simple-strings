@@ -5,17 +5,18 @@
 #include "internal/debug.h"
 
 /*
- * Internal function, formats a string using the usual C formatting directive and
- * concatenates the formatted string to the s string. The variadic arguments are
- * passed as a va_list type argument list.
+ * Format a string using the usual C formatting directives and concatenate the
+ * formatted string to the ss string s. The function accepts s va_list to
+ * accommodate a variable number of arguments.
  *
- * The returned string must be freed with the dedicated ss_free function().
+ * Returns 1 if the function succeeded or 0 if the eventual reallocation fails. In
+ * case of failure the s string is still valid and must be still freed.
  */
-static ss *ss_sprintf_concat_va(ss *s, const char *format, va_list arg_list) {
+int ss_sprintf_concat_va(ss *s, const char *format, va_list arg_list) {
     size_t buf_len = sizeof(char) * strlen(format) * 2;
     char *buf = _malloc(buf_len);
     if (buf == NULL) {
-        return NULL;
+        return 0;
     }
 
     int n_written;
@@ -27,7 +28,7 @@ static ss *ss_sprintf_concat_va(ss *s, const char *format, va_list arg_list) {
         if (n_written < 0 ) {
             printf("ss_lib: vsnprintf() encoding error");
             free(buf);
-            return NULL;
+            return 0;
         }
 
         va_end(arg_list_copy);
@@ -41,45 +42,49 @@ static ss *ss_sprintf_concat_va(ss *s, const char *format, va_list arg_list) {
         char *new_buf = _realloc(buf, buf_len);
         if (new_buf == NULL) {
             free(buf);
-            return NULL;
+            return 0;
         }
         buf = new_buf;
     }
 
     // Finally, concat the ss string with the formatted
     // one, shrink the free space and return the former.
-    s = ss_concat_raw_len(s, buf, n_written);
+    int ok = ss_concat_raw_len(s, buf, n_written);
     free(buf);
-    if (s == NULL) return NULL;
-    s = ss_shrink(s);
-    if (s == NULL) return NULL;
-    return s;
+    if (!ok) return 0;
+    ok = ss_shrink(s);
+    if (!ok) return 0;
+    return 1;
 }
 
 /*
- * Format a string using the usual C formatting directive and concatenate the formatted string
- * to the s string. The returned string must be freed with the dedicated ss_free function().
+ * Format a string using the usual C formatting directives and concatenate the
+ * formatted string to the s string. The function is variadic exactly as sprintf,
+ * printf, etc. functions.
  *
- * Returns the concatenated s string in case of success or NULL in case of allocations errors.
+ * Returns 1 if the function succeeded or 0 if the eventual reallocation fails. In
+ * case of failure the s string is still valid and must be still freed.
  */
-ss *ss_sprintf_concat(ss *s, const char *format, ...) {
+int ss_sprintf_concat(ss *s, const char *format, ...) {
     va_list arg_list;
     va_start(arg_list, format);
-    s = ss_sprintf_concat_va(s, format, arg_list);
+    int ok = ss_sprintf_concat_va(s, format, arg_list);
     va_end(arg_list);
-    return s;
+    return ok;
 }
 
 /*
  * Format a string using the usual C formatting directive and returns a formatted string.
  * The returned string must be freed with the dedicated ss_free function().
  *
- * Returns the concatenated s string in case of success or NULL in case of allocations errors.
+ * Returns a formatted ss string in case of success or NULL in case of allocations errors.
  */
 ss *ss_sprintf(const char *format, ...) {
     va_list arg_list;
     va_start(arg_list, format);
-    ss *s = ss_sprintf_concat_va(ss_new_empty(), format, arg_list);
+    ss *s = ss_new_empty();
+    if (s == NULL) return 0;
+    int ok = ss_sprintf_concat_va(s, format, arg_list);
     va_end(arg_list);
-    return s;
+    return ok ? s : 0;
 }
