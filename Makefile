@@ -10,8 +10,8 @@ help:
 	@echo " - make uninstall				remove the static library and the header files from the system"
 	@echo
 
-install: static-lib install-static-lib install-headers
-install-with-exit: static-lib-exit install-static-lib install-headers
+install: install-static-lib install-headers
+install-with-exit: install-static-lib-exit install-headers
 
 static-lib:
 	@mkdir -p lib
@@ -24,12 +24,16 @@ static-lib:
 static-lib-exit:
 	@mkdir -p lib
 	@rm -f lib/*
-	@gcc -DSS_ALLOC_EXIT -c src/alloc.c src/string.c src/string_iter.c src/string_fmt.c src/internal/debug.c
+	@gcc -DSS_ALLOC_EXIT src/alloc.c src/string.c src/string_iter.c src/string_fmt.c src/internal/debug.c -c
 	@mv *.o lib/
 	@ar rcs lib/libss.a lib/alloc.o lib/string.o lib/string_iter.o lib/string_fmt.o lib/debug.o
 	@rm -f lib/*.o
 
 install-static-lib: static-lib
+	@cp lib/libss.a $(PREFIX)/lib/
+	@echo "Copied static library libss.a to $(PREFIX)/lib/libss.a"
+
+install-static-lib-exit: static-lib-exit
 	@cp lib/libss.a $(PREFIX)/lib/
 	@echo "Copied static library libss.a to $(PREFIX)/lib/libss.a"
 

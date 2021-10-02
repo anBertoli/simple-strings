@@ -1,4 +1,3 @@
-#include <strings.h>
 #include <stdlib.h>
 
 /*
@@ -9,7 +8,6 @@
  */
 
 #ifdef SS_ALLOC_EXIT
-#warning "Compiled with SS_ALLOC_EXIT"
 
 #include <stdio.h>
 
@@ -32,7 +30,6 @@ void *_realloc(void *ptr, size_t size) {
 }
 
 #else
-#warning "Compiled without SS_ALLOC_EXIT"
 
 void *_malloc(size_t size) {
     return malloc(size);
