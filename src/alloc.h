@@ -1,8 +1,8 @@
-//
-// Created by Andrea Bertoli on 04/11/21.
-//
 
-#ifndef SIMPLE_STRINGS_ALLOC_H
-#define SIMPLE_STRINGS_ALLOC_H
+#ifndef SS_ALLOC_H
+#define SS_ALLOC_H
 
-#endif //SIMPLE_STRINGS_ALLOC_H
+void *_malloc(size_t size);
+void *_realloc(void *ptr, size_t size);
+
+#endif

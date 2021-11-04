@@ -8,38 +8,27 @@
 #define END_ITER (ss *)1
 
 /*
- * Memory allocation functions.
+ * IMPORTANT: the ss struct fields must not be manipulated by the caller, they are
+ * updated by the functions of this library and they must be considered read-only.
  */
-
-void *_malloc(size_t size);
-void *_realloc(void *ptr, size_t size);
-
-/*
- * String type and methods.
- */
-
 typedef struct {
     unsigned int len;
     unsigned int cap;
     char *buf;
 } ss;
 
-ss *ss_new_raw_len_cap(const char *init, const size_t len, const size_t cap);
-ss *ss_new_raw_len(const char *init, const size_t len);
-ss *ss_new_raw(const char *init);
+/*
+ * Creation and memory manipulation functions.
+ */
+
+ss *ss_new_from_raw_len_cap(const char *init, const size_t len, const size_t cap);
+ss *ss_new_from_raw_len(const char *init, const size_t len);
+ss *ss_new_from_raw(const char *init);
+ss *ss_new_empty_with_cap(const size_t cap);
 ss *ss_new_empty(void);
+
 ss *ss_clone(ss *s);
-
-ss *ss_concat_raw_len(ss *s1, const char *s2, const size_t s2_len);
-ss *ss_concat_raw(ss *s1, const char *s2);
-ss *ss_concat_str(ss *s1, ss *s2);
-
-void ss_trim(ss *s, const char *cutset);
-void ss_trim_left(ss *s, const char *cutset);
-void ss_trim_right(ss *s, const char *cutset);
-
-void ss_cut(ss *s, size_t len);
-void ss_clear(ss *s);
+ss *ss_slice(ss *s, const int str_index, const int end_index);
 
 ss *ss_set_free_space(ss *s, size_t free_space);
 ss *ss_grow(ss *s, size_t space);
@@ -48,32 +37,28 @@ ss *ss_shrink(ss *s);
 void ss_free(ss *s);
 
 /*
- * String formatting functions.
+ * Searching functions.
  */
 
-ss *ss_sprintf_concat_va(ss *s, const char *format, va_list arg_list);
-ss *ss_sprintf_concat(ss *s, const char *format, ...);
-ss *ss_sprintf(const char *format, ...);
+int ss_index(ss *s, const char *needle);
 
 /*
- * String iterator type and methods.
+ * Concatenation functions.
  */
 
-typedef struct {
-    char *buf;
-    char *ptr;
-    char *del;
-} ss_iter;
+ss *ss_concat_raw_len(ss *s1, const char *s2, const size_t s2_len);
+ss *ss_concat_raw(ss *s1, const char *s2);
+ss *ss_concat_str(ss *s1, ss *s2);
 
-ss_iter *ss_split_raw(const char *s, const char *del);
-ss_iter *ss_split(ss *s, const char *del);
+/*
+ * Trimming and cutting functions.
+ */
 
-ss *ss_iter_next(ss_iter *s_iter);
+void ss_trim(ss *s, const char *cutset);
+void ss_trim_left(ss *s, const char *cutset);
+void ss_trim_right(ss *s, const char *cutset);
 
-ss **ss_collect_iter(ss_iter *s_iter, int *n_str);
-ss **ss_collect_from_row(const char *raw_str, const char  *del, int *n_str);
-ss **ss_collect_from_str(ss *s, const char  *del, int *n_str);
-
-void ss_iter_free(ss_iter *s_iter);
+void ss_cut(ss *s, size_t len);
+void ss_clear(ss *s);
 
 #endif

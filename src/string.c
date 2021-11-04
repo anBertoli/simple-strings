@@ -1,37 +1,31 @@
 #include <stdlib.h>
 #include <strings.h>
 #include "string.h"
-#include "internal/debug.h"
+#include "alloc.h"
 
 /*
  * Build a new string copying the provided init string of length len (the len argument
  * doesn't include the null terminator) and making total space for cap + 1 bytes (plus
  * one for the null terminator). If the length of the init string is greater than len,
- * the exceeding bytes are discarded. If cap < len, len is adjusted to be equal to cap.
+ * the exceeding bytes are discarded. If cap < len, cap is adjusted to be equal to len.
  * The caller is responsible for providing the correct values of len, cap and init string.
  * The ss string is heap allocated and a pointer to it is returned. The string must be
- * freed after use with the provided ss_free function.
- *
- * Useful shorthands are the ss_new_raw_len and ss_new_raw functions, which are more
- * ergonomic and easier to use.
+ * freed after use with the provided ss_free function. Useful shorthands are the
+ * ss_new_raw_len and ss_new_raw functions, which are more ergonomic and easier to use.
  *
  * Returns the newly generated string or NULL if the allocation fails.
- *
- * IMPORTANT
- * The ss struct fields must not be manipulated by the caller, they are updated by the
- * functions of this library and they must be considered read-only.
  */
-ss *ss_new_raw_len_cap(const char *init, const size_t len, const size_t cap) {
-    size_t _len = len;
-    if (cap <= len) _len = cap;
+ss *ss_new_from_raw_len_cap(const char *init, const size_t len, const size_t cap) {
+    size_t _cap = cap;
+    if (_cap <= len) _cap = len;
 
-    char *buf = _malloc(sizeof(char) * cap + 1);
+    char *buf = _malloc(sizeof(char) * _cap + 1);
     if (buf == NULL) {
         return NULL;
     }
 
-    memcpy(buf, init, _len);
-    buf[_len] = END_STRING;
+    memcpy(buf, init, len);
+    buf[len] = END_STRING;
 
     ss *s = _malloc(sizeof(ss));
     if (s == NULL) {
@@ -39,8 +33,8 @@ ss *ss_new_raw_len_cap(const char *init, const size_t len, const size_t cap) {
         return NULL;
     }
     *s = (ss){
-        .len = _len,
-        .cap = cap,
+        .len = len,
+        .cap = _cap,
         .buf = buf
     };
 
@@ -56,17 +50,14 @@ ss *ss_new_raw_len_cap(const char *init, const size_t len, const size_t cap) {
  * The ss_new_raw_len function is a shorthand for ss_new_raw_len_cap(init, len, len * 2).
  *
  * The returned string has length len, but (len * 2 + 1) bytes are allocated (the cap
- * value, +1 for the null terminator). This overallocation is often useful because it's
- * reduces the probability of future reallocations when the string is manipulated.
+ * value) and +1 is added for the null terminator. This overallocation is often useful
+ * because it's reduces the probability of future reallocations when the string is
+ * manipulated.
  *
  * Returns the newly generated string or NULL if the allocation fails.
- *
- * IMPORTANT
- * The ss struct fields must not be manipulated by the caller, they are updated by the
- * functions of this library and they must be considered read-only.
  */
-ss *ss_new_raw_len(const char *init, const size_t len) {
-    return ss_new_raw_len_cap(init, len, len * 2);
+ss *ss_new_from_raw_len(const char *init, const size_t len) {
+    return ss_new_from_raw_len_cap(init, len, len * 2);
 }
 
 /*
@@ -76,59 +67,172 @@ ss *ss_new_raw_len(const char *init, const size_t len) {
  * ss string must be freed after use with the provided ss_free function.
  *
  * Returns the newly generated string or NULL if the allocation fails.
- *
- * IMPORTANT
- * The ss struct fields must not be manipulated by the caller, they are updated by the
- * functions of this library and they must be considered read-only.
  */
-ss *ss_new_raw(const char *init) {
+ss *ss_new_from_raw(const char *init) {
     return (init == NULL)
         ? ss_new_empty()
-        : ss_new_raw_len(init, strlen(init));
+        : ss_new_from_raw_len(init, strlen(init));
+}
+
+/*
+ * Build and returns a new empty ss string with length and the provided cap. In any case
+ * the string always has an implicit null term, so 1 byte is allocated anyway. The ss must
+ * be freed after use with the provided ss_free function.
+ *
+ * Returns the new empty string or NULL if the allocation fails.
+ */
+ss *ss_new_empty_with_cap(const size_t cap) {
+    return ss_new_from_raw_len_cap("", 0, cap);
 }
 
 /*
  * Build and returns a new empty ss string with length and cap zero. Even in this case the
  * string always has an implicit null term, so 1 byte is allocated anyway. The ss must be
- * freed after use with the provided ss_free function.
+ * freed after use with the provided ss_free function. Note that usually an empty string
+ * is built to be filled, so it could be a better idea in several situations to directly
+ * preallocate some space via ss_new_empty_with_cap().
  *
  * Returns the new empty string or NULL if the allocation fails.
- *
- * IMPORTANT
- * The ss struct fields must not be manipulated by the caller, they are updated by the
- * functions of this library and they must be considered read-only.
  */
 ss *ss_new_empty(void) {
-    return ss_new_raw_len("", 0);
+    return ss_new_from_raw_len("", 0);
 }
 
 /*
- * Build and return a new string copied which is an independent copy of the ss string s.
- * The new string and the old one are independent and both of them must be freed after
- * use. Cloning a string is useful when, for example, we want to manipulate a string
- * while also retaining the content of the old one.
+ * Build and return a clone of the provided ss string. The new string and the old one are
+ * independent and both of them must be freed after use. Cloning a string is useful when,
+ * for example, we want to mutate a string while also retaining the original content.
  *
  * Returns the new string in case of success or NULL if the allocation fails.
- *
- * IMPORTANT
- * The ss struct fields must not be manipulated by the caller, they are updated by the
- * functions of this library and they must be considered read-only.
  */
 ss *ss_clone(ss *s) {
-    return ss_new_raw_len(s->buf, s->len);
+    return ss_new_from_raw_len_cap(s->buf, s->len, s->cap);
 }
 
 /*
- * Concatenate a ss string s1 with a raw string s2 of length len. If the length of the
- * raw string is greater than len, the exceeding bytes are discarded. The s2 raw string
- * is appended to the ss string s1, eventually growing s1. The strategy used in concat
- * functions is the following one. If the first string s1 has enough allocated space to
- * contain the raw string s2, the content is simply appended, otherwise the ss string
- * will be reallocated in order to have a capacity (cap) of (2 * n) bytes, where n is
- * the resulting (concatenated) string length.
+ * Create a new ss string slicing the original provided string s. The original ss string
+ * is not mutated. Both the original string and the returned one must be freed after use.
+ * The slicing boundaries must be provided via the str_index and end_index (0-indexing)
+ * and the resulting range is [str_index, end_index) (right boundary not inclusive). If
+ * the str_index is >= of the original string length a new empty string is returned. If
+ * the end index is < of str_index a new empty string is returned. If end_index > of the
+ * original string length, end_index is reduced to original string length.
+ *
+ * Returns the substring in case of success or NULL if the allocation fails.
+ */
+ss *ss_slice(ss *s, const int str_index, const int end_index) {
+    if (str_index >= s->len) return ss_new_empty();
+    if (end_index < str_index) return ss_new_empty();
+
+    // After this, start index will range from 0 to s->len-1,
+    // while end index will range from start index to s->len.
+    int _end_index = end_index;
+    if (end_index > s->len) _end_index = s->len;
+
+    char *start_string = &s->buf[str_index];
+    size_t len = _end_index - str_index;
+
+    return ss_new_from_raw_len_cap(start_string, len, len);
+}
+
+/*
+ * Changes the allocated space for the string. The operation doesn't change the
+ * stored string itself, both in the content and the length. It only changes the
+ * available (allocated) space beyond the string len. The function is useful to
+ * reserve more space earlier in order to avoid frequent reallocations later.
+ *
+ * Returns the ss string s if the function succeeded or NULL if the eventual
+ * reallocation fails. In case of failure the ss string s is still valid and
+ * must be freed after use.
+ */
+ss *ss_set_free_space(ss *s, size_t free_space) {
+    size_t new_cap = s->len + free_space;
+
+    char *new_buf = _realloc(s->buf, sizeof(char) * new_cap + 1);
+    if (new_buf == NULL) return NULL;
+
+    s->buf = new_buf;
+    s->cap = new_cap;
+    return s;
+}
+
+/*
+ * Grow the allocated space (capacity cap) by 'space' bytes. The operation doesn't
+ * change the stored string buffer itself, both in the content and the length. It
+ * only changes the available space beyond the string length. The function is useful
+ * to reserve more space earlier in order to avoid frequent reallocations
+ *
+ * Returns the ss string s if the function succeeded or NULL if the eventual
+ * reallocation fails. In case of failure the ss string s is still valid and
+ * must be freed after use.
+ */
+ss *ss_grow(ss *s, size_t space) {
+    return ss_set_free_space(s, (s->cap - s->len) + space);
+}
+
+/*
+ * Reduce the allocated space (cap) to contain exactly the current string. The
+ * allocated string itself is left untouched. It is possible to combine a call
+ * to ss_clear with a call to ss_shrink to drastically reduce the amount
+ * of allocated space (the string will have 0 len and cap).
+ *
+ * Returns the ss string s if the function succeeded or NULL if the eventual
+ * reallocation fails. In case of failure the ss string s is still valid and
+ * must be freed after use.
+ */
+ss *ss_shrink(ss *s) {
+    return ss_set_free_space(s, 0);
+}
+
+/*
+ * Deallocate the memory used by a ss string s. The string can't be used after
+ * being freed.
+ */
+void ss_free(ss *s) {
+    if (s == NULL || s->buf == NULL) return;
+    free(s->buf);
+    s->buf = NULL,
+    s->len = 0;
+    s->cap = 0;
+    free(s);
+}
+
+
+
+
+
+
+
+
+
+/*
+ * Returns the position (0-indexed) of the first occurrence of the substring needle in the
+ * ss string provided as first argument. Returns -1 if no occurrence is found.
+ */
+int ss_index(ss *s, const char *needle) {
+    char *sub_ptr = strstr(s->buf, needle);
+    return sub_ptr != NULL
+        ? sub_ptr - s->buf
+        : -1;
+}
+
+
+
+
+
+
+
+
+/*
+ * Concatenate a ss string s1 with a C string s2 of length s2_len. If the length of the C
+ * string is greater than s2_len, the exceeding bytes are discarded. The s2 C string is
+ * appended to the ss string s1, eventually growing s1. The strategy used in concat
+ * functions is: if the string s1 has enough allocated space to contain also the string s2
+ * the content is simply appended, otherwise the s1 string will be grown in order to have
+ * a capacity (cap) of (2*n + 1) bytes, where n is the resulting (concatenated) string length.
  *
  * Returns the concatenated string s1 if the function succeeded or NULL if the eventual
- * reallocation fails. In case of failure the ss string s1 is still valid and must be
+ * reallocation fails. In case of failure the string s1 is still valid and must be
  * freed after use.
  */
 ss *ss_concat_raw_len(ss *s1, const char *s2, const size_t s2_len) {
@@ -156,7 +260,7 @@ ss *ss_concat_raw_len(ss *s1, const char *s2, const size_t s2_len) {
 }
 
 /*
- * Concatenate a ss string s1 with a null terminated raw string s2. The s2 string is
+ * Concatenate a ss string s1 with a null terminated C string s2. The s2 string is
  * appended to s1, eventually growing the s1 string. Basically, it is a shorthand for
  * str_concat_raw(s1, s1, strlen(s2)).
  *
@@ -165,8 +269,9 @@ ss *ss_concat_raw_len(ss *s1, const char *s2, const size_t s2_len) {
  * freed after use.
  */
 ss *ss_concat_raw(ss *s1, const char *s2) {
-    size_t init_len = (s2 == NULL) ? 0 : strlen(s2);
-    return ss_concat_raw_len(s1, s2, init_len);
+    return s2 != NULL
+        ? ss_concat_raw_len(s1, s2, strlen(s2))
+        : s1;
 }
 
 /*
@@ -181,6 +286,13 @@ ss *ss_concat_raw(ss *s1, const char *s2) {
 ss *ss_concat_str(ss *s1, ss *s2) {
     return ss_concat_raw_len(s1, s2->buf, s2->len);
 }
+
+
+
+
+
+
+
 
 /*
  * Removes characters contained in the cutset string from both the start and the end of the
@@ -268,68 +380,11 @@ void ss_cut(ss *s, size_t len) {
  * marked as 'unused' since they are beyond the length of the string.
  */
 void ss_clear(ss *s) {
-    s->len = 0;
-    s->buf[0] = END_STRING;
+    ss_cut(s, 0);
 }
 
-/*
- * Changes the allocated space for the string. The operation doesn't change the
- * stored string itself, both in the content and the length. It only changes the
- * available (allocated) space beyond the string len. The function is useful to
- * reserve more space earlier in order to avoid frequent reallocations later.
- *
- * Returns the ss string s if the function succeeded or NULL if the eventual
- * reallocation fails. In case of failure the ss string s is still valid and
- * must be freed after use.
- */
-ss *ss_set_free_space(ss *s, size_t free_space) {
-    size_t new_cap = s->len + free_space;
 
-    char *new_buf = _realloc(s->buf, sizeof(char) * new_cap + 1);
-    if (new_buf == NULL) return NULL;
 
-    s->buf = new_buf;
-    s->cap = new_cap;
-    return s;
-}
 
-/*
- * Grow the allocated space (capacity cap) by 'space' bytes. The operation doesn't
- * change the stored string buffer itself, both in the content and the length. It
- * only changes the available space beyond the string length. The function is useful
- * to reserve more space earlier in order to avoid frequent reallocations
- *
- * Returns the ss string s if the function succeeded or NULL if the eventual
- * reallocation fails. In case of failure the ss string s is still valid and
- * must be freed after use.
- */
-ss *ss_grow(ss *s, size_t space) {
-    return ss_set_free_space(s, (s->cap - s->len) + space);
-}
 
-/*
- * Reduce the allocated space (cap) to contain exactly the current string. The
- * allocated string itself is left untouched. It is possible to combine a call
- * to ss_clear with a call to ss_shrink to drastically reduce the amount
- * of allocated space (the string will have 0 len and cap).
- *
- * Returns the ss string s if the function succeeded or NULL if the eventual
- * reallocation fails. In case of failure the ss string s is still valid and
- * must be freed after use.
- */
-ss *ss_shrink(ss *s) {
-    return ss_set_free_space(s, 0);
-}
 
-/*
- * Deallocate the memory used by a ss string s. The string can't be used after
- * being freed.
- */
-void ss_free(ss *s) {
-    if (s == NULL || s->buf == NULL) return;
-    free(s->buf);
-    s->buf = NULL,
-    s->len = 0;
-    s->cap = 0;
-    free(s);
-}

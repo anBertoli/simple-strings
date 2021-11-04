@@ -1,6 +1,8 @@
 #include <stdlib.h>
 #include <strings.h>
 #include "../src/string.h"
+#include "../src/string_fmt.h"
+#include "../src/string_iter.h"
 #include "framework/framework.h"
 
 

@@ -1,6 +1,8 @@
 #include <stdio.h>
 #include <strings.h>
 #include "../string.h"
+#include "../string_fmt.h"
+#include "../string_iter.h"
 
 void ss_debug(ss *s, int mem) {
     if (s->buf == NULL) {

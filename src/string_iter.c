@@ -1,6 +1,8 @@
 #include <stdlib.h>
 #include <strings.h>
 #include "string.h"
+#include "string_iter.h"
+#include "alloc.h"
 #include "internal/debug.h"
 
 
@@ -17,7 +19,7 @@
  *
  * Returns ss_iter* or NULL in case of allocation failures.
  */
-ss_iter *ss_split_raw(const char *s, const char *del) {
+ss_iter *ss_split_raw_to_iter(const char *s, const char *del) {
     char *buf = _malloc(sizeof(char) * strlen(s) + 1);
     if (buf == NULL) return NULL;
     strcpy(buf, s);
@@ -57,79 +59,8 @@ ss_iter *ss_split_raw(const char *s, const char *del) {
  *
  * Returns ss_iter* or NULL in case of allocation failures.
  */
-ss_iter *ss_split(ss *s, const char *del) {
-    return ss_split_raw(s->buf, del);
-}
-
-/*
- * Advance the string iterator and return the next substring. The returned substring
- * starts at the end of the previous delimiter (or the start of the original string)
- * and ends at the start of the next delimiter. Those ss substrings are heap allocated
- * and must be freed after use (wth ss_free). If no more delimiters are present, the
- * remaining part of the string is returned. If the iterator contains an empty delimiter
- * the entire string is returned. Multiple consecutive delimiters are treated as one
- * delimiter, and in general no empty strings are returned from this function. If the
- * delimiter is not found in the string, the entire string is returned.
- *
- * When the iterator is exhausted ss_iter_next returns END_ITER. The caller can test
- * for this condition to stop the iteration. When END_ITER is returned, ss_iter_next
- * has already taken care of freeing the string iterator and the ss string must be
- * considered invalid to be used.
- *
- * Returns a ss* in case of success, NULL in case of allocation failures or END_ITER
- * when the iterator is exhausted.
- */
-ss *ss_iter_next(ss_iter *s_iter) {
-    // Iterator exhausted, this must be the
-    // last call, because the iter is freed.
-    if (s_iter->ptr == NULL) {
-        ss_iter_free(s_iter);
-        return END_ITER;
-    }
-
-    // Guard against empty delimiter. Return all the
-    // string and flag the iterator as ended (ptr to NULL).
-    if (strcmp(s_iter->del, "") == 0) {
-        ss *s = ss_new_raw_len(s_iter->ptr, strlen(s_iter->ptr));
-        ss_shrink(s);
-        if (s == NULL) return NULL;
-        s_iter->ptr = NULL;
-        return s;
-    }
-
-    while (1) {
-        char *end = strstr(s_iter->ptr, s_iter->del);
-        if (end == NULL) {
-            size_t len = strlen(s_iter->ptr);
-            if (len == 0) {
-                // Delimiter at the end, don't
-                // return an empty string.
-                ss_iter_free(s_iter);
-                return END_ITER;
-            }
-
-            // Return the last substring and flag
-            // the iterator as ended (ptr to NULL).
-            ss *s = ss_new_raw_len(s_iter->ptr, len);
-            ss_shrink(s);
-            if (s == NULL) return NULL;
-            s_iter->ptr = NULL;
-            return s;
-        }
-
-        size_t len = end - s_iter->ptr;
-        if (len == 0) {
-            // Avoid returning empty strings in
-            // case of consecutive delimiters.
-            s_iter->ptr = end + strlen(s_iter->del);
-            continue;
-        }
-
-        ss *s = ss_new_raw_len_cap(s_iter->ptr, len, len);
-        if (s == NULL) return NULL;
-        s_iter->ptr = end + strlen(s_iter->del);
-        return s;
-    }
+ss_iter *ss_split_str_to_iter(ss *s, const char *del) {
+    return ss_split_raw_to_iter(s->buf, del);
 }
 
 /*
@@ -143,7 +74,7 @@ ss *ss_iter_next(ss_iter *s_iter) {
  * NULL in case of allocation failures. In case of errors the strings already collected
  * are discarded while the string iterator is consumed and freed nonetheless.
  */
-ss **ss_collect_iter(ss_iter *s_iter, int *n_str) {
+ss **ss_iter_collect(ss_iter *s_iter, int *n_str) {
     ss **str_array = NULL;
     *n_str = 0;
     int i = 0;
@@ -179,6 +110,79 @@ ss **ss_collect_iter(ss_iter *s_iter, int *n_str) {
 }
 
 /*
+ * Advance the string iterator and return the next substring. The returned substring
+ * starts at the end of the previous delimiter (or the start of the original string)
+ * and ends at the start of the next delimiter. Those ss substrings are heap allocated
+ * and must be freed after use (wth ss_free). If no more delimiters are present, the
+ * remaining part of the string is returned. If the iterator contains an empty delimiter
+ * the entire string is returned. Multiple consecutive delimiters are treated as one
+ * delimiter, and in general no empty strings are returned from this function. If the
+ * delimiter is not found in the string, the entire string is returned.
+ *
+ * When the iterator is exhausted ss_iter_next returns END_ITER. The caller can test
+ * for this condition to stop the iteration. When END_ITER is returned, ss_iter_next
+ * has already taken care of freeing the string iterator and the ss string must be
+ * considered invalid to be used.
+ *
+ * Returns a ss* in case of success, NULL in case of allocation failures or END_ITER
+ * when the iterator is exhausted.
+ */
+ss *ss_iter_next(ss_iter *s_iter) {
+    // Iterator exhausted, this must be the
+    // last call, because the iter is freed.
+    if (s_iter->ptr == NULL) {
+        ss_iter_free(s_iter);
+        return END_ITER;
+    }
+
+    // Guard against empty delimiter. Return all the
+    // string and flag the iterator as ended (ptr to NULL).
+    if (strcmp(s_iter->del, "") == 0) {
+        ss *s = ss_new_from_raw_len(s_iter->ptr, strlen(s_iter->ptr));
+        ss_shrink(s);
+        if (s == NULL) return NULL;
+        s_iter->ptr = NULL;
+        return s;
+    }
+
+    while (1) {
+        char *end = strstr(s_iter->ptr, s_iter->del);
+        if (end == NULL) {
+            size_t len = strlen(s_iter->ptr);
+            if (len == 0) {
+                // Delimiter at the end, don't
+                // return an empty string.
+                ss_iter_free(s_iter);
+                return END_ITER;
+            }
+
+            // Return the last substring and flag
+            // the iterator as ended (ptr to NULL).
+            ss *s = ss_new_from_raw_len(s_iter->ptr, len);
+            ss_shrink(s);
+            if (s == NULL) return NULL;
+            s_iter->ptr = NULL;
+            return s;
+        }
+
+        size_t len = end - s_iter->ptr;
+        if (len == 0) {
+            // Avoid returning empty strings in
+            // case of consecutive delimiters.
+            s_iter->ptr = end + strlen(s_iter->del);
+            continue;
+        }
+
+        ss *s = ss_new_from_raw_len_cap(s_iter->ptr, len, len);
+        if (s == NULL) return NULL;
+        s_iter->ptr = end + strlen(s_iter->del);
+        return s;
+    }
+}
+
+
+
+/*
  * Return all the ss substrings generated from splitting the raw_str argument with the
  * delimiter string. The function is useful when the caller doesn't want/need to
  * create a string iterator and collect substrings manually.
@@ -187,11 +191,11 @@ ss **ss_collect_iter(ss_iter *s_iter, int *n_str) {
  * NULL in case of allocation failures. In case of errors the strings already collected
  * are discarded while the string iterator is consumed and freed nonetheless.
  */
-ss **ss_collect_from_row(const char *raw_str, const char  *del, int *n_str) {
-    ss_iter *s_iter = ss_split_raw(raw_str, del);
+ss **ss_split_row(const char *raw_str, const char  *del, int *n_str) {
+    ss_iter *s_iter = ss_split_raw_to_iter(raw_str, del);
     if (s_iter == NULL) return NULL;
 
-    ss **substrings = ss_collect_iter(s_iter, n_str);
+    ss **substrings = ss_iter_collect(s_iter, n_str);
     if (substrings == NULL) {
         // If an error occurred the iterator wasn't
         // freed automatically during the iteration.
@@ -211,11 +215,11 @@ ss **ss_collect_from_row(const char *raw_str, const char  *del, int *n_str) {
  * NULL in case of allocation failures. In case of errors the strings already collected
  * are discarded while the string iterator is consumed and freed nonetheless.
  */
-ss **ss_collect_from_str(ss *s, const char  *del, int *n_str) {
-    ss_iter *s_iter = ss_split(s, del);
+ss **ss_split_str(ss *s, const char  *del, int *n_str) {
+    ss_iter *s_iter = ss_split_str_to_iter(s, del);
     if (s_iter == NULL) return NULL;
 
-    ss ** substrings = ss_collect_iter(s_iter, n_str);
+    ss ** substrings = ss_iter_collect(s_iter, n_str);
     if (substrings == NULL) {
         // If an error occurred the iterator wasn't
         // freed automatically during the iteration.

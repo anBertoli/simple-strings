@@ -2,16 +2,16 @@
 #include <strings.h>
 #include <stdarg.h>
 #include "string.h"
-#include "internal/debug.h"
+#include "alloc.h"
 
 /*
  * Format a string using the usual C formatting directives and concatenate the
  * formatted string to the ss string s. The function accepts s va_list to
  * accommodate a variable number of arguments.
  *
- * Returns the formatted and concatenated ss string s in case of success or NULL
- * in case of allocations errors. In case of errors the ss string s is still valid
- * and must be freed after use.
+ * Returns the ss string s concatenated with the formatted string in case of success
+ * or NULL in case of allocations errors. In case of errors the ss string s is still
+ * valid and must be freed after use.
  */
 ss *ss_sprintf_concat_va(ss *s, const char *format, va_list arg_list) {
     size_t buf_len = sizeof(char) * strlen(format) * 2;
@@ -39,6 +39,7 @@ ss *ss_sprintf_concat_va(ss *s, const char *format, va_list arg_list) {
         // formatted sting, so we can break. Otherwise, double the space
         // allocated and try again.
         if (n_written < buf_len) break;
+
         buf_len *= 2;
         char *new_buf = _realloc(buf, buf_len);
         if (new_buf == NULL) {
@@ -49,13 +50,10 @@ ss *ss_sprintf_concat_va(ss *s, const char *format, va_list arg_list) {
     }
 
     // Finally, concat the ss string with the formatted
-    // one, shrink the free space and return the former.
+    // one and return the former.
     ss *s1 = ss_concat_raw_len(s, buf, n_written);
     free(buf);
-    if (s1 == NULL) return NULL;
-    ss *s2 = ss_shrink(s);
-    if (s2 == NULL) return NULL;
-    return s2;
+    return s1;
 }
 
 /*
@@ -84,8 +82,9 @@ ss *ss_sprintf_concat(ss *s, const char *format, ...) {
 ss *ss_sprintf(const char *format, ...) {
     va_list arg_list;
     va_start(arg_list, format);
+
     ss *s = ss_new_empty();
-    if (s == NULL) return 0;
+    if (s == NULL) return NULL;
     ss *s1 = ss_sprintf_concat_va(s, format, arg_list);
     va_end(arg_list);
     if (s1 == NULL) {
