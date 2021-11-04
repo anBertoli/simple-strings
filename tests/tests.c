@@ -448,41 +448,13 @@ void test_ss_sprintf(void) {
     ss *s = ss_sprintf("test=123 test=ehy");
     test_strings("should have formatted the string", "test=123 test=ehy", s->buf);
     test_equal("should have correct len", 17, s->len);
-    test_equal("should have correct cap", 34, s->cap);
+    test_equal("should have correct cap", 17, s->cap);
 
     test_subgroup("formatting with arguments");
     s = ss_sprintf("test=%d test=%s", 123, "success");
     test_strings("should have formatted the string", "test=123 test=success", s->buf);
     test_equal("should have correct len", 21, s->len);
-    test_equal("should have correct cap", 42, s->cap);
-}
-
-void test_ss_sprintf_concat(void) {
-    test_group("test ss_sprintf_concat");
-
-    test_subgroup("with empty string");
-    ss *s = ss_new_empty();
-    ss_sprintf_concat(s, "test=123 test=ehy");
-    test_strings("should have formatted the string", "test=123 test=ehy", s->buf);
-    test_equal("should have correct len", 17, s->len);
-    test_equal("should have correct cap", 34, s->cap);
-    free(s);
-
-    test_subgroup("formatting with arguments");
-    s = ss_new_from_raw("ehy, ");
-    ss_sprintf_concat(s, "test=%d test=%s", 123, "success");
-    test_strings("should have formatted the string", "ehy, test=123 test=success", s->buf);
-    test_equal("should have correct len", 26, s->len);
-    test_equal("should have correct cap", 52, s->cap);
-    free(s);
-
-    test_subgroup("formatting with arguments, enough free space");
-    s = ss_new_from_raw_len_cap("ehy, ", 5, 30);
-    ss_sprintf_concat(s, "test=%d test=%s", 123, "success");
-    test_strings("should have formatted the string", "ehy, test=123 test=success", s->buf);
-    test_equal("should have correct len", 26, s->len);
-    test_equal("should have correct cap", 30, s->cap);
-    free(s);
+    test_equal("should have correct cap", 21, s->cap);
 }
 
 /*
@@ -709,7 +681,6 @@ int main(void) {
     test_shrink();
 
     test_ss_sprintf();
-    test_ss_sprintf_concat();
 
     test_ss_split_raw();
     test_ss_split();
