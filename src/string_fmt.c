@@ -8,6 +8,8 @@
  * Format a string using the usual C formatting directives and return it. The function
  * accepts s va_list to accommodate a variable number of arguments. In case of success
  * the returned string must be freed after use with the dedicated ss_free function().
+ * The argument list should be started (va_start) before providing it to this function
+ * and must be ended (va_end) after the function call.
  *
  * Returns the ss string s in case of success or NULL in case of allocations errors.
  */

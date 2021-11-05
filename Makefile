@@ -43,8 +43,10 @@ install-headers:
 
 test:
 	@gcc -DSS_ALLOC_EXIT \
-		tests/tests.c \
-		tests/utils.c \
+		tests/main.c \
+		tests/string_test.c \
+		tests/string_fmt_test.c \
+		tests/string_iter_test.c \
 		tests/framework/framework.c \
 		src/alloc.c \
 		src/string.c \
