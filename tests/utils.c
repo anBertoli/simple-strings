@@ -2,12 +2,14 @@
 #include <strings.h>
 #include "../src/string.h"
 #include "../src/string_fmt.h"
+#include "../src/internal/debug.h"
 #include "../src/string_iter.h"
 #include "framework/framework.h"
 
 
 void test_tokens_iter(const char *desc, ss_iter *s_iter, int n_tokens, char **tokens) {
     for (int i = 0; ; i++) {
+
         ss *s_next = ss_iter_next(s_iter);
         if (s_next == END_ITER) break;
         if (s_next == NULL) exit(1);
@@ -32,21 +34,21 @@ void test_tokens_iter(const char *desc, ss_iter *s_iter, int n_tokens, char **to
     test_success(desc);
 }
 
-void test_tokens_list(const char *desc, ss **str_list, int n_list, char **wanted_list, int n_wanted) {
-    if (n_list != n_wanted) {
+void test_tokens_list(const char *desc, ss_list *str_list, char **wanted_list, int n_wanted) {
+    if (str_list->len != n_wanted) {
         test_failure("should have the correct number of words");
         return;
     }
 
-    for (int i = 0; i < n_list; i++) {
-        if (strcmp(wanted_list[i], str_list[i]->buf) != 0) {
+    for (int i = 0; i < str_list->len; i++) {
+        if (strcmp(wanted_list[i], str_list->list[i]->buf) != 0) {
             test_failure(desc);
             return;
         }
         if (
-                strlen(wanted_list[i]) != str_list[i]->len ||
-                str_list[i]->cap != str_list[i]->len
-                ) {
+            strlen(wanted_list[i]) != str_list->list[i]->len ||
+            str_list->list[i]->cap != str_list->list[i]->len
+        ) {
             test_failure("should have len = cap = length of token");
             return;
         }

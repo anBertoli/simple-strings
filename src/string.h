@@ -5,7 +5,6 @@
 #include <stdio.h>
 
 #define END_STRING '\0'
-#define END_ITER (ss *)1
 
 /*
  * IMPORTANT: the ss struct fields must not be manipulated by the caller, they are

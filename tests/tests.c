@@ -521,143 +521,141 @@ void test_ss_iter_next(void) {
 
 void test_ss_collect_iter(void) {
     test_group("test ss_collect_iter");
-    int n_tokens;
 
     test_subgroup("split in words");
     ss_iter *s_iter = ss_split_raw_to_iter("Ehy how are you?", " ");
-    ss **tokens = ss_iter_collect(s_iter, &n_tokens);
+    ss_list *list = ss_iter_collect(s_iter);
     test_tokens_list(
-        "should split in words", tokens, n_tokens,
-        (char *[]){"Ehy", "how", "are", "you?"}, 4
+            "should split in words", list,(char *[]){"Ehy", "how", "are", "you?"}, 4
     );
 
     test_subgroup("missing delimiter");
     s_iter = ss_split_raw_to_iter("Ehy how are you?", "_");
-    tokens = ss_iter_collect(s_iter, &n_tokens);
+    list = ss_iter_collect(s_iter);
     test_tokens_list(
-        "should return the entire string", tokens, n_tokens,
+            "should return the entire string", list,
         (char *[]){"Ehy how are you?"}, 1
     );
 
     test_subgroup("empty delimiter");
     s_iter = ss_split_raw_to_iter("Ehy how are you?", "");
-    tokens = ss_iter_collect(s_iter, &n_tokens);
+    list = ss_iter_collect(s_iter);
     test_tokens_list(
-        "should return the entire string", tokens, n_tokens,
+        "should return the entire string", list,
         (char *[]){"Ehy how are you?"}, 1
     );
 
     test_subgroup("multiple consecutive delimiters");
     s_iter = ss_split_raw_to_iter("   Ehy    how   are   you?   ", " ");
-    tokens = ss_iter_collect(s_iter, &n_tokens);
+    list = ss_iter_collect(s_iter);
     test_tokens_list(
-        "shouldn't return empty tokens", tokens, n_tokens,
+            "shouldn't return empty tokens", list,
         (char *[]){"Ehy", "how", "are", "you?"}, 4
     );
 
     test_subgroup("only consecutive delimiters");
     s_iter = ss_split_raw_to_iter("      ", " ");
-    tokens = ss_iter_collect(s_iter, &n_tokens);
+    list = ss_iter_collect(s_iter);
     test_tokens_list(
-        "shouldn't return empty tokens", tokens, n_tokens,
+            "shouldn't return empty tokens", list,
         (char *[]){}, 0
     );
 }
 
-void test_ss_collect_from_row(void) {
-    test_group("test ss_collect_from_row");
-    int n_tokens;
-
-    test_subgroup("split in words");
-    ss **tokens = ss_split_row("Ehy how are you?", " ", &n_tokens);
-    test_tokens_list(
-        "should split in words", tokens, n_tokens,
-        (char *[]){"Ehy", "how", "are", "you?"}, 4
-    );
-
-    test_subgroup("missing delimiter");
-    tokens = ss_split_row("Ehy how are you?", "_", &n_tokens);
-    test_tokens_list(
-        "should return the entire string", tokens, n_tokens,
-        (char *[]){"Ehy how are you?"}, 1
-    );
-
-    test_subgroup("empty delimiter");
-    tokens = ss_split_row("Ehy how are you?", "", &n_tokens);
-    test_tokens_list(
-        "should return the entire string", tokens, n_tokens,
-        (char *[]){"Ehy how are you?"}, 1
-    );
-
-    test_subgroup("multiple consecutive delimiters");
-    tokens = ss_split_row("   Ehy    how   are   you?   ", " ", &n_tokens);
-    test_tokens_list(
-        "shouldn't return empty tokens", tokens, n_tokens,
-        (char *[]){"Ehy", "how", "are", "you?"}, 4
-    );
-
-    test_subgroup("only consecutive delimiters");
-    tokens = ss_split_row("      ", " ", &n_tokens);
-    test_tokens_list(
-        "shouldn't return empty tokens", tokens, n_tokens,
-        (char *[]){}, 0
-    );
-}
-
-void test_ss_collect_from_str(void) {
-    test_group("test ss_collect_from_str");
-    int n_tokens;
-
-    test_subgroup("split in words");
-    ss *s = ss_new_from_raw("Ehy how are you?");
-    ss **tokens = ss_split_str(s, " ", &n_tokens);
-    test_tokens_list(
-        "should split in words", tokens, n_tokens,
-        (char *[]){"Ehy", "how", "are", "you?"}, 4
-    );
-    free(tokens);
-    free(s);
-
-    test_subgroup("missing delimiter");
-    s = ss_new_from_raw("Ehy how are you?");
-    tokens = ss_split_str(s, "_", &n_tokens);
-    test_tokens_list(
-        "should return the entire string", tokens, n_tokens,
-        (char *[]){"Ehy how are you?"}, 1
-    );
-    free(tokens);
-    free(s);
-
-    test_subgroup("empty delimiter");
-    s = ss_new_from_raw("Ehy how are you?");
-    tokens = ss_split_str(s, "", &n_tokens);
-    test_tokens_list(
-        "should return the entire string", tokens, n_tokens,
-        (char *[]){"Ehy how are you?"}, 1
-    );
-    free(tokens);
-    free(s);
-
-    test_subgroup("multiple consecutive delimiters");
-    s = ss_new_from_raw("   Ehy    how   are   you?   ");
-    tokens = ss_split_str(s, " ", &n_tokens);
-    test_tokens_list(
-        "shouldn't return empty tokens", tokens, n_tokens,
-        (char *[]){"Ehy", "how", "are", "you?"}, 4
-    );
-    free(tokens);
-    free(s);
-
-    test_subgroup("only consecutive delimiters");
-    s = ss_new_from_raw("      ");
-    tokens = ss_split_str(s, " ", &n_tokens);
-    test_tokens_list(
-        "shouldn't return empty tokens", tokens, n_tokens,
-        (char *[]){}, 0
-    );
-    free(tokens);
-    free(s);
-}
+//void test_ss_collect_from_row(void) {
+//    test_group("test ss_collect_from_row");
+//    int n_tokens;
+//
+//    test_subgroup("split in words");
+//    ss **tokens = ss_split_row("Ehy how are you?", " ", &n_tokens);
+//    test_tokens_list(
+//        "should split in words", tokens, n_tokens,
+//        (char *[]){"Ehy", "how", "are", "you?"}, 4
+//    );
+//
+//    test_subgroup("missing delimiter");
+//    tokens = ss_split_row("Ehy how are you?", "_", &n_tokens);
+//    test_tokens_list(
+//        "should return the entire string", tokens, n_tokens,
+//        (char *[]){"Ehy how are you?"}, 1
+//    );
+//
+//    test_subgroup("empty delimiter");
+//    tokens = ss_split_row("Ehy how are you?", "", &n_tokens);
+//    test_tokens_list(
+//        "should return the entire string", tokens, n_tokens,
+//        (char *[]){"Ehy how are you?"}, 1
+//    );
+//
+//    test_subgroup("multiple consecutive delimiters");
+//    tokens = ss_split_row("   Ehy    how   are   you?   ", " ", &n_tokens);
+//    test_tokens_list(
+//        "shouldn't return empty tokens", tokens, n_tokens,
+//        (char *[]){"Ehy", "how", "are", "you?"}, 4
+//    );
+//
+//    test_subgroup("only consecutive delimiters");
+//    tokens = ss_split_row("      ", " ", &n_tokens);
+//    test_tokens_list(
+//        "shouldn't return empty tokens", tokens, n_tokens,
+//        (char *[]){}, 0
+//    );
+//}
+//
+//void test_ss_collect_from_str(void) {
+//    test_group("test ss_collect_from_str");
+//    int n_tokens;
+//
+//    test_subgroup("split in words");
+//    ss *s = ss_new_from_raw("Ehy how are you?");
+//    ss **tokens = ss_split_str(s, " ", &n_tokens);
+//    test_tokens_list(
+//        "should split in words", tokens, n_tokens,
+//        (char *[]){"Ehy", "how", "are", "you?"}, 4
+//    );
+//    free(tokens);
+//    free(s);
+//
+//    test_subgroup("missing delimiter");
+//    s = ss_new_from_raw("Ehy how are you?");
+//    tokens = ss_split_str(s, "_", &n_tokens);
+//    test_tokens_list(
+//        "should return the entire string", tokens, n_tokens,
+//        (char *[]){"Ehy how are you?"}, 1
+//    );
+//    free(tokens);
+//    free(s);
+//
+//    test_subgroup("empty delimiter");
+//    s = ss_new_from_raw("Ehy how are you?");
+//    tokens = ss_split_str(s, "", &n_tokens);
+//    test_tokens_list(
+//        "should return the entire string", tokens, n_tokens,
+//        (char *[]){"Ehy how are you?"}, 1
+//    );
+//    free(tokens);
+//    free(s);
+//
+//    test_subgroup("multiple consecutive delimiters");
+//    s = ss_new_from_raw("   Ehy    how   are   you?   ");
+//    tokens = ss_split_str(s, " ", &n_tokens);
+//    test_tokens_list(
+//        "shouldn't return empty tokens", tokens, n_tokens,
+//        (char *[]){"Ehy", "how", "are", "you?"}, 4
+//    );
+//    free(tokens);
+//    free(s);
+//
+//    test_subgroup("only consecutive delimiters");
+//    s = ss_new_from_raw("      ");
+//    tokens = ss_split_str(s, " ", &n_tokens);
+//    test_tokens_list(
+//        "shouldn't return empty tokens", tokens, n_tokens,
+//        (char *[]){}, 0
+//    );
+//    free(tokens);
+//    free(s);
+//}
 
 int main(void) {
     test_ss_new_raw_len_cap();
@@ -686,8 +684,8 @@ int main(void) {
     test_ss_split();
     test_ss_iter_next();
     test_ss_collect_iter();
-    test_ss_collect_from_row();
-    test_ss_collect_from_str();
+//    test_ss_collect_from_row();
+//    test_ss_collect_from_str();
 
     return test_report();
 }
