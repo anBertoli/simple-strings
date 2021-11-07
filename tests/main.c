@@ -31,6 +31,9 @@ int main(void) {
     test_ss_trim_right();
     test_ss_trim_left();
 
+    test_ss_to_lower();
+    test_ss_to_upper();
+
     // string_fmt.c
     test_ss_sprintf();
     test_ss_sprintf_va();
@@ -41,7 +44,6 @@ int main(void) {
     test_ss_iter_next();
 
     test_ss_iter_collect();
-
     test_ss_split_raw();
     test_ss_split_str();
 

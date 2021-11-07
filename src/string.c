@@ -1,5 +1,6 @@
 #include <stdlib.h>
 #include <strings.h>
+#include <ctype.h>
 #include "string.h"
 #include "alloc.h"
 
@@ -110,32 +111,6 @@ ss *ss_clone(ss *s) {
 }
 
 /*
- * Create a new ss string slicing the original provided string s. The original ss string
- * is not mutated. Both the original string and the returned one must be freed after use.
- * The slicing boundaries must be provided via the str_index and end_index (0-indexing)
- * and the resulting range is [str_index, end_index) (right boundary not inclusive). If
- * the str_index is >= of the original string length a new empty string is returned. If
- * the end index is < of str_index a new empty string is returned. If end_index > of the
- * original string length, end_index is reduced to original string length.
- *
- * Returns the substring in case of success or NULL if the allocation fails.
- */
-ss *ss_slice(ss *s, const int str_index, const int end_index) {
-    if (str_index >= s->len) return ss_new_empty();
-    if (end_index < str_index) return ss_new_empty();
-
-    // After this, start index will range from 0 to s->len-1,
-    // while end index will range from start index to s->len.
-    int _end_index = end_index;
-    if (end_index > s->len) _end_index = s->len;
-
-    char *start_string = &s->buf[str_index];
-    size_t len = _end_index - str_index;
-
-    return ss_new_from_raw_len_cap(start_string, len, len);
-}
-
-/*
  * Grow the string to have the specified length. New bytes inserted will be set to
  * zero. If the specified length is smaller than the current length, the function
  * is a no-op.
@@ -146,7 +121,9 @@ ss *ss_grow(ss *s, size_t len) {
     if (len <= s->len) return s;
 
     s = ss_reserve_free_space(s, len - s->len);
-    if (s == NULL) return NULL;
+    if (s == NULL) {
+        return NULL;
+    }
 
     memset(s->buf + s->len, 0, len - s->len);
     s->buf[len] = END_STRING;
@@ -328,6 +305,28 @@ ss *ss_concat_str(ss *s1, ss *s2) {
 
 
 
+/*
+ * Substring the original ss string slicing it with the provided index. The string is modified
+ * in-place. The slicing boundaries must be provided via the str_index and end_index (0-indexed)
+ * and the resulting range is [str_index, end_index) (right boundary not inclusive). If the str_index
+ * is >= of the original string length no changes are made. If the end index is < of str_index no
+ * changes are made. If end_index > of the original string length, end_index is reduced to original
+ * string length before slicing the string.
+ */
+void ss_slice(ss *s, const int str_index, const int end_index) {
+    if (str_index >= s->len) return;
+    if (end_index < str_index) return;
+
+    // After this, start index will range from 0 to s->len-1,
+    // while end index will range from start index to s->len.
+    int _end_index = end_index;
+    if (end_index > s->len) _end_index = s->len;
+
+    size_t len = _end_index - str_index;
+    memmove(s->buf, &s->buf[str_index], len);
+    s->buf[len] = END_STRING;
+    s->len = len;
+}
 
 /*
  * Removes characters contained in the cutset string from both the start and the end of the
@@ -394,7 +393,23 @@ void ss_trim_right(ss *s, const char *cutset) {
     s->len = len;
 }
 
+/*
+ * Turn the ss string by turning each char into its lowercase version.
+ * Modifies the string in place.
+ */
+void ss_to_lower(ss *s) {
+    for (int i = 0; i < s->len; i++) {
+        s->buf[i] = tolower(s->buf[i]);
+    }
+}
 
-
-
+/*
+ * Turn the ss string by turning each char into its uppercase version.
+ * Modifies the string in place.
+ */
+void ss_to_upper(ss *s) {
+    for (int i = 0; i < s->len; i++) {
+        s->buf[i] = toupper(s->buf[i]);
+    }
+}
 

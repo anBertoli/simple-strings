@@ -9,7 +9,7 @@ void ss_debug(ss *s, int mem) {
         return;
     }
     printf(
-        "str {len = %d, cap = %d, buf_ptr = %p ('%s')}\n",
+        "str {len = %lu, cap = %lu, buf_ptr = %p ('%s')}\n",
         s->len, s->cap, s->buf, s->buf
     );
 

@@ -2,7 +2,6 @@
 #include "../src/string.h"
 #include "framework/framework.h"
 
-
 void test_ss_new_from_raw_len_cap(void) {
     test_group("ss_new_from_raw_len_cap");
 
@@ -130,73 +129,6 @@ void test_ss_clone(void) {
     test_cond("should have different len", s1->len != s2->len);
     test_cond("should have different cap", s1->cap != s2->cap);
     test_cond("should have different strings", strcmp(s1->buf, s2->buf) != 0);
-    ss_free(s1);
-    ss_free(s2);
-}
-
-void test_ss_slice(void) {
-    test_group("ss_slice");
-
-    test_subgroup("slice all string");
-    ss *s1 = ss_new_from_raw("ehy how are you?");
-    ss *s2 = ss_slice(s1, 0, 16);
-    test_equal("should have same len", s1->len, s2->len);
-    test_cond("should have different cap", s1->cap != s2->cap);
-    test_equal("slice should have same cap = len", s2->len, s2->cap);
-    test_strings("should have the same string", s1->buf, s2->buf);
-    test_cond("should have different buffer pointers", s1->buf != s2->buf);
-    ss_free(s1);
-    ss_free(s2);
-
-    test_subgroup("slice substring");
-    s1 = ss_new_from_raw("ehy how are you?");
-    s2 = ss_slice(s1, 3, 14);
-    test_equal("slice should have correct len", s2->len, 11);
-    test_equal("slice should have correct cap (cap = len)", s2->cap, 11);
-    test_strings("slice should have correct string", s2->buf, " how are yo");
-    test_equal("original should have correct len", s1->len, 16);
-    test_equal("original should have correct cap (cap = len)", s1->cap, 32);
-    test_strings("original should have correct string", s1->buf, "ehy how are you?");
-    test_cond("should have different buffer pointers", s1->buf != s2->buf);
-    ss_free(s1);
-    ss_free(s2);
-
-    test_subgroup("end index > len");
-    s1 = ss_new_from_raw("ehy how are you?");
-    s2 = ss_slice(s1, 3, 100);
-    test_equal("slice should have correct len", s2->len, 13);
-    test_equal("slice should have correct cap (cap = len)", s2->cap, 13);
-    test_strings("slice should have correct string", s2->buf, " how are you?");
-    test_equal("original should have correct len", s1->len, 16);
-    test_equal("original should have correct cap (cap = len)", s1->cap, 32);
-    test_strings("original should have correct string", s1->buf, "ehy how are you?");
-    test_cond("should have different buffer pointers", s1->buf != s2->buf);
-    ss_free(s1);
-    ss_free(s2);
-
-    test_subgroup("start index > len = empty string");
-    s1 = ss_new_from_raw("ehy how are you?");
-    s2 = ss_slice(s1, 100, 102);
-    test_equal("slice should have correct len", s2->len, 0);
-    test_equal("slice should have correct cap (cap = len)", s2->cap, 0);
-    test_strings("slice should have correct string", s2->buf, "");
-    test_equal("original should have correct len", s1->len, 16);
-    test_equal("original should have correct cap (cap = len)", s1->cap, 32);
-    test_strings("original should have correct string", s1->buf, "ehy how are you?");
-    test_cond("should have different buffer pointers", s1->buf != s2->buf);
-    ss_free(s1);
-    ss_free(s2);
-
-    test_subgroup("start index > end index = empty string");
-    s1 = ss_new_from_raw("ehy how are you?");
-    s2 = ss_slice(s1, 5, 2);
-    test_equal("slice should have correct len", s2->len, 0);
-    test_equal("slice should have correct cap (cap = len)", s2->cap, 0);
-    test_strings("slice should have correct string", s2->buf, "");
-    test_equal("original should have correct len", s1->len, 16);
-    test_equal("original should have correct cap (cap = len)", s1->cap, 32);
-    test_strings("original should have correct string", s1->buf, "ehy how are you?");
-    test_cond("should have different buffer pointers", s1->buf != s2->buf);
     ss_free(s1);
     ss_free(s2);
 }
@@ -473,6 +405,58 @@ void test_ss_concat_str(void) {
     ss_free(s2);
 }
 
+void test_ss_slice(void) {
+    test_group("ss_slice");
+
+    test_subgroup("slice all string");
+    ss *s1 = ss_new_from_raw_len_cap("ehy how are you?", 16, 20);
+    ss_slice(s1, 0, 16);
+    test_equal("should have same len", 16, s1->len);
+    test_equal("should have same cap", 20, s1->cap);
+    test_strings("should have the same string", "ehy how are you?", s1->buf);
+    ss_free(s1);
+
+    test_subgroup("slice substring");
+    s1 = ss_new_from_raw_len_cap("ehy how are you?", 16, 20);
+    ss_slice(s1, 3, 14);
+    test_equal("slice should have correct len", 11, s1->len);
+    test_equal("slice should have correct cap", 20, s1->cap);
+    test_strings("slice should have correct string", s1->buf, " how are yo");
+    ss_free(s1);
+
+    test_subgroup("end index > len");
+    s1 = ss_new_from_raw_len_cap("ehy how are you?", 16, 20);
+    ss_slice(s1, 3, 100);
+    test_equal("slice should have correct len", s1->len, 13);
+    test_equal("slice should have correct cap", s1->cap, 20);
+    test_strings("slice should have correct string", s1->buf, " how are you?");
+    ss_free(s1);
+
+    test_subgroup("start index > len = no change");
+    s1 = ss_new_from_raw_len_cap("ehy how are you?", 16, 20);
+    ss_slice(s1, 100, 102);
+    test_equal("slice should have correct len", s1->len, 16);
+    test_equal("slice should have correct cap (cap = len)", s1->cap, 20);
+    test_strings("slice should have correct string", s1->buf, "ehy how are you?");
+    ss_free(s1);
+
+    test_subgroup("start index > end index = no change");
+    s1 = ss_new_from_raw_len_cap("ehy how are you?", 16, 20);
+    ss_slice(s1, 5, 2);
+    test_equal("slice should have correct len", s1->len, 16);
+    test_equal("slice should have correct cap (cap = len)", s1->cap, 20);
+    test_strings("slice should have correct string", s1->buf, "ehy how are you?");
+    ss_free(s1);
+
+    test_subgroup("start index > end index and start index > len = no change");
+    s1 = ss_new_from_raw_len_cap("ehy how are you?", 16, 20);
+    ss_slice(s1, 50, 2);
+    test_equal("slice should have correct len", s1->len, 16);
+    test_equal("slice should have correct cap (cap = len)", s1->cap, 20);
+    test_strings("slice should have correct string", s1->buf, "ehy how are you?");
+    ss_free(s1);
+}
+
 void test_ss_trim(void) {
     test_group("ss_trim");
 
@@ -605,4 +589,25 @@ void test_ss_trim_left(void) {
     ss_free(s1);
 }
 
+void test_ss_to_lower(void) {
+    test_group("ss_to_lower");
+
+    test_subgroup("base case");
+    ss *s1 = ss_new_from_raw("1234567890EHY    eHy  EhY!?_");
+    ss_to_lower(s1);
+    test_equal("shouldn't reduce the len", 28, s1->len);
+    test_equal("shouldn't change the cap", 56, s1->cap);
+    test_strings("should have turned the string to lowercase", "1234567890ehy    ehy  ehy!?_", s1->buf);
+}
+
+void test_ss_to_upper(void) {
+    test_group("ss_to_upper");
+
+    test_subgroup("base case");
+    ss *s1 = ss_new_from_raw("1234567890EHY    eHy  EhY!?_");
+    ss_to_upper(s1);
+    test_equal("shouldn't reduce the len", 28, s1->len);
+    test_equal("shouldn't change the cap", 56, s1->cap);
+    test_strings("should have turned the string to uppercase", "1234567890EHY    EHY  EHY!?_", s1->buf);
+}
 

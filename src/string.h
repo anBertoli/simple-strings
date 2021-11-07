@@ -11,8 +11,8 @@
  * updated by the functions of this library and they must be considered read-only.
  */
 typedef struct {
-    unsigned int len;
-    unsigned int cap;
+    size_t len;
+    size_t cap;
     char *buf;
 } ss;
 
@@ -25,9 +25,7 @@ ss *ss_new_from_raw_len(const char *init, const size_t len);
 ss *ss_new_from_raw(const char *init);
 ss *ss_new_empty_with_cap(const size_t cap);
 ss *ss_new_empty(void);
-
 ss *ss_clone(ss *s);
-ss *ss_slice(ss *s, const int str_index, const int end_index);
 
 ss *ss_grow(ss *s, size_t len);
 void ss_cut(ss *s, size_t len);
@@ -45,19 +43,20 @@ void ss_free(ss *s);
 int ss_index(ss *s, const char *needle);
 
 /*
- * Concatenation functions.
+ * Manipulation functions.
  */
 
 ss *ss_concat_raw_len(ss *s1, const char *s2, const size_t s2_len);
 ss *ss_concat_raw(ss *s1, const char *s2);
 ss *ss_concat_str(ss *s1, ss *s2);
 
-/*
- * Trimming and cutting functions.
- */
+void ss_slice(ss *s, const int str_index, const int end_index);
 
 void ss_trim(ss *s, const char *cutset);
 void ss_trim_left(ss *s, const char *cutset);
 void ss_trim_right(ss *s, const char *cutset);
+
+void ss_to_lower(ss *s);
+void ss_to_upper(ss *s);
 
 #endif

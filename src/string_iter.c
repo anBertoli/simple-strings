@@ -153,23 +153,19 @@ ss *ss_iter_next(ss_iter *s_iter) {
  * useful when the caller doesn't want/need to iterate and collect substrings manually;
  * ss_split_row and ss_split_str have similar functions but ss_iter_collect is more flexible
  * since it could be used also when some substrings were already obtained from an iterator.
- * All substrings are heap allocated and returned as a ss_list that must be freed after use
- * with the dedicated ss_list_free function.
+ * All substrings are heap allocated and returned as an array of *ss that must be freed after
+ * use with the dedicated ss_list_free function.
  *
- * Returns a list of strings (ss_list) of length ss_list.len in case of success or
- * NULL in case of allocation failures. In case of errors the strings list is freed
- * along with the iterator.
+ * Returns an array of strings (ss*) of length n in case of success or NULL in case of
+ * allocation failures. In case of errors the strings list is freed along with the iterator.
  */
-ss_list *ss_iter_collect(ss_iter *s_iter) {
-    ss_list *str_list = _malloc(sizeof(ss_list));
+ss **ss_iter_collect(ss_iter *s_iter, int *n) {
+    *n = 0;
+    ss **str_list = _malloc(sizeof(ss));
     if (str_list == NULL) {
         ss_iter_free(s_iter);
         return NULL;
     }
-    *str_list = (ss_list){
-        .list = NULL,
-        .len = 0,
-    };
 
     // Loop until the iterator is exhausted. If END_ITER is returned, the
     // iterator was already freed, so we can just break and return the
@@ -178,27 +174,29 @@ ss_list *ss_iter_collect(ss_iter *s_iter) {
         ss *str_next = ss_iter_next(s_iter);
         if (str_next == END_ITER) break;
         if (str_next == NULL) {
-            ss_list_free(str_list);
+            ss_list_free(str_list, *n);
             ss_iter_free(s_iter);
+            *n = 0;
             return NULL;
         }
 
         // The allocated string list memory is
         // enlarged with steps of length 20.
-        if (str_list->len % 20 == 0) {
-            ss **new_str_array = _realloc(str_list->list, sizeof(ss*) * (str_list->len + 20));
+        if (*n % 20 == 0) {
+            ss **new_str_array = _realloc(str_list, sizeof(ss*) * (*n + 20));
             if (new_str_array == NULL) {
-                ss_list_free(str_list);
+                ss_list_free(str_list, *n);
                 ss_iter_free(s_iter);
+                *n = 0;
                 return NULL;
             } else {
-                str_list->list = new_str_array;
+                str_list = new_str_array;
             }
         }
 
         // Append the new substring to the list.
-        str_list->list[str_list->len] = str_next;
-        str_list->len = str_list->len + 1;
+        str_list[*n] = str_next;
+        (*n)++;
     }
 
     return str_list;
@@ -208,37 +206,38 @@ ss_list *ss_iter_collect(ss_iter *s_iter) {
  * Return all the ss substrings generated from splitting the raw_str argument with the
  * delimiter string. The function is useful when the caller doesn't want/need to
  * create a string iterator and collect substrings manually. All substrings are heap
- * allocated and returned as a ss_list that must be freed after use with the dedicated
- * ss_list_free function.
+ * allocated and returned as an array of ss (ss**) that must be freed after use with
+ * the dedicated ss_list_free function.
  *
- * Returns a list of strings (ss_list) of length ss_list.len in case of success or
- * NULL in case of allocation failures.
+ * Returns an array of strings (ss**) of length n in case of success or NULL in case of
+ * allocation failures. In case of errors the strings list is freed along with the iterator.
  */
-ss_list *ss_split_row(const char *raw_str, const char  *del) {
+ss **ss_split_row(const char *raw_str, const char *del, int *n) {
     ss_iter *s_iter = ss_split_raw_to_iter(raw_str, del);
     if (s_iter == NULL) return NULL;
-    return ss_iter_collect(s_iter);
+    return ss_iter_collect(s_iter, n);
 }
 
 /*
  * Return all the ss substrings generated from splitting the ss string argument with
  * the delimiter string. The function is useful when the caller doesn't want/need to
  * create a string iterator and collect substrings manually. All substrings are heap
- * allocated and returned as a ss_list that must be freed after use with the dedicated
- * ss_list_free function.
+ * allocated and returned as an array of *ss that must be freed after use with the
+ * dedicated ss_list_free function.
  *
- * Returns a list of strings (ss_list) of length ss_list.len in case of success or
- * NULL in case of allocation failures.
+ * Returns an array of strings (ss**) of length n in case of success or NULL in case of
+ * allocation failures. In case of errors the strings list is freed along with the iterator.
  */
-ss_list *ss_split_str(ss *s, const char  *del) {
+ss **ss_split_str(ss *s, const char *del, int *n) {
     ss_iter *s_iter = ss_split_str_to_iter(s, del);
     if (s_iter == NULL) return NULL;
-    return ss_iter_collect(s_iter);
+    return ss_iter_collect(s_iter, n);
 }
 
 /*
  * Deallocate the memory used by a string iterator. The string iterator can't be
- * used after being freed.
+ * used after being freed. Note that some functions automatically consumes and
+ * frees the iterator, so it shouldn't be freed again.
  */
 void ss_iter_free(ss_iter *s_iter) {
     free(s_iter->buf);
@@ -250,14 +249,11 @@ void ss_iter_free(ss_iter *s_iter) {
 }
 
 /*
- * Deallocate the memory used by a string list. The string list can't be
- * used after being freed.
+ * Deallocate the memory used by a ss string array. The string array and all the
+ * strings can't be used after being freed.
  */
-void ss_list_free(ss_list *s_list) {
-    for (int i = 0; i < s_list->len; i++) ss_free(s_list->list[i]);
-    s_list->list = NULL;
-    s_list->len = 0;
-    free(s_list->list);
+void ss_list_free(ss **s_list, const int n) {
+    for (int i = 0; i < n; i++) ss_free(s_list[i]);
     free(s_list);
 }
 

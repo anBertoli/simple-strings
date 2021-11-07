@@ -1,4 +1,3 @@
-#include <strings.h>
 #include "../src/string_fmt.h"
 #include "framework/framework.h"
 
