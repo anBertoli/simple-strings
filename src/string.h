@@ -29,9 +29,12 @@ ss *ss_new_empty(void);
 ss *ss_clone(ss *s);
 ss *ss_slice(ss *s, const int str_index, const int end_index);
 
+ss *ss_grow(ss *s, size_t len);
+void ss_cut(ss *s, size_t len);
+void ss_clear(ss *s);
+
 ss *ss_set_free_space(ss *s, size_t free_space);
-ss *ss_grow(ss *s, size_t space);
-ss *ss_shrink(ss *s);
+ss *ss_reserve_free_space(ss *s, size_t free_space);
 
 void ss_free(ss *s);
 
@@ -56,8 +59,5 @@ ss *ss_concat_str(ss *s1, ss *s2);
 void ss_trim(ss *s, const char *cutset);
 void ss_trim_left(ss *s, const char *cutset);
 void ss_trim_right(ss *s, const char *cutset);
-
-void ss_cut(ss *s, size_t len);
-void ss_clear(ss *s);
 
 #endif

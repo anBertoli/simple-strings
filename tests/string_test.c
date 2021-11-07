@@ -201,6 +201,74 @@ void test_ss_slice(void) {
     ss_free(s2);
 }
 
+void test_ss_grow(void) {
+    test_group("ss_grow");
+
+    test_subgroup("grow > 0");
+    ss *s1 = ss_new_from_raw_len_cap("ehy you", 7, 7);
+    ss_grow(s1, 10);
+    test_equal("shouldn't change the len", 10, s1->len);
+    test_equal("should change the cap", 10, s1->cap);
+    test_strings("shouldn't change the string", "ehy you", s1->buf);
+    test_cond("should have inserted the 0s",s1->buf[7] == 0 && s1->buf[8] == 0 && s1->buf[9] == 0);
+    ss_free(s1);
+
+    test_subgroup("grow = 0");
+    s1 = ss_new_from_raw_len_cap("ehy you", 7, 7);
+    ss_grow(s1, 5);
+    test_equal("shouldn't change the len", 7, s1->len);
+    test_equal("shouldn't change the cap", 7, s1->cap);
+    test_strings("shouldn't change the string", "ehy you", s1->buf);
+    ss_free(s1);
+}
+
+void test_ss_cut(void) {
+    test_group("ss_cut");
+
+    test_subgroup("non empty string");
+    ss *s1 = ss_new_from_raw("ehy you");
+    ss_cut(s1, 4);
+    test_equal("should reduce the len", 4, s1->len);
+    test_equal("shouldn't change the cap", 14, s1->cap);
+    test_strings("should have reduced the string", "ehy ", s1->buf);
+    ss_free(s1);
+
+    test_subgroup("len cut > string len");
+    s1 = ss_new_from_raw("ehy you");
+    ss_cut(s1, 10);
+    test_equal("shouldn't reduce the len", 7, s1->len);
+    test_equal("shouldn't change the cap", 14, s1->cap);
+    test_strings("shouldn't have reduced the string", "ehy you", s1->buf);
+    ss_free(s1);
+
+    test_subgroup("empty string");
+    s1 = ss_new_from_raw("");
+    ss_cut(s1, 10);
+    test_equal("shouldn't change the len", 0, s1->len);
+    test_equal("shouldn't change the cap", 0, s1->cap);
+    test_strings("should maintain the empty string", "", s1->buf);
+    ss_free(s1);
+}
+
+void test_ss_clear(void) {
+    test_group("ss_clear");
+
+    test_subgroup("non empty string");
+    ss *s1 = ss_new_from_raw("ehy you");
+    ss_clear(s1);
+    test_equal("should reduce the len to zero", 0, s1->len);
+    test_equal("shouldn't change the cap", 14, s1->cap);
+    test_strings("should have cleaned the string", "", s1->buf);
+    ss_free(s1);
+
+    test_subgroup("already empty string");
+    s1 = ss_new_from_raw("");
+    ss_clear(s1);
+    test_equal("shouldn't change the len", 0, s1->len);
+    test_equal("shouldn't change the cap", 0, s1->cap);
+    test_strings("should maintain the empty string", "", s1->buf);
+    ss_free(s1);
+}
 
 void test_ss_set_free_space(void) {
     test_group("ss_set_free_space");
@@ -222,34 +290,30 @@ void test_ss_set_free_space(void) {
     ss_free(s1);
 }
 
-void test_ss_grow(void) {
-    test_group("ss_grow");
+void test_ss_reserve_free_space(void) {
+    test_group("ss_set_free_space");
 
-    test_subgroup("grow > 0");
+    test_subgroup("enlarge free space");
     ss *s1 = ss_new_from_raw_len_cap("ehy you", 7, 7);
-    ss_grow(s1, 20);
+    ss_reserve_free_space(s1, 10);
     test_equal("shouldn't change the len", 7, s1->len);
-    test_equal("should change the cap", 27, s1->cap);
+    test_equal("should augment the cap", 17, s1->cap);
     test_strings("shouldn't change the string", "ehy you", s1->buf);
     ss_free(s1);
 
-    test_subgroup("grow = 0");
+    test_subgroup("new free space = 0");
     s1 = ss_new_from_raw_len_cap("ehy you", 7, 7);
-    ss_grow(s1, 0);
+    ss_reserve_free_space(s1, 0);
     test_equal("shouldn't change the len", 7, s1->len);
     test_equal("shouldn't change the cap", 7, s1->cap);
     test_strings("shouldn't change the string", "ehy you", s1->buf);
     ss_free(s1);
-}
 
-void test_ss_shrink(void) {
-    test_group("ss_shrink");
-
-    test_subgroup("base case");
-    ss *s1 = ss_new_from_raw("ehy you");
-    ss_shrink(s1);
-    test_equal("shouldn't change the len to zero", 7, s1->len);
-    test_equal("should change the cap", 7, s1->cap);
+    test_subgroup("already free space");
+    s1 = ss_new_from_raw_len_cap("ehy you",7, 20);
+    ss_reserve_free_space(s1, 10);
+    test_equal("shouldn't change the len", 7, s1->len);
+    test_equal("should set cap = len", 20, s1->cap);
     test_strings("shouldn't change the string", "ehy you", s1->buf);
     ss_free(s1);
 }
@@ -409,7 +473,6 @@ void test_ss_concat_str(void) {
     ss_free(s2);
 }
 
-
 void test_ss_trim(void) {
     test_group("ss_trim");
 
@@ -542,51 +605,4 @@ void test_ss_trim_left(void) {
     ss_free(s1);
 }
 
-void test_ss_cut(void) {
-    test_group("ss_cut");
-
-    test_subgroup("non empty string");
-    ss *s1 = ss_new_from_raw("ehy you");
-    ss_cut(s1, 4);
-    test_equal("should reduce the len", 4, s1->len);
-    test_equal("shouldn't change the cap", 14, s1->cap);
-    test_strings("should have reduced the string", "ehy ", s1->buf);
-    ss_free(s1);
-
-    test_subgroup("len cut > string len");
-    s1 = ss_new_from_raw("ehy you");
-    ss_cut(s1, 10);
-    test_equal("shouldn't reduce the len", 7, s1->len);
-    test_equal("shouldn't change the cap", 14, s1->cap);
-    test_strings("shouldn't have reduced the string", "ehy you", s1->buf);
-    ss_free(s1);
-
-    test_subgroup("empty string");
-    s1 = ss_new_from_raw("");
-    ss_cut(s1, 10);
-    test_equal("shouldn't change the len", 0, s1->len);
-    test_equal("shouldn't change the cap", 0, s1->cap);
-    test_strings("should maintain the empty string", "", s1->buf);
-    ss_free(s1);
-}
-
-void test_ss_clear(void) {
-    test_group("ss_clear");
-
-    test_subgroup("non empty string");
-    ss *s1 = ss_new_from_raw("ehy you");
-    ss_clear(s1);
-    test_equal("should reduce the len to zero", 0, s1->len);
-    test_equal("shouldn't change the cap", 14, s1->cap);
-    test_strings("should have cleaned the string", "", s1->buf);
-    ss_free(s1);
-
-    test_subgroup("already empty string");
-    s1 = ss_new_from_raw("");
-    ss_clear(s1);
-    test_equal("shouldn't change the len", 0, s1->len);
-    test_equal("shouldn't change the cap", 0, s1->cap);
-    test_strings("should maintain the empty string", "", s1->buf);
-    ss_free(s1);
-}
 

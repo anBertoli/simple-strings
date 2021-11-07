@@ -3,7 +3,6 @@
 #include "string.h"
 #include "string_iter.h"
 #include "alloc.h"
-#include "internal/debug.h"
 
 /*
  * Build a new string iterator from a raw string and a string delimiter. The string

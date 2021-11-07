@@ -136,6 +136,51 @@ ss *ss_slice(ss *s, const int str_index, const int end_index) {
 }
 
 /*
+ * Grow the string to have the specified length. New bytes inserted will be set to
+ * zero. If the specified length is smaller than the current length, the function
+ * is a no-op.
+ *
+ * Returns the enlarged substring in case of success or NULL if any allocation fails.
+ */
+ss *ss_grow(ss *s, size_t len) {
+    if (len <= s->len) return s;
+
+    s = ss_reserve_free_space(s, len - s->len);
+    if (s == NULL) return NULL;
+
+    memset(s->buf + s->len, 0, len - s->len);
+    s->buf[len] = END_STRING;
+    s->len = len;
+    return s;
+}
+
+/*
+ * Cut the string at the provided length len. The string is shortened to contain the
+ * first len bytes. The allocation space (cap) is left untouched. The bytes after the
+ * number len are not cleaned, they are just marked as 'unused' since they are beyond
+ * the length of the string. If the length len is greater than the string s length
+ * the function is a no-op.
+ */
+void ss_cut(ss *s, size_t len) {
+    if (len >= s->len) return;
+    s->len = len;
+    s->buf[len] = END_STRING;
+}
+
+/*
+ * Erase the string. The length of the string is set to 0 and a null terminator
+ * is written in the first byte of the string buffer. The allocation space (cap)
+ * is left untouched, so future string manipulations can be performed with fewer
+ * reallocations. The bytes after the number len are not cleaned, they are just
+ * marked as 'unused' since they are beyond the length of the string.
+ */
+void ss_clear(ss *s) {
+    ss_cut(s, 0);
+}
+
+
+
+/*
  * Changes the allocated space for the string. The operation doesn't change the
  * stored string itself, both in the content and the length. It only changes the
  * available (allocated) space beyond the string len. The function is useful to
@@ -157,32 +202,22 @@ ss *ss_set_free_space(ss *s, size_t free_space) {
 }
 
 /*
- * Grow the allocated space (capacity cap) by 'space' bytes. The operation doesn't
- * change the stored string buffer itself, both in the content and the length. It
- * only changes the available space beyond the string length. The function is useful
- * to reserve more space earlier in order to avoid frequent reallocations
+ * Enlarge the free allocated space (the space after the string itself) to at least
+ * 'free_space' bytes. The operation doesn't change the stored string buffer itself,
+ * both in the content and the length. It only changes the available space beyond the
+ * string length. The function is useful to reserve more space earlier in order to
+ * avoid frequent reallocations. If enough space is already present the function is
+ * a no-op.
  *
  * Returns the ss string s if the function succeeded or NULL if the eventual
  * reallocation fails. In case of failure the ss string s is still valid and
  * must be freed after use.
  */
-ss *ss_grow(ss *s, size_t space) {
-    return ss_set_free_space(s, (s->cap - s->len) + space);
+ss *ss_reserve_free_space(ss *s, size_t free_space) {
+    if (s->cap - s->len >= free_space) return s;
+    return ss_set_free_space(s, free_space);
 }
 
-/*
- * Reduce the allocated space (cap) to contain exactly the current string. The
- * allocated string itself is left untouched. It is possible to combine a call
- * to ss_clear with a call to ss_shrink to drastically reduce the amount
- * of allocated space (the string will have 0 len and cap).
- *
- * Returns the ss string s if the function succeeded or NULL if the eventual
- * reallocation fails. In case of failure the ss string s is still valid and
- * must be freed after use.
- */
-ss *ss_shrink(ss *s) {
-    return ss_set_free_space(s, 0);
-}
 
 /*
  * Deallocate the memory used by a ss string s. The string can't be used after
@@ -358,31 +393,6 @@ void ss_trim_right(ss *s, const char *cutset) {
     s->buf[len] = END_STRING;
     s->len = len;
 }
-
-/*
- * Cut the string at the provided length len. The string is shortened to contain the
- * first len bytes. The allocation space (cap) is left untouched. The bytes after the
- * number len are not cleaned, they are just marked as 'unused' since they are beyond
- * the length of the string. If the length len is greater than the string s length
- * the function is a no-op.
- */
-void ss_cut(ss *s, size_t len) {
-    if (len > s->len) return;
-    s->len = len;
-    s->buf[len] = END_STRING;
-}
-
-/*
- * Erase the string. The length of the string is set to 0 and a null terminator
- * is written in the first byte of the string buffer. The allocation space (cap)
- * is left untouched, so future string manipulations can be performed with fewer
- * reallocations. The bytes after the number len are not cleaned, they are just
- * marked as 'unused' since they are beyond the length of the string.
- */
-void ss_clear(ss *s) {
-    ss_cut(s, 0);
-}
-
 
 
 
