@@ -111,7 +111,7 @@ void test_ss_split_raw(void) {
 }
 
 void test_ss_split_str(void) {
-    test_group("test ss_collect_from_str");
+    test_group("ss_collect_from_str");
     int n = 0;
 
     test_subgroup("split in words");
@@ -138,6 +138,87 @@ void test_ss_split_str(void) {
     s = ss_new_from_raw("      ");
     list = ss_split_str(s, " ", &n);
     test_tokens_from_list(list, n, (char *[]){}, 0);
+}
+
+void test_ss_join_raw(void) {
+    test_group("ss_join_raw");
+
+    test_subgroup("simple join");
+
+    ss *s1 = ss_join_raw((char *[]){ "how", "are", "you?" }, 3, "___");
+    test_strings("should have joined the strings", "how___are___you?", s1->buf);
+    test_equal("should have the correct len", 16, s1->len);
+    test_equal("should have the correct cap", 18, s1->cap);
+    ss_free(s1);
+
+    test_subgroup("empty separator");
+    s1 = ss_join_raw((char *[]){ "how", "are", "you?" }, 3, "");
+    test_strings("should have joined the strings", "howareyou?", s1->buf);
+    test_equal("should have the correct len", 10, s1->len);
+    test_equal("should have the correct cap", 20, s1->cap);
+    ss_free(s1);
+
+    test_subgroup("empty strings");
+    s1 = ss_join_raw((char *[]){ "", "", "" }, 3, "___");
+    test_strings("should have joined the strings", "______", s1->buf);
+    test_equal("should have the correct len", 6, s1->len);
+    test_equal("should have the correct cap", 6, s1->cap);
+    ss_free(s1);
+
+    test_subgroup("empty string and separator");
+    s1 = ss_join_raw((char *[]){ "", "", "" }, 3, "");
+    test_strings("should have joined the strings", "", s1->buf);
+    test_equal("should have the correct len", 0, s1->len);
+    test_equal("should have the correct cap", 0, s1->cap);
+    ss_free(s1);
+}
+
+void test_ss_join_str(void) {
+    test_group("ss_join_str");
+
+    test_subgroup("simple join");
+    ss *s1 = ss_new_from_raw("how");
+    ss *s2 = ss_new_from_raw("are");
+    ss *s3 = ss_new_from_raw("you?");
+
+    ss *s4 = ss_join_str((ss *[]){ s1,s2,s3 }, 3, "___");
+    test_strings("should have joined the strings", "how___are___you?", s4->buf);
+    test_equal("should have the correct len", 16, s4->len);
+    test_equal("should have the correct cap", 18, s4->cap);
+    ss_free(s4);
+
+    test_subgroup("empty separator");
+    s4 = ss_join_str((ss *[]){ s1,s2,s3 }, 3, "");
+    test_strings("should have joined the strings", "howareyou?", s4->buf);
+    test_equal("should have the correct len", 10, s4->len);
+    test_equal("should have the correct cap", 20, s4->cap);
+    ss_free(s4);
+
+    ss_free(s1);
+    ss_free(s2);
+    ss_free(s3);
+
+    test_subgroup("empty strings");
+    s1 = ss_new_from_raw("");
+    s2 = ss_new_from_raw("");
+    s3 = ss_new_from_raw("");
+
+    s4 = ss_join_str((ss *[]){ s1,s2,s3 }, 3, "___");
+    test_strings("should have joined the strings", "______", s4->buf);
+    test_equal("should have the correct len", 6, s4->len);
+    test_equal("should have the correct cap", 6, s4->cap);
+    ss_free(s4);
+
+    test_subgroup("empty string and separator");
+    s4 = ss_join_str((ss *[]){ s1,s2,s3 }, 3, "");
+    test_strings("should have joined the strings", "", s4->buf);
+    test_equal("should have the correct len", 0, s4->len);
+    test_equal("should have the correct cap", 0, s4->cap);
+    ss_free(s4);
+
+    ss_free(s1);
+    ss_free(s2);
+    ss_free(s3);
 }
 
 

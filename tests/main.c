@@ -47,5 +47,8 @@ int main(void) {
     test_ss_split_raw();
     test_ss_split_str();
 
+    test_ss_join_raw();
+    test_ss_join_str();
+
     return test_report();
 }
