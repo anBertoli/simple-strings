@@ -151,7 +151,7 @@ ss *ss_iter_next(ss_iter *s_iter) {
 /*
  * Collect and return all the ss substrings that a ss_iter could produce. The function is
  * useful when the caller doesn't want/need to iterate and collect substrings manually;
- * ss_split_row and ss_split_str have similar functions but ss_iter_collect is more flexible
+ * ss_split_raw and ss_split_str have similar functions but ss_iter_collect is more flexible
  * since it could be used also when some substrings were already obtained from an iterator.
  * All substrings are heap allocated and returned as an array of *ss that must be freed after
  * use with the dedicated ss_list_free function.
@@ -212,7 +212,7 @@ ss **ss_iter_collect(ss_iter *s_iter, int *n) {
  * Returns an array of strings (ss**) of length n in case of success or NULL in case of
  * allocation failures. In case of errors the strings list is freed along with the iterator.
  */
-ss **ss_split_row(const char *raw_str, const char *del, int *n) {
+ss **ss_split_raw(const char *raw_str, const char *del, int *n) {
     ss_iter *s_iter = ss_split_raw_to_iter(raw_str, del);
     if (s_iter == NULL) return NULL;
     return ss_iter_collect(s_iter, n);
@@ -232,6 +232,70 @@ ss **ss_split_str(ss *s, const char *del, int *n) {
     ss_iter *s_iter = ss_split_str_to_iter(s, del);
     if (s_iter == NULL) return NULL;
     return ss_iter_collect(s_iter, n);
+}
+
+/*
+ * Join an array of C strings using the provided separator (also a C string) between them.
+ * The returned ss string must be freed after use. As an example, if the provided strings
+ * are "how", "are", "you?" and the delimiter is a hash (#) the resulting string is:
+ * "how#are#you?".
+ *
+ * Returns the joined ss string in case of success or NULL in case of allocation errors.
+ */
+ss *ss_join_raw(const char **s, const int n, const char *sep) {
+    ss *join = ss_new_empty();
+    ss *join_alias = join;
+    if (join == NULL) return NULL;
+
+    for (int i = 0; i < n; i++) {
+        join = ss_concat_raw(join, s[i]);
+        if (join == NULL) {
+            ss_free(join_alias);
+            return NULL;
+        }
+
+        if (i != n-1) {
+            join = ss_concat_raw(join, sep);
+            if (join == NULL) {
+                ss_free(join_alias);
+                return NULL;
+            }
+        }
+    }
+
+    return join;
+}
+
+/*
+ * Join an array of ss strings using the provided separator (a C string) between them.
+ * The returned ss string must be freed after use. As an example, if the provided strings
+ * are "how", "are", "you?" and the delimiter is a hash (#) the resulting string is:
+ * "how#are#you?".
+ *
+ * Returns the joined ss string in case of success or NULL in case of allocation errors.
+ */
+ss *ss_join_str(ss **s, const int n, const char *sep) {
+    ss *join = ss_new_empty();
+    ss *join_alias = join;
+    if (join == NULL) return NULL;
+
+    for (int i = 0; i < n; i++) {
+        join = ss_concat_str(join, s[i]);
+        if (join == NULL) {
+            ss_free(join_alias);
+            return NULL;
+        }
+
+        if (i != n-1) {
+            join = ss_concat_raw(join, sep);
+            if (join == NULL) {
+                ss_free(join_alias);
+                return NULL;
+            }
+        }
+    }
+
+    return join;
 }
 
 /*
