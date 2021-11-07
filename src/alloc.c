@@ -1,10 +1,10 @@
 #include <stdlib.h>
 
 /*
- * If SS_ALLOC_EXIT is defined (usually through the compiler flags), failures in
- * memory allocation will abort the program. In this case the user doesn't need to
- * check the returned string pointer for NULL values. Otherwise, the default
- * behaviour is the same as the standard library malloc and realloc functions.
+ * If SS_ALLOC_EXIT is defined (usually through the compiler flags at compile time),
+ * failures in memory allocation will abort the program. In this case the user doesn't
+ * need to check returned string pointers for NULL values. Otherwise, the default
+ * behaviour is the same as the standard library `malloc` and `realloc` functions.
  */
 
 #ifdef SS_ALLOC_EXIT
