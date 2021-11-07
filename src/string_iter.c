@@ -242,7 +242,7 @@ ss **ss_split_str(ss *s, const char *del, int *n) {
  *
  * Returns the joined ss string in case of success or NULL in case of allocation errors.
  */
-ss *ss_join_raw(const char **s, const int n, const char *sep) {
+ss *ss_join_raw(char **s, const int n, const char *sep) {
     ss *join = ss_new_empty();
     ss *join_alias = join;
     if (join == NULL) return NULL;

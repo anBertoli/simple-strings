@@ -86,27 +86,27 @@ void test_ss_iter_collect(void) {
 }
 
 void test_ss_split_raw(void) {
-    test_group("ss_split_row");
+    test_group("ss_split_raw");
     int n = 0;
 
     test_subgroup("split in words");
-    ss **tokens = ss_split_row("Ehy how are you?", " ", &n);
+    ss **tokens = ss_split_raw("Ehy how are you?", " ", &n);
     test_tokens_from_list(tokens, n, (char *[]){"Ehy", "how", "are", "you?"}, 4);
 
     test_subgroup("missing delimiter");
-    tokens = ss_split_row("Ehy how are you?", "_", &n);
+    tokens = ss_split_raw("Ehy how are you?", "_", &n);
     test_tokens_from_list(tokens, n, (char *[]){"Ehy how are you?"}, 1);
 
     test_subgroup("empty delimiter");
-    tokens = ss_split_row("Ehy how are you?", "", &n);
+    tokens = ss_split_raw("Ehy how are you?", "", &n);
     test_tokens_from_list(tokens, n, (char *[]){"Ehy how are you?"}, 1);
 
     test_subgroup("multiple consecutive delimiters");
-    tokens = ss_split_row("   Ehy    how   are   you?   ", " ", &n);
+    tokens = ss_split_raw("   Ehy    how   are   you?   ", " ", &n);
     test_tokens_from_list(tokens, n, (char *[]){"Ehy", "how", "are", "you?"}, 4);
 
     test_subgroup("only consecutive delimiters");
-    tokens = ss_split_row("      ", " ", &n);
+    tokens = ss_split_raw("      ", " ", &n);
     test_tokens_from_list(tokens, n, (char *[]){}, 0);
 }
 
