@@ -1,8 +1,8 @@
 #include <strings.h>
-#include "../src/string.h"
-#include "../src/string_fmt.h"
-#include "../src/internal/debug.h"
-#include "../src/string_iter.h"
+#include "../string.h"
+#include "../string_fmt.h"
+#include "../internal/debug.h"
+#include "../string_iter.h"
 #include "framework/framework.h"
 
 void test_tokens_from_iter(ss_iter *s_iter, char **tokens, int num_tokens);

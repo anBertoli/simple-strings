@@ -1,5 +1,5 @@
 #include <strings.h>
-#include "../src/string.h"
+#include "../string.h"
 #include "framework/framework.h"
 
 void test_ss_new_from_raw_len_cap(void) {
