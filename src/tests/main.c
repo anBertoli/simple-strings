@@ -26,6 +26,9 @@ int main(void) {
     test_ss_concat_raw_len();
     test_ss_concat_raw();
     test_ss_concat_str();
+    test_ss_prepend_raw_len();
+    test_ss_prepend_raw();
+    test_ss_prepend_str();
 
     test_ss_trim();
     test_ss_trim_right();

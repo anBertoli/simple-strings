@@ -1,5 +1,5 @@
 #include <stdlib.h>
-#include <strings.h>
+#include <string.h>
 #include <ctype.h>
 #include "string.h"
 #include "alloc.h"
@@ -299,10 +299,71 @@ ss *ss_concat_str(ss *s1, ss *s2) {
     return ss_concat_raw_len(s1, s2->buf, s2->len);
 }
 
+/*
+ * Prepend a C string s1 of length s1_len to a ss string s2. If the length of the C
+ * string is greater than s1_len, the exceeding bytes are discarded. The s1 C string is
+ * prepended to the ss string s2, eventually growing s2. The strategy used in prepend
+ * functions is: if the string s2 has enough allocated space to contain also the string s1
+ * the content is simply prepended, otherwise the s2 string will be grown in order to have
+ * a capacity (cap) of (2*n + 1) bytes, where n is the resulting string length. The s2 string
+ * buffer is memmoved ahead in any case.
+ *
+ * Returns the string s2 with the appended C string in case of success or NULL if the eventual
+ * reallocation fails. In case of failure the string s2 is still valid and must be
+ * freed after use.
+ */
+ss *ss_prepend_raw_len(const char *s1, ss *s2, const size_t s1_len) {
+    size_t new_len = s2->len + s1_len;
 
+    if (new_len > s2->cap) {
+        // We need to alias the reallocated buffer to
+        // avoid overwriting the original pointer in
+        // case of failures.
+        size_t new_cap = (sizeof(char) * new_len) * 2;
+        char *new_buf = _realloc(s2->buf, new_cap + 1);
+        if (new_buf == NULL) return NULL;
 
+        s2->buf = new_buf;
+        s2->cap = new_cap;
+    }
 
+    // Make space for the string to prepend, then
+    // copy that string at the beginning.
+    memmove(s2->buf + s1_len, s2->buf, s2->len);
+    memcpy(s2->buf, s1, s1_len);
+    s2->buf[new_len] = END_STRING;
+    s2->len = new_len;
 
+    return s2;
+}
+
+/*
+ * Prepend a null terminated C string s1 to a ss string s2. The s1 string is prepended to
+ * s2, eventually growing the s2 string. Basically, it is a shorthand for
+ * ss_prepend_raw_len(s1, s2, strlen(s1)).
+ *
+ * Returns the string s2 with the prepended C string in case of success or NULL if the eventual
+ * reallocation fails. In case of failure the string s2 is still valid and must be
+ * freed after use.
+ */
+ss *ss_prepend_raw(const char *s1, ss *s2) {
+    return s1 != NULL
+        ? ss_prepend_raw_len(s1, s2, strlen(s1))
+        : s2;
+}
+
+/*
+ * Prepend a ss string s1 to another ss string s2. The s1 string is appended to
+ * s2, eventually growing the s2 string. Both strings are still valid after the
+ * function call and must be freed separately.
+ *
+ * Returns the string s2 with the prepended s1 string in case of success or NULL if the eventual
+ * reallocation fails. In case of failure the string s2 is still valid and must be
+ * freed after use.
+ */
+ss *ss_prepend_str(ss *s1, ss *s2) {
+    return ss_prepend_raw_len(s1->buf, s2, s1->len);
+}
 
 
 /*

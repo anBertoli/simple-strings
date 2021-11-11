@@ -21,6 +21,9 @@ void test_ss_index(void);
 void test_ss_concat_raw_len(void);
 void test_ss_concat_raw(void);
 void test_ss_concat_str(void);
+void test_ss_prepend_raw_len(void);
+void test_ss_prepend_raw(void);
+void test_ss_prepend_str(void);
 
 void test_ss_slice(void);
 void test_ss_trim(void);

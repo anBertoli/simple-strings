@@ -37,18 +37,17 @@ ss *ss_reserve_free_space(ss *s, size_t free_space);
 void ss_free(ss *s);
 
 /*
- * Searching functions.
+ * Searching and manipulation functions.
  */
 
 int ss_index(ss *s, const char *needle);
 
-/*
- * Manipulation functions.
- */
-
 ss *ss_concat_raw_len(ss *s1, const char *s2, const size_t s2_len);
 ss *ss_concat_raw(ss *s1, const char *s2);
 ss *ss_concat_str(ss *s1, ss *s2);
+ss *ss_prepend_raw_len(const char *s1, ss *s2, const size_t s1_len);
+ss *ss_prepend_raw(const char *s1, ss *s2);
+ss *ss_prepend_str(ss *s1, ss *s2);
 
 void ss_slice(ss *s, const int str_index, const int end_index);
 

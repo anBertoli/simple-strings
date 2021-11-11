@@ -1,6 +1,6 @@
 #include "../string_fmt.h"
 #include "framework/framework.h"
-
+#include "../private/debug.h"
 
 void test_ss_sprintf(void) {
     test_group("test ss_sprintf");

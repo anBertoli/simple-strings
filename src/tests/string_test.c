@@ -1,6 +1,7 @@
 #include <strings.h>
 #include "../string.h"
 #include "framework/framework.h"
+#include "../private/debug.h"
 
 void test_ss_new_from_raw_len_cap(void) {
     test_group("ss_new_from_raw_len_cap");
@@ -362,7 +363,7 @@ void test_ss_concat_raw(void) {
 }
 
 void test_ss_concat_str(void) {
-    test_group("test ss_concat_str");
+    test_group("ss_concat_str");
 
     test_subgroup("non empty strings");
     ss *s1 = ss_new_from_raw("See you");
@@ -403,6 +404,130 @@ void test_ss_concat_str(void) {
     test_strings("should have concat the strings", "", s1->buf);
     ss_free(s1);
     ss_free(s2);
+}
+
+void test_ss_prepend_raw_len(void) {
+    test_group("ss_prepend_raw_len");
+
+    test_subgroup("non empty strings");
+//    ss *s1 = ss_new_from_raw("Ehy ");
+//    ss_concat_raw_len(s1, "you!", 4);
+//    test_equal("should have correct len", 8, s1->len);
+//    test_equal("should have correct cap", 8, s1->cap);
+//    test_strings("should have concat the strings", "Ehy you!", s1->buf);
+//    ss_free(s1);
+
+    test_subgroup("non empty strings with len > raw string length");
+//    s1 = ss_new_from_raw("See you");
+//    ss_concat_raw_len(s1, " later!!!", 3);
+//    test_equal("should have extended the len", 10, s1->len);
+//    test_equal("should have extended the cap", 14, s1->cap);
+//    test_strings("should have concat the strings", "See you la", s1->buf);
+//    ss_free(s1);
+
+    test_subgroup("non empty strings with reallocations");
+//    s1 = ss_new_from_raw("See you");
+//    ss_concat_raw_len(s1, " later!!!", 9);
+//    test_equal("should have extended the len", 16, s1->len);
+//    test_equal("should have extended the cap", 32, s1->cap);
+//    test_strings("should have concat the strings", "See you later!!!", s1->buf);
+//    ss_free(s1);
+
+    test_subgroup("one empty string");
+//    s1 = ss_new_from_raw("See you");
+//    ss_concat_raw_len(s1, "", 0);
+//    test_equal("shouldn't have extended the len", 7, s1->len);
+//    test_equal("shouldn't have extended the cap", 14, s1->cap);
+//    test_strings("should have concat the strings", "See you", s1->buf);
+//    ss_free(s1);
+
+    test_subgroup("both empty strings");
+//    s1 = ss_new_from_raw("");
+//    ss_concat_raw_len(s1, "", 0);
+//    test_equal("shouldn't have extended the len", 0, s1->len);
+//    test_equal("shouldn't have extended the cap", 0, s1->cap);
+//    test_strings("should have concat the strings", "", s1->buf);
+//    ss_free(s1);
+}
+
+void test_ss_prepend_raw(void) {
+    test_group("ss_prepend_raw");
+
+    test_subgroup("non empty strings");
+//    ss *s1 = ss_new_from_raw("Ehy ");
+//    ss_concat_raw(s1, "you!");
+//    test_equal("should have correct len", 8, s1->len);
+//    test_equal("should have correct cap", 8, s1->cap);
+//    test_strings("should have concat the strings", "Ehy you!", s1->buf);
+//    ss_free(s1);
+
+    test_subgroup("non empty strings with reallocations");
+//    s1 = ss_new_from_raw("See you");
+//    ss_concat_raw(s1, " later!!!");
+//    test_equal("should have extended the len", 16, s1->len);
+//    test_equal("should have extended the cap", 32, s1->cap);
+//    test_strings("should have concat the strings", "See you later!!!", s1->buf);
+//    ss_free(s1);
+
+    test_subgroup("one empty string");
+//    s1 = ss_new_from_raw("See you");
+//    ss_concat_raw(s1, "");
+//    test_equal("shouldn't have extended the len", 7, s1->len);
+//    test_equal("shouldn't have extended the cap", 14, s1->cap);
+//    test_strings("should have concat the strings", "See you", s1->buf);
+//    ss_free(s1);
+
+    test_subgroup("both empty strings");
+//    s1 = ss_new_from_raw("");
+//    ss_concat_raw(s1, "");
+//    test_equal("shouldn't have extended the len", 0, s1->len);
+//    test_equal("shouldn't have extended the cap", 0, s1->cap);
+//    test_strings("should have concat the strings", "", s1->buf);
+//    ss_free(s1);
+}
+
+void test_ss_prepend_str(void) {
+    test_group("ss_prepend_str");
+
+    test_subgroup("non empty strings");
+//    ss *s1 = ss_new_from_raw("See you");
+//    ss *s2 = ss_new_from_raw(" later.");
+//    ss_concat_str(s1, s2);
+//    test_equal("should have correct len", 14, s1->len);
+//    test_equal("should have correct cap", 14, s1->cap);
+//    test_strings("should have concat the strings", "See you later.", s1->buf);
+//    ss_free(s1);
+//    ss_free(s2);
+
+    test_subgroup("non empty strings with reallocations");
+//    s1 = ss_new_from_raw("See you");
+//    s2 = ss_new_from_raw(" later!!!");
+//    ss_concat_str(s1, s2);
+//    test_equal("should have extended the len", 16, s1->len);
+//    test_equal("should have extended the cap", 32, s1->cap);
+//    test_strings("should have concat the strings", "See you later!!!", s1->buf);
+//    ss_free(s1);
+//    ss_free(s2);
+
+    test_subgroup("one empty string");
+//    s1 = ss_new_from_raw("See you");
+//    s2 = ss_new_from_raw("");
+//    ss_concat_str(s1, s2);
+//    test_equal("shouldn't have extended the len", 7, s1->len);
+//    test_equal("shouldn't have extended the cap", 14, s1->cap);
+//    test_strings("should have concat the strings", "See you", s1->buf);
+//    ss_free(s1);
+//    ss_free(s2);
+
+    test_subgroup("both empty strings");
+//    s1 = ss_new_from_raw("");
+//    s2 = ss_new_from_raw("");
+//    ss_concat_str(s1, s2);
+//    test_equal("shouldn't have extended the len", 0, s1->len);
+//    test_equal("shouldn't have extended the cap", 0, s1->cap);
+//    test_strings("should have concat the strings", "", s1->buf);
+//    ss_free(s1);
+//    ss_free(s2);
 }
 
 void test_ss_slice(void) {

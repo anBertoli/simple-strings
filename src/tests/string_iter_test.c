@@ -1,9 +1,9 @@
 #include <strings.h>
 #include "../string.h"
 #include "../string_fmt.h"
-#include "../internal/debug.h"
 #include "../string_iter.h"
 #include "framework/framework.h"
+#include "../private/debug.h"
 
 void test_tokens_from_iter(ss_iter *s_iter, char **tokens, int num_tokens);
 void test_tokens_from_list(ss **str_list, int num_str, char **tokens, int num_tokens);
