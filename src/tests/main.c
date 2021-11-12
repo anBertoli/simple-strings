@@ -10,9 +10,7 @@ int main(void) {
     test_ss_new_from_raw();
     test_ss_new_empty_with_cap();
     test_ss_new_empty();
-
     test_ss_clone();
-    test_ss_slice();
 
     test_ss_grow();
     test_ss_cut();
@@ -29,6 +27,8 @@ int main(void) {
     test_ss_prepend_raw_len();
     test_ss_prepend_raw();
     test_ss_prepend_str();
+
+    test_ss_slice();
 
     test_ss_trim();
     test_ss_trim_right();
