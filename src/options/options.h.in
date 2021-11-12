@@ -1,0 +1,7 @@
+
+#ifndef SS_OPTIONS_H
+#define SS_OPTIONS_H
+
+#cmakedefine SS_ALLOC_EXIT
+
+#endif

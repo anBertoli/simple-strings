@@ -2,6 +2,7 @@
 #include "string_fmt_test.h"
 #include "string_iter_test.h"
 #include "framework/framework.h"
+#include "options.h"
 
 int main(void) {
     // string.c tests

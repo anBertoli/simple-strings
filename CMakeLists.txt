@@ -1,6 +1,12 @@
 cmake_minimum_required(VERSION 3.10)
 project(simple_strings VERSION 0.1)
 
+# Create options to be used in the compilation process. Who compiles
+# the project can choose which option to apply. The choices are reflected
+# into the configuration file (src/options/options.h).
+option(SS_ALLOC_EXIT "Exit on allocation failures" OFF)
+configure_file("src/options/options.h.in" "src/options/options.h")
+
 ################################################
 # Simple Strings Library
 ################################################
@@ -11,6 +17,12 @@ add_library(ss STATIC
     "src/string.c"
     "src/string_fmt.c"
     "src/string_iter.c"
+)
+
+# Include the /src/options in the searched include directories
+# in order to include also the generated options.h file.
+target_include_directories(ss PUBLIC
+    "${PROJECT_BINARY_DIR}/src/options"
 )
 
 # Merge headers in one file. In this way the callers can refer to
@@ -45,4 +57,10 @@ add_executable(ss_tests
     "src/tests/string_test.c"
     "src/tests/string_fmt_test.c"
     "src/tests/string_iter_test.c"
+)
+
+# Include the /src/options in the searched include directories
+# in order to include also the generated options.h file.
+target_include_directories(ss_tests PUBLIC
+    "${PROJECT_BINARY_DIR}/src/options"
 )

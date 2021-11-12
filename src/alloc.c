@@ -1,4 +1,5 @@
 #include <stdlib.h>
+#include "options.h"
 
 /*
  * If SS_ALLOC_EXIT is defined (usually through the compiler flags at compile time),
@@ -6,6 +7,7 @@
  * need to check returned string pointers for NULL values. Otherwise, the default
  * behaviour is the same as the standard library malloc and realloc functions.
  */
+
 
 #ifdef SS_ALLOC_EXIT
 
