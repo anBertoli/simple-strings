@@ -1,4 +1,4 @@
-### [Strings creation and memory management](#Strings creation and memory management)
+### Strings creation and memory management
 - [ss_new_from_raw_len_cap](#ss_new_from_raw_len_cap)
 - [ss_new_from_raw_len](#ss_new_from_raw_len)
 - [ss_new_from_raw](#ss_new_from_raw)
