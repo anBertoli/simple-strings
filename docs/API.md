@@ -1,9 +1,4 @@
-##ss_new_from_raw_len_cap
-
----
-
-ss_new_from_raw_len_cap
----
+## ss_new_from_raw_len_cap {#ss_new_from_raw_len_cap}
 
 Build a new string copying the provided init string of length len (the len argument
 doesn't include the null terminator) and making total space for cap + 1 bytes (plus
