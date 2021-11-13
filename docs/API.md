@@ -36,6 +36,8 @@
 - [ss_iter_free](#ss_iter_free)
 - [ss_list_free](#ss_list_free)
 
+# String creation and allocation
+
 ## ss_new_from_raw_len_cap
 
 Build a new string copying the provided init string of length len (the len argument
@@ -189,6 +191,9 @@ being freed.
 ```c
 void ss_free(ss *s);
 ```
+
+# String manipulation
+
 ## ss_index
 
 Returns the position (0-indexed) of the first occurrence of the substring needle in the
@@ -337,6 +342,8 @@ void ss_to_lower(ss *s);
 Turn the ss string by turning each char into its uppercase version.
 Modifies the string in place.
 
+# String formatting
+
 ```c
 void ss_to_upper(ss *s);
 ```
@@ -363,6 +370,9 @@ Returns a formatted ss string in case of success or NULL in case of allocations 
 ```c
 ss *ss_sprintf(const char *format, ...);
 ```
+
+# String splitting and iteration
+
 ## ss_split_raw_to_iter
 
 Build a new string iterator from a raw string and a string delimiter. The string
