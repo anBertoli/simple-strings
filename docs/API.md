@@ -1,49 +1,44 @@
-### Strings creation and memory management
-- [ss_new_from_raw_len_cap](#ss_new_from_raw_len_cap)
-- [ss_new_from_raw_len](#ss_new_from_raw_len)
-- [ss_new_from_raw](#ss_new_from_raw)
-- [ss_new_empty_with_cap](#ss_new_empty_with_cap)
-- [ss_new_empty](#ss_new_empty)
-- [ss_clone](#ss_clone)
-- [ss_grow](#ss_grow)
-- [ss_cut](#ss_cut)
-- [ss_clear](#ss_clear)
-- [ss_set_free_space](#ss_set_free_space)
-- [ss_reserve_free_space](#ss_reserve_free_space)
-- [ss_free](#ss_free)
+## Index
+[ss *ss_new_from_raw_len_cap(const char *init, const size_t len, const size_t cap);](#ss_new_from_raw_len_cap)  
+[ss *ss_new_from_raw_len(const char *init, const size_t len);](#ss_new_from_raw_len)  
+[ss *ss_new_from_raw(const char *init);](#ss_new_from_raw)  
+[ss *ss_new_empty_with_cap(const size_t cap);](#ss_new_empty_with_cap)  
+[ss *ss_new_empty(void);](#ss_new_empty)  
+[ss *ss_clone(ss *s);](#ss_clone)  
+[ss *ss_grow(ss *s, size_t len);](#ss_grow)  
+[void ss_cut(ss *s, size_t len);](#ss_cut)  
+[void ss_clear(ss *s);](#ss_clear)  
+[ss *ss_set_free_space(ss *s, size_t free_space);](#ss_set_free_space)  
+[ss *ss_reserve_free_space(ss *s, size_t free_space);](#ss_reserve_free_space)  
+[void ss_free(ss *s);](#ss_free)  
 
-### Strings manipulation
-- [ss_index](#ss_index)
-- [ss_concat_raw_len](#ss_concat_raw_len)
-- [ss_concat_raw](#ss_concat_raw)
-- [ss_concat_str](#ss_concat_str)
-- [ss_prepend_raw_len](#ss_prepend_raw_len)
-- [ss_prepend_raw](#ss_prepend_raw)
-- [ss_prepend_str](#ss_prepend_str)
-- [ss_slice](#ss_slice)
-- [ss_trim](#ss_trim)
-- [ss_trim_left](#ss_trim_left)
-- [ss_trim_right](#ss_trim_right)
-- [ss_to_lower](#ss_to_lower)
-- [ss_to_upper](#ss_to_upper)
+[int ss_index(ss *s, const char *needle);](#ss_index)  
+[ss *ss_concat_raw_len(ss *s1, const char *s2, const size_t s2_len);](#ss_concat_raw_len)  
+[ss *ss_concat_raw(ss *s1, const char *s2);](#ss_concat_raw)  
+[ss *ss_concat_str(ss *s1, ss *s2);](#ss_concat_str)  
+[ss *ss_prepend_raw_len(const char *s1, ss *s2, const size_t s1_len);](#ss_prepend_raw_len)  
+[ss *ss_prepend_raw(const char *s1, ss *s2);](#ss_prepend_raw)  
+[ss *ss_prepend_str(ss *s1, ss *s2);](#ss_prepend_str)  
+[void ss_slice(ss *s, const int str_index, const int end_index);](#ss_slice)  
+[void ss_trim(ss *s, const char *cutset);](#ss_trim)  
+[void ss_trim_left(ss *s, const char *cutset);](#ss_trim_left)  
+[void ss_trim_right(ss *s, const char *cutset);](#ss_trim_right)  
+[void ss_to_lower(ss *s);](#ss_to_lower)  
+[void ss_to_upper(ss *s);](#ss_to_upper)  
 
-### Strings formatting
-- [ss_sprintf_va](#ss_sprintf_va)
-- [ss_sprintf](#ss_sprintf)
+[ss *ss_sprintf_va(const char *format, va_list arg_list);](#ss_sprintf_va)  
+[ss *ss_sprintf(const char *format, ...);](#ss_sprintf)  
 
-### Strings splitting and iteration
-- [ss_split_raw_to_iter](#ss_split_raw_to_iter)
-- [ss_split_str_to_iter](#ss_split_str_to_iter)
-- [ss_iter_next](#ss_iter_next)
-- [ss_iter_collect](#ss_iter_collect)
-- [ss_split_raw](#ss_split_raw)
-- [ss_split_str](#ss_split_str)
-- [ss_join_raw](#ss_join_raw)
-- [ss_join_str](#ss_join_str)
-- [ss_iter_free](#ss_iter_free)
-- [ss_list_free](#ss_list_free)
-
-# Strings creation and memory management
+[ss_iter *ss_split_raw_to_iter(const char *s, const char *del);](#ss_split_raw_to_iter)  
+[ss_iter *ss_split_str_to_iter(ss *s, const char *del);](#ss_split_str_to_iter)  
+[ss *ss_iter_next(ss_iter *s_iter);](#ss_iter_next)  
+[ss **ss_iter_collect(ss_iter *s_iter, int *n);](#ss_iter_collect)  
+[ss **ss_split_raw(const char *raw_str, const char *del, int *n);](#ss_split_raw)  
+[ss **ss_split_str(ss *s, const char *del, int *n);](#ss_split_str)  
+[ss *ss_join_raw(char **s, const int n, const char *sep);](#ss_join_raw)  
+[ss *ss_join_str(ss **s, const int n, const char *sep);](#ss_join_str)  
+[void ss_iter_free(ss_iter *s_iter);](#ss_iter_free)  
+[void ss_list_free(ss **s_list, const int n);](#ss_list_free)
 
 ## ss_new_from_raw_len_cap
 
@@ -198,9 +193,6 @@ being freed.
 ```c
 void ss_free(ss *s);
 ```
-
-# Strings manipulation
-
 ## ss_index
 
 Returns the position (0-indexed) of the first occurrence of the substring needle in the
@@ -349,8 +341,6 @@ void ss_to_lower(ss *s);
 Turn the ss string by turning each char into its uppercase version.
 Modifies the string in place.
 
-# String formatting
-
 ```c
 void ss_to_upper(ss *s);
 ```
@@ -377,9 +367,6 @@ Returns a formatted ss string in case of success or NULL in case of allocations 
 ```c
 ss *ss_sprintf(const char *format, ...);
 ```
-
-# Strings splitting and iteration
-
 ## ss_split_raw_to_iter
 
 Build a new string iterator from a raw string and a string delimiter. The string
@@ -520,3 +507,4 @@ strings can't be used after being freed.
 ```c
 void ss_list_free(ss **s_list, const int n);
 ```
+
