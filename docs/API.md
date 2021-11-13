@@ -1,46 +1,49 @@
-- Strings creation and allocation
-    - [ss_new_from_raw_len_cap](#ss_new_from_raw_len_cap)
-    - [ss_new_from_raw_len](#ss_new_from_raw_len)
-    - [ss_new_from_raw](#ss_new_from_raw)
-    - [ss_new_empty_with_cap](#ss_new_empty_with_cap)
-    - [ss_new_empty](#ss_new_empty)
-    - [ss_clone](#ss_clone)
-    - [ss_grow](#ss_grow)
-    - [ss_cut](#ss_cut)
-    - [ss_clear](#ss_clear)
-    - [ss_set_free_space](#ss_set_free_space)
-    - [ss_reserve_free_space](#ss_reserve_free_space)
-    - [ss_free](#ss_free)
-- Strings manipulation
-    - [ss_index](#ss_index)
-    - [ss_concat_raw_len](#ss_concat_raw_len)
-    - [ss_concat_raw](#ss_concat_raw)
-    - [ss_concat_str](#ss_concat_str)
-    - [ss_prepend_raw_len](#ss_prepend_raw_len)
-    - [ss_prepend_raw](#ss_prepend_raw)
-    - [ss_prepend_str](#ss_prepend_str)
-    - [ss_slice](#ss_slice)
-    - [ss_trim](#ss_trim)
-    - [ss_trim_left](#ss_trim_left)
-    - [ss_trim_right](#ss_trim_right)
-    - [ss_to_lower](#ss_to_lower)
-    - [ss_to_upper](#ss_to_upper)
-- Strings formatting
-    - [ss_sprintf_va](#ss_sprintf_va)
-    - [ss_sprintf](#ss_sprintf)
-- Strings splitting and iteration
-    - [ss_split_raw_to_iter](#ss_split_raw_to_iter)
-    - [ss_split_str_to_iter](#ss_split_str_to_iter)
-    - [ss_iter_next](#ss_iter_next)
-    - [ss_iter_collect](#ss_iter_collect)
-    - [ss_split_raw](#ss_split_raw)
-    - [ss_split_str](#ss_split_str)
-    - [ss_join_raw](#ss_join_raw)
-    - [ss_join_str](#ss_join_str)
-    - [ss_iter_free](#ss_iter_free)
-    - [ss_list_free](#ss_list_free)
+### [Strings creation and memory management](#Strings creation and memory management)
+- [ss_new_from_raw_len_cap](#ss_new_from_raw_len_cap)
+- [ss_new_from_raw_len](#ss_new_from_raw_len)
+- [ss_new_from_raw](#ss_new_from_raw)
+- [ss_new_empty_with_cap](#ss_new_empty_with_cap)
+- [ss_new_empty](#ss_new_empty)
+- [ss_clone](#ss_clone)
+- [ss_grow](#ss_grow)
+- [ss_cut](#ss_cut)
+- [ss_clear](#ss_clear)
+- [ss_set_free_space](#ss_set_free_space)
+- [ss_reserve_free_space](#ss_reserve_free_space)
+- [ss_free](#ss_free)
 
-# String creation and allocation
+### Strings manipulation
+- [ss_index](#ss_index)
+- [ss_concat_raw_len](#ss_concat_raw_len)
+- [ss_concat_raw](#ss_concat_raw)
+- [ss_concat_str](#ss_concat_str)
+- [ss_prepend_raw_len](#ss_prepend_raw_len)
+- [ss_prepend_raw](#ss_prepend_raw)
+- [ss_prepend_str](#ss_prepend_str)
+- [ss_slice](#ss_slice)
+- [ss_trim](#ss_trim)
+- [ss_trim_left](#ss_trim_left)
+- [ss_trim_right](#ss_trim_right)
+- [ss_to_lower](#ss_to_lower)
+- [ss_to_upper](#ss_to_upper)
+
+### Strings formatting
+- [ss_sprintf_va](#ss_sprintf_va)
+- [ss_sprintf](#ss_sprintf)
+
+### Strings splitting and iteration
+- [ss_split_raw_to_iter](#ss_split_raw_to_iter)
+- [ss_split_str_to_iter](#ss_split_str_to_iter)
+- [ss_iter_next](#ss_iter_next)
+- [ss_iter_collect](#ss_iter_collect)
+- [ss_split_raw](#ss_split_raw)
+- [ss_split_str](#ss_split_str)
+- [ss_join_raw](#ss_join_raw)
+- [ss_join_str](#ss_join_str)
+- [ss_iter_free](#ss_iter_free)
+- [ss_list_free](#ss_list_free)
+
+# Strings creation and memory management
 
 ## ss_new_from_raw_len_cap
 
@@ -196,7 +199,7 @@ being freed.
 void ss_free(ss *s);
 ```
 
-# String manipulation
+# Strings manipulation
 
 ## ss_index
 
@@ -375,7 +378,7 @@ Returns a formatted ss string in case of success or NULL in case of allocations 
 ss *ss_sprintf(const char *format, ...);
 ```
 
-# String splitting and iteration
+# Strings splitting and iteration
 
 ## ss_split_raw_to_iter
 
