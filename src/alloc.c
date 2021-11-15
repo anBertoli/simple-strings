@@ -33,11 +33,11 @@ void *ss_realloc(void *ptr, size_t size) {
 
 #else
 
-void *_malloc(size_t size) {
+void *ss_malloc(size_t size) {
     return malloc(size);
 }
 
-void *_realloc(void *ptr, size_t size) {
+void *ss_realloc(void *ptr, size_t size) {
     return realloc(ptr, size);
 }
 
