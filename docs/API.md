@@ -5,8 +5,9 @@ one for the null terminator). If the length of the initial string is greater tha
 the exceeding bytes are discarded. If `cap` < `len`, `cap` is adjusted to be equal to `len`.
 The caller is responsible for providing the correct values of the three arguments. The new
 ss string is heap allocated and a pointer to it is returned. The string must be freed after
-use with the provided [`ss_free`](#ss_free) function. Useful shorthands are the `ss_new_raw_len` and
-`ss_new_raw` functions, which are more ergonomic and easier to use.
+use with the provided [`ss_free`](#ss_free) function. Useful shorthands are the 
+[`ss_new_from_raw_len`](#ss_new_from_raw_len) and [`ss_new_from_raw`](#ss_new_from_raw)
+functions, which are more ergonomic and easier to use.
 
 Returns the newly generated string or NULL if the allocation fails.
 
