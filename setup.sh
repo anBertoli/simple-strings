@@ -47,3 +47,4 @@ if [ "install" = $1 ]; then
 fi
 
 rm tmp/ss.h
+rmdir tmp 2>/dev/null

@@ -1,12 +1,12 @@
 ### ss_new_from_raw_len_cap
-Build a new string copying the provided init string of length len (the len argument
-doesn't include the null terminator) and making total space for cap + 1 bytes (plus
-one for the null terminator). If the length of the init string is greater than len,
-the exceeding bytes are discarded. If cap < len, cap is adjusted to be equal to len.
-The caller is responsible for providing the correct values of len, cap and init string.
-The ss string is heap allocated and a pointer to it is returned. The string must be
-freed after use with the provided ss_free function. Useful shorthands are the
-ss_new_raw_len and ss_new_raw functions, which are more ergonomic and easier to use.
+Build a new string copying the provided `init` string of length `len` (the length argument
+doesn't include the null terminator) and making total space for `cap` + 1 bytes (plus
+one for the null terminator). If the length of the initial string is greater than `len`,
+the exceeding bytes are discarded. If `cap` < `len`, `cap` is adjusted to be equal to `len`.
+The caller is responsible for providing the correct values of the three arguments. The new
+ss string is heap allocated and a pointer to it is returned. The string must be freed after
+use with the provided [`ss_free`](#ss_free) function. Useful shorthands are the `ss_new_raw_len` and
+`ss_new_raw` functions, which are more ergonomic and easier to use.
 
 Returns the newly generated string or NULL if the allocation fails.
 
