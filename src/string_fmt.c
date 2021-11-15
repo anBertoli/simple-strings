@@ -5,13 +5,13 @@
 #include "alloc.h"
 
 /*
- * Format a string using the usual C formatting directives and return it. The function
- * accepts s va_list to accommodate a variable number of arguments. In case of success
- * the returned string must be freed after use with the dedicated ss_free function().
- * The argument list should be started (va_start) before providing it to this function
- * and must be ended (va_end) after the function call.
+ * Formats and returns a string using the usual C formatting directives. The function
+ * accepts a `va_list` to accommodate a variable number of arguments. In case of success
+ * the returned string must be freed after use with the dedicated [`ss_free`](#ss_free)
+ * function. The argument list should be started (`va_start`) before providing it to this
+ * function and must be ended (`va_end`) after the function call.
  *
- * Returns the ss string s in case of success or NULL in case of allocations errors.
+ * Returns the formatted string in case of success or NULL in case of allocations errors.
  */
 ss ss_sprintf_va(const char *format, va_list arg_list) {
     size_t buf_len = sizeof(char) * strlen(format) * 2;
@@ -62,10 +62,10 @@ ss ss_sprintf_va(const char *format, va_list arg_list) {
 }
 
 /*
- * Format a string using the usual C formatting directive and returns a formatted string.
- * The returned string must be freed after use with the dedicated ss_free function().
+ * Formats and returns a string using the usual C formatting directive. The returned string must
+ * be freed after use as usual with the dedicated [`ss_free`](#ss_free) function.
  *
- * Returns a formatted ss string in case of success or NULL in case of allocations errors.
+ * Returns the formatted string in case of success or NULL in case of allocations errors.
  */
 ss ss_sprintf(const char *format, ...) {
     va_list arg_list;

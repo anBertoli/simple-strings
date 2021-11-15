@@ -11,10 +11,6 @@ typedef struct s {
     char *buf;
 } *ss;
 
-/*
- * Strings creation and memory manipulation functions.
- */
-
 ss ss_new_from_raw_len_cap(const char *init, size_t len, size_t cap);
 ss ss_new_from_raw_len(const char *init, size_t len);
 ss ss_new_from_raw(const char *init);
@@ -35,7 +31,7 @@ ss ss_grow(ss s, size_t len);
 void ss_cut(ss s, size_t len);
 void ss_clear(ss s);
 
-int ss_index(ss s, const char *needle);
+size_t ss_index(ss s, const char *needle);
 
 ss ss_concat_raw_len(ss s1, const char *s2, size_t s2_len);
 ss ss_concat_raw(ss s1, const char *s2);
@@ -44,7 +40,7 @@ ss ss_prepend_raw_len(const char *s1, ss s2, size_t s1_len);
 ss ss_prepend_raw(const char *s1, ss s2);
 ss ss_prepend_str(ss s1, ss s2);
 
-void ss_slice(ss s, int str_index, int end_index);
+void ss_slice(ss s, size_t str_index, size_t end_index);
 
 void ss_trim(ss s, const char *cutset);
 void ss_trim_left(ss s, const char *cutset);

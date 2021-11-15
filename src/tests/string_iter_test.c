@@ -5,54 +5,54 @@
 #include "framework/framework.h"
 #include "../private/debug.h"
 
-void test_tokens_from_iter(ss_iter *s_iter, char **tokens, int num_tokens);
+void test_tokens_from_iter(ss_iter iter, char **tokens, int num_tokens);
 void test_tokens_from_list(ss *str_list, int num_str, char **tokens, int num_tokens);
 
 void test_ss_split_raw_to_iter(void) {
     test_group("ss_split_raw_to_iter");
 
-    ss_iter *s_iter = ss_split_raw_to_iter("Ehy how are you?", " ");
-    test_cond("should point to the start", s_iter->buf == s_iter->ptr);
-    test_cond("should have correct delimiter", strcmp(s_iter->del, " ") == 0);
-    test_cond("should have not ended", s_iter->end == ITER_ACTIVE);
-    test_strings("should have copied the del", " ", s_iter->del);
-    ss_iter_free(s_iter);
+    ss_iter iter = ss_split_raw_to_iter("Ehy how are you?", " ");
+    test_cond("should point to the start", iter->buf == iter->ptr);
+    test_cond("should have correct delimiter", strcmp(iter->del, " ") == 0);
+    test_cond("should have not ended", iter->end == ITER_ACTIVE);
+    test_strings("should have copied the del", " ", iter->del);
+    ss_iter_free(iter);
 }
 
 void test_ss_split_str_to_iter(void) {
     test_group("ss_split_str_to_iter");
 
     ss s = ss_new_from_raw("Ehy how are you?");
-    ss_iter *s_iter = ss_split_str_to_iter(s, " ");
-    test_cond("should point to the start", s_iter->buf == s_iter->ptr);
-    test_cond("should have correct delimiter", strcmp(s_iter->del, " ") == 0);
-    test_cond("should have not ended", s_iter->end == ITER_ACTIVE);
-    test_strings("should have copied the del", " ", s_iter->del);
-    ss_iter_free(s_iter);
+    ss_iter iter = ss_split_str_to_iter(s, " ");
+    test_cond("should point to the start", iter->buf == iter->ptr);
+    test_cond("should have correct delimiter", strcmp(iter->del, " ") == 0);
+    test_cond("should have not ended", iter->end == ITER_ACTIVE);
+    test_strings("should have copied the del", " ", iter->del);
+    ss_iter_free(iter);
 }
 
 void test_ss_iter_next(void) {
     test_group("ss_iter_next");
 
     test_subgroup("split in words");
-    ss_iter *s_iter = ss_split_raw_to_iter("Ehy how are you?", " ");
-    test_tokens_from_iter(s_iter, (char *[]){"Ehy", "how", "are", "you?"}, 4);
+    ss_iter iter = ss_split_raw_to_iter("Ehy how are you?", " ");
+    test_tokens_from_iter(iter, (char *[]){"Ehy", "how", "are", "you?"}, 4);
 
     test_subgroup("missing delimiter");
-    s_iter = ss_split_raw_to_iter("Ehy how are you?", "_");
-    test_tokens_from_iter(s_iter, (char *[]){"Ehy how are you?"}, 1);
+    iter = ss_split_raw_to_iter("Ehy how are you?", "_");
+    test_tokens_from_iter(iter, (char *[]){"Ehy how are you?"}, 1);
 
     test_subgroup("empty delimiter");
-    s_iter = ss_split_raw_to_iter("Ehy how are you?", "");
-    test_tokens_from_iter(s_iter, (char *[]){"Ehy how are you?"}, 1);
+    iter = ss_split_raw_to_iter("Ehy how are you?", "");
+    test_tokens_from_iter(iter, (char *[]){"Ehy how are you?"}, 1);
 
     test_subgroup("multiple consecutive delimiters");
-    s_iter = ss_split_raw_to_iter("   Ehy    how   are   you?   ", " ");
-    test_tokens_from_iter(s_iter, (char *[]){"Ehy", "how", "are", "you?"}, 4);
+    iter = ss_split_raw_to_iter("   Ehy    how   are   you?   ", " ");
+    test_tokens_from_iter(iter, (char *[]){"Ehy", "how", "are", "you?"}, 4);
 
     test_subgroup("only consecutive delimiters");
-    s_iter = ss_split_raw_to_iter("       ", " ");
-    test_tokens_from_iter(s_iter,(char *[]){}, 0);
+    iter = ss_split_raw_to_iter("       ", " ");
+    test_tokens_from_iter(iter,(char *[]){}, 0);
 }
 
 void test_ss_iter_collect(void) {
@@ -60,28 +60,28 @@ void test_ss_iter_collect(void) {
     int n = 0;
 
     test_subgroup("split in words");
-    ss_iter *s_iter = ss_split_raw_to_iter("Ehy how are you?", " ");
-    ss *list = ss_iter_collect(s_iter, &n);
+    ss_iter iter = ss_split_raw_to_iter("Ehy how are you?", " ");
+    ss *list = ss_iter_collect(iter, &n);
     test_tokens_from_list(list, n, (char *[]){"Ehy", "how", "are", "you?"}, 4);
 
     test_subgroup("missing delimiter");
-    s_iter = ss_split_raw_to_iter("Ehy how are you?", "_");
-    list = ss_iter_collect(s_iter, &n);
+    iter = ss_split_raw_to_iter("Ehy how are you?", "_");
+    list = ss_iter_collect(iter, &n);
     test_tokens_from_list(list, n, (char *[]){"Ehy how are you?"}, 1);
 
     test_subgroup("empty delimiter");
-    s_iter = ss_split_raw_to_iter("Ehy how are you?", "");
-    list = ss_iter_collect(s_iter, &n);
+    iter = ss_split_raw_to_iter("Ehy how are you?", "");
+    list = ss_iter_collect(iter, &n);
     test_tokens_from_list(list, n,(char *[]){"Ehy how are you?"}, 1);
 
     test_subgroup("multiple consecutive delimiters");
-    s_iter = ss_split_raw_to_iter("   Ehy    how   are   you?   ", " ");
-    list = ss_iter_collect(s_iter, &n);
+    iter = ss_split_raw_to_iter("   Ehy    how   are   you?   ", " ");
+    list = ss_iter_collect(iter, &n);
     test_tokens_from_list(list, n,(char *[]){"Ehy", "how", "are", "you?"}, 4);
 
     test_subgroup("only consecutive delimiters");
-    s_iter = ss_split_raw_to_iter("      ", " ");
-    list = ss_iter_collect(s_iter, &n);
+    iter = ss_split_raw_to_iter("      ", " ");
+    list = ss_iter_collect(iter, &n);
     test_tokens_from_list(list, n,(char *[]){}, 0);
 }
 
@@ -226,10 +226,10 @@ void test_ss_join_str(void) {
  * Utilities used in iterator and lists tests.
  */
 
-void test_tokens_from_iter(ss_iter *s_iter, char **tokens, int num_tokens) {
+void test_tokens_from_iter(ss_iter iter, char **tokens, int num_tokens) {
     int i = 0;
     while (1) {
-        ss s_next = ss_iter_next(s_iter);
+        ss s_next = ss_iter_next(iter);
         if (s_next == END_ITER) break;
         if (s_next == NULL) {
             test_failure("s_next == NULL");
