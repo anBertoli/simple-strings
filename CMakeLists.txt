@@ -64,3 +64,25 @@ add_executable(ss_tests
 target_include_directories(ss_tests PUBLIC
     "${PROJECT_BINARY_DIR}/src/options"
 )
+
+
+
+################################################
+# Simple Strings Docs Generation
+################################################
+add_executable(docs
+    "src/docs/main.c"
+    "src/docs/utils.c"
+    "src/docs/parser.c"
+    "src/docs/docs.c"
+
+    "src/alloc.c"
+    "src/string.c"
+    "src/string_fmt.c"
+    "src/string_iter.c"
+    "src/private/debug.c"
+)
+
+target_include_directories(docs PUBLIC
+    "${PROJECT_BINARY_DIR}/src/options"
+)
