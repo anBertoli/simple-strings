@@ -1,21 +1,26 @@
 #include <stdbool.h>
 
-#define test_cond(desc, cond) _test_cond(desc, cond, __FILE__, __LINE__)
-#define test_equal(desc, want, got) _test_equal(desc, want, got, __FILE__, __LINE__)
-#define test_strings(desc, want, got) _test_strings(desc, want, got, __FILE__, __LINE__)
-#define test_success(desc) _test_success(desc, __FILE__, __LINE__)
-#define test_failure(desc) _test_failure(desc, __FILE__, __LINE__)
+#ifndef SS_TEST_FRAMEWORK_H
+#define SS_TEST_FRAMEWORK_H
 
-#define test_report() _test_report()
-#define test_group(desc) _test_group(desc)
-#define test_subgroup(desc) _test_subgroup(desc)
+#define test_cond(desc, cond) t_test_cond(desc, cond, __FILE__, __LINE__)
+#define test_equal(desc, want, got) t_test_equal(desc, want, got, __FILE__, __LINE__)
+#define test_strings(desc, want, got) t_test_strings(desc, want, got, __FILE__, __LINE__)
+#define test_success(desc) t_test_success(desc, __FILE__, __LINE__)
+#define test_failure(desc) t_test_failure(desc, __FILE__, __LINE__)
 
-void _test_cond(const char *desc, const bool cond, const char *filename, const int line);
-void _test_equal(const char *desc, const int want, const int got, const char *filename, const int line);
-void _test_strings(const char *desc, const char *want, const char *got, const char *filename, const int line);
-void _test_success(const char *desc, const char *filename, const int line);
-void _test_failure(const char *desc, const char *filename, const int line);
+#define test_report() t_test_report()
+#define test_group(desc) t_test_group(desc)
+#define test_subgroup(desc) t_test_subgroup(desc)
 
-void _test_group(const char *desc);
-void _test_subgroup(const char *desc);
-int _test_report(void);
+void t_test_cond(const char *desc, bool cond, const char *filename, int line);
+void t_test_equal(const char *desc, int want, int got, const char *filename, int line);
+void t_test_strings(const char *desc, const char *want, const char *got, const char *filename, int line);
+void t_test_success(const char *desc, const char *filename, int line);
+void t_test_failure(const char *desc, const char *filename, int line);
+
+void t_test_group(const char *desc);
+void t_test_subgroup(const char *desc);
+int t_test_report(void);
+
+#endif

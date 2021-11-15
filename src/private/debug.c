@@ -3,7 +3,7 @@
 #include "../string.h"
 #include "../string_iter.h"
 
-void ss_debug(ss *s, int mem) {
+void ss_debug(ss s, int mem) {
     if (s->buf == NULL) {
         printf("ss {NULL}\n");
         return;

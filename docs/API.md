@@ -11,7 +11,7 @@ ss_new_raw_len and ss_new_raw functions, which are more ergonomic and easier to 
 Returns the newly generated string or NULL if the allocation fails.
 
 ```c
-ss *ss_new_from_raw_len_cap(const char *init, const size_t len, const size_t cap);
+ss ss_new_from_raw_len_cap(const char *init, size_t len, size_t cap);
 ```
 
 ### ss_new_from_raw_len
@@ -30,7 +30,7 @@ manipulated.
 Returns the newly generated string or NULL if the allocation fails.
 
 ```c
-ss *ss_new_from_raw_len(const char *init, const size_t len);
+ss ss_new_from_raw_len(const char *init, size_t len);
 ```
 
 ### ss_new_from_raw
@@ -42,7 +42,7 @@ ss string must be freed after use with the provided ss_free function.
 Returns the newly generated string or NULL if the allocation fails.
 
 ```c
-ss *ss_new_from_raw(const char *init);
+ss ss_new_from_raw(const char *init);
 ```
 
 ### ss_new_empty_with_cap
@@ -53,7 +53,7 @@ be freed after use with the provided ss_free function.
 Returns the new empty string or NULL if the allocation fails.
 
 ```c
-ss *ss_new_empty_with_cap(const size_t cap);
+ss ss_new_empty_with_cap(size_t cap);
 ```
 
 ### ss_new_empty
@@ -66,7 +66,7 @@ preallocate some space via ss_new_empty_with_cap().
 Returns the new empty string or NULL if the allocation fails.
 
 ```c
-ss *ss_new_empty(void);
+ss ss_new_empty(void);
 ```
 
 ### ss_clone
@@ -77,40 +77,7 @@ for example, we want to mutate a string while also retaining the original conten
 Returns the new string in case of success or NULL if the allocation fails.
 
 ```c
-ss *ss_clone(ss *s);
-```
-
-### ss_grow
-Grow the string to have the specified length. New bytes inserted will be set to
-zero. If the specified length is smaller than the current length, the function
-is a no-op.
-
-Returns the enlarged substring in case of success or NULL if any allocation fails.
-
-```c
-ss *ss_grow(ss *s, size_t len);
-```
-
-### ss_cut
-Cut the string at the provided length len. The string is shortened to contain the
-first len bytes. The allocation space (cap) is left untouched. The bytes after the
-number len are not cleaned, they are just marked as 'unused' since they are beyond
-the length of the string. If the length len is greater than the string s length
-the function is a no-op.
-
-```c
-void ss_cut(ss *s, size_t len);
-```
-
-### ss_clear
-Erase the string. The length of the string is set to 0 and a null terminator
-is written in the first byte of the string buffer. The allocation space (cap)
-is left untouched, so future string manipulations can be performed with fewer
-reallocations. The bytes after the number len are not cleaned, they are just
-marked as 'unused' since they are beyond the length of the string.
-
-```c
-void ss_clear(ss *s);
+ss ss_clone(ss s);
 ```
 
 ### ss_set_free_space
@@ -124,7 +91,7 @@ reallocation fails. In case of failure the ss string s is still valid and
 must be freed after use.
 
 ```c
-ss *ss_set_free_space(ss *s, size_t free_space);
+ss ss_set_free_space(ss s, size_t free_space);
 ```
 
 ### ss_reserve_free_space
@@ -140,7 +107,7 @@ reallocation fails. In case of failure the ss string s is still valid and
 must be freed after use.
 
 ```c
-ss *ss_reserve_free_space(ss *s, size_t free_space);
+ss ss_reserve_free_space(ss s, size_t free_space);
 ```
 
 ### ss_free
@@ -148,7 +115,40 @@ Deallocate the memory used by a ss string s. The string can't be used after
 being freed.
 
 ```c
-void ss_free(ss *s);
+void ss_free(ss s);
+```
+
+### ss_grow
+Grow the string to have the specified length. New bytes inserted will be set to
+zero. If the specified length is smaller than the current length, the function
+is a no-op.
+
+Returns the enlarged substring in case of success or NULL if any allocation fails.
+
+```c
+ss ss_grow(ss s, size_t len);
+```
+
+### ss_cut
+Cut the string at the provided length len. The string is shortened to contain the
+first len bytes. The allocation space (cap) is left untouched. The bytes after the
+number len are not cleaned, they are just marked as 'unused' since they are beyond
+the length of the string. If the length len is greater than the string s length
+the function is a no-op.
+
+```c
+void ss_cut(ss s, size_t len);
+```
+
+### ss_clear
+Erase the string. The length of the string is set to 0 and a null terminator
+is written in the first byte of the string buffer. The allocation space (cap)
+is left untouched, so future string manipulations can be performed with fewer
+reallocations. The bytes after the number len are not cleaned, they are just
+marked as 'unused' since they are beyond the length of the string.
+
+```c
+void ss_clear(ss s);
 ```
 
 ### ss_index
@@ -156,7 +156,7 @@ Returns the position (0-indexed) of the first occurrence of the substring needle
 ss string provided as first argument. Returns -1 if no occurrence is found.
 
 ```c
-int ss_index(ss *s, const char *needle);
+int ss_index(ss s, const char *needle);
 ```
 
 ### ss_concat_raw_len
@@ -172,7 +172,7 @@ reallocation fails. In case of failure the string s1 is still valid and must be
 freed after use.
 
 ```c
-ss *ss_concat_raw_len(ss *s1, const char *s2, const size_t s2_len);
+ss ss_concat_raw_len(ss s1, const char *s2, size_t s2_len);
 ```
 
 ### ss_concat_raw
@@ -185,7 +185,7 @@ reallocation fails. In case of failure the ss string s1 is still valid and must 
 freed after use.
 
 ```c
-ss *ss_concat_raw(ss *s1, const char *s2);
+ss ss_concat_raw(ss s1, const char *s2);
 ```
 
 ### ss_concat_str
@@ -198,7 +198,7 @@ reallocation fails. In case of failure the ss string s1 is still valid and must 
 freed after use.
 
 ```c
-ss *ss_concat_str(ss *s1, ss *s2);
+ss ss_concat_str(ss s1, ss s2);
 ```
 
 ### ss_prepend_raw_len
@@ -215,7 +215,7 @@ reallocation fails. In case of failure the string s2 is still valid and must be
 freed after use.
 
 ```c
-ss *ss_prepend_raw_len(const char *s1, ss *s2, const size_t s1_len);
+ss ss_prepend_raw_len(const char *s1, ss s2, size_t s1_len);
 ```
 
 ### ss_prepend_raw
@@ -228,7 +228,7 @@ reallocation fails. In case of failure the string s2 is still valid and must be
 freed after use.
 
 ```c
-ss *ss_prepend_raw(const char *s1, ss *s2);
+ss ss_prepend_raw(const char *s1, ss s2);
 ```
 
 ### ss_prepend_str
@@ -241,7 +241,7 @@ reallocation fails. In case of failure the string s2 is still valid and must be
 freed after use.
 
 ```c
-ss *ss_prepend_str(ss *s1, ss *s2);
+ss ss_prepend_str(ss s1, ss s2);
 ```
 
 ### ss_slice
@@ -253,7 +253,7 @@ changes are made. If end_index > of the original string length, end_index is red
 string length before slicing the string.
 
 ```c
-void ss_slice(ss *s, const int str_index, const int end_index);
+void ss_slice(ss s, int str_index, int end_index);
 ```
 
 ### ss_trim
@@ -263,7 +263,7 @@ size (the capacity cap) is left untouched. If all characters are trimmed the res
 valid but empty ss string.
 
 ```c
-void ss_trim(ss *s, const char *cutset);
+void ss_trim(ss s, const char *cutset);
 ```
 
 ### ss_trim_left
@@ -273,7 +273,7 @@ After the trimming operation, the string length is reduced while the allocation 
 valid but empty string.
 
 ```c
-void ss_trim_left(ss *s, const char *cutset);
+void ss_trim_left(ss s, const char *cutset);
 ```
 
 ### ss_trim_right
@@ -283,7 +283,7 @@ size is left untouched. If all characters are trimmed the result is a valid but
 empty ss string.
 
 ```c
-void ss_trim_right(ss *s, const char *cutset);
+void ss_trim_right(ss s, const char *cutset);
 ```
 
 ### ss_to_lower
@@ -291,7 +291,7 @@ Turn the ss string by turning each char into its lowercase version.
 Modifies the string in place.
 
 ```c
-void ss_to_lower(ss *s);
+void ss_to_lower(ss s);
 ```
 
 ### ss_to_upper
@@ -299,7 +299,7 @@ Turn the ss string by turning each char into its uppercase version.
 Modifies the string in place.
 
 ```c
-void ss_to_upper(ss *s);
+void ss_to_upper(ss s);
 ```
 
 ### ss_split_raw_to_iter
@@ -333,7 +333,7 @@ freed.
 Returns ss_iter* or NULL in case of allocation failures.
 
 ```c
-ss_iter *ss_split_str_to_iter(ss *s, const char *del);
+ss_iter *ss_split_str_to_iter(ss s, const char *del);
 ```
 
 ### ss_iter_next
@@ -355,7 +355,7 @@ Returns a ss* in case of success, NULL in case of allocation failures or END_ITE
 when the iterator is exhausted.
 
 ```c
-ss *ss_iter_next(ss_iter *s_iter);
+ss ss_iter_next(ss_iter *s_iter);
 ```
 
 ### ss_iter_collect
@@ -370,7 +370,7 @@ Returns an array of strings (ss*) of length n in case of success or NULL in case
 allocation failures. In case of errors the strings list is freed along with the iterator.
 
 ```c
-ss **ss_iter_collect(ss_iter *s_iter, int *n);
+ss *ss_iter_collect(ss_iter *s_iter, int *n);
 ```
 
 ### ss_split_raw
@@ -384,7 +384,7 @@ Returns an array of strings (ss**) of length n in case of success or NULL in cas
 allocation failures. In case of errors the strings list is freed along with the iterator.
 
 ```c
-ss **ss_split_raw(const char *raw_str, const char *del, int *n);
+ss *ss_split_raw(const char *raw_str, const char *del, int *n);
 ```
 
 ### ss_split_str
@@ -394,11 +394,11 @@ create a string iterator and collect substrings manually. All substrings are hea
 allocated and returned as an array of *ss that must be freed after use with the
 dedicated ss_list_free function.
 
-Returns an array of strings (ss**) of length n in case of success or NULL in case of
+Returns an array of strings (ss*) of length n in case of success or NULL in case of
 allocation failures. In case of errors the strings list is freed along with the iterator.
 
 ```c
-ss **ss_split_str(ss *s, const char *del, int *n);
+ss *ss_split_str(ss s, const char *del, int *n);
 ```
 
 ### ss_join_raw
@@ -410,7 +410,7 @@ are "how", "are", "you?" and the delimiter is a hash (#) the resulting string is
 Returns the joined ss string in case of success or NULL in case of allocation errors.
 
 ```c
-ss *ss_join_raw(char **s, const int n, const char *sep);
+ss ss_join_raw(char **s, int n, const char *sep);
 ```
 
 ### ss_join_str
@@ -422,7 +422,7 @@ are "how", "are", "you?" and the delimiter is a hash (#) the resulting string is
 Returns the joined ss string in case of success or NULL in case of allocation errors.
 
 ```c
-ss *ss_join_str(ss **s, const int n, const char *sep);
+ss ss_join_str(ss *s, int n, const char *sep);
 ```
 
 ### ss_iter_free
@@ -439,7 +439,7 @@ Deallocate the memory used by a ss string array. The string array and all the
 strings can't be used after being freed.
 
 ```c
-void ss_list_free(ss **s_list, const int n);
+void ss_list_free(ss *s_list, const int n);
 ```
 
 ### ss_sprintf_va
@@ -452,7 +452,7 @@ and must be ended (va_end) after the function call.
 Returns the ss string s in case of success or NULL in case of allocations errors.
 
 ```c
-ss *ss_sprintf_va(const char *format, va_list arg_list);
+ss ss_sprintf_va(const char *format, va_list arg_list);
 ```
 
 ### ss_sprintf
@@ -462,6 +462,6 @@ The returned string must be freed after use with the dedicated ss_free function(
 Returns a formatted ss string in case of success or NULL in case of allocations errors.
 
 ```c
-ss *ss_sprintf(const char *format, ...);
+ss ss_sprintf(const char *format, ...);
 ```
 

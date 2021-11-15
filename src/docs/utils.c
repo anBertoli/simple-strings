@@ -4,14 +4,14 @@
 #include <stdlib.h>
 #include "main.h"
 
-ss *read_file_to_string(char *path) {
+ss read_file_to_string(char *path) {
     FILE *file_pointer = fopen(path, "r");
     if (file_pointer == NULL) {
         perror("error opening the file");
         return NULL;
     }
 
-    ss *s = ss_new_empty();
+    ss s = ss_new_empty();
     if (s == NULL) return NULL;
 
     size_t i = 0;

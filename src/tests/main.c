@@ -13,12 +13,12 @@ int main(void) {
     test_ss_new_empty();
     test_ss_clone();
 
+    test_ss_set_free_space();
+    test_ss_reserve_free_space();
+
     test_ss_grow();
     test_ss_cut();
     test_ss_clear();
-
-    test_ss_set_free_space();
-    test_ss_reserve_free_space();
 
     test_ss_index();
 

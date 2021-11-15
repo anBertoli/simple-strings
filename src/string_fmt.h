@@ -5,7 +5,7 @@
 #include <stdarg.h>
 #include "string.h"
 
-ss *ss_sprintf_va(const char *format, va_list arg_list);
-ss *ss_sprintf(const char *format, ...);
+ss ss_sprintf_va(const char *format, va_list arg_list);
+ss ss_sprintf(const char *format, ...);
 
 #endif

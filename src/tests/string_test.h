@@ -1,6 +1,6 @@
 
-#ifndef SS_STRING_TEST_H
-#define SS_STRING_TEST_H
+#ifndef SS_TEST_STRING_TEST_H
+#define SS_TEST_STRING_TEST_H
 
 void test_ss_new_from_raw_len_cap(void);
 void test_ss_new_from_raw_len(void);

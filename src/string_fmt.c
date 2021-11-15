@@ -13,9 +13,9 @@
  *
  * Returns the ss string s in case of success or NULL in case of allocations errors.
  */
-ss *ss_sprintf_va(const char *format, va_list arg_list) {
+ss ss_sprintf_va(const char *format, va_list arg_list) {
     size_t buf_len = sizeof(char) * strlen(format) * 2;
-    char *buf = _malloc(buf_len);
+    char *buf = ss_malloc(buf_len);
     if (buf == NULL) {
         return NULL;
     }
@@ -46,7 +46,7 @@ ss *ss_sprintf_va(const char *format, va_list arg_list) {
         if (n_written < buf_len) break;
 
         buf_len *= 2;
-        char *new_buf = _realloc(buf, buf_len);
+        char *new_buf = ss_realloc(buf, buf_len);
         if (new_buf == NULL) {
             free(buf);
             return NULL;
@@ -56,7 +56,7 @@ ss *ss_sprintf_va(const char *format, va_list arg_list) {
 
     // Finally, build the ss string with the
     // formatted C string and return it.
-    ss *s = ss_new_from_raw_len_cap(buf, n_written, n_written);
+    ss s = ss_new_from_raw_len_cap(buf, n_written, n_written);
     free(buf);
     return s;
 }
@@ -67,10 +67,10 @@ ss *ss_sprintf_va(const char *format, va_list arg_list) {
  *
  * Returns a formatted ss string in case of success or NULL in case of allocations errors.
  */
-ss *ss_sprintf(const char *format, ...) {
+ss ss_sprintf(const char *format, ...) {
     va_list arg_list;
     va_start(arg_list, format);
-    ss *s1 = ss_sprintf_va(format, arg_list);
+    ss s1 = ss_sprintf_va(format, arg_list);
     va_end(arg_list);
     return s1;
 }

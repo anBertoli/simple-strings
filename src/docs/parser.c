@@ -8,7 +8,7 @@ doc *generate_files_documentation(char **file_paths, int n_files, int *n_docs) {
 
     for (int i = 0; i < n_files; i++) {
         printf("reading file '%s'...\n", file_paths[i]);
-        ss *file_contents = read_file_to_string(file_paths[i]);
+        ss file_contents = read_file_to_string(file_paths[i]);
         if (file_contents == NULL) {
             printf("error reading file, exiting..\n");
             exit(1);
@@ -32,16 +32,16 @@ doc *generate_files_documentation(char **file_paths, int n_files, int *n_docs) {
     return docs;
 }
 
-doc *parse_file_comments(ss *file_content, int *nd) {
+doc *parse_file_comments(ss file_content, int *nd) {
     doc *docs = NULL;
     int n_docs = 0;
 
     int n_lines = 0;
-    ss **lines = ss_split_str(file_content, "\n", &n_lines);
+    ss *lines = ss_split_str(file_content, "\n", &n_lines);
     bool in_comment = false;
 
     for (int i = 0; i < n_lines; i++) {
-        ss *line = lines[i];
+        ss line = lines[i];
         ss_trim(line, "\n\t\r ");
 
         // end comment
@@ -78,21 +78,21 @@ doc *parse_file_comments(ss *file_content, int *nd) {
     return docs;
 }
 
-void parse_comment_line(doc *doc, ss *line) {
+void parse_comment_line(doc *doc, ss line) {
     if (line->buf[0] == '*') line->buf[0] = ' ';
     ss_trim(line, " ");
     ss_concat_str(doc->comment, line);
     ss_concat_raw(doc->comment, "\n");
 }
 
-void parse_start_comment_line(doc *doc, ss *line) {
+void parse_start_comment_line(doc *doc, ss line) {
     ss_trim(line, "/* ");
     if (line->len == 0) return;
     ss_concat_str(doc->comment, line);
     ss_concat_raw(doc->comment, "\n");
 }
 
-void parse_end_comment_line(doc *doc, ss *line) {
+void parse_end_comment_line(doc *doc, ss line) {
     int pos_end = ss_index(line, "*/");
     if (pos_end == -1) {
         printf("end comment line: closing '*/' not found in line '%s'\n", line->buf);
@@ -106,7 +106,7 @@ void parse_end_comment_line(doc *doc, ss *line) {
     ss_concat_raw(doc->comment, line->buf);
 }
 
-void parse_func_line(doc *doc, ss *line) {
+void parse_func_line(doc *doc, ss line) {
     ss_trim(line, "\n\t\r ");
     int after_parameters = ss_index(line, ")");
     if (after_parameters == -1) return;
@@ -122,3 +122,4 @@ void parse_func_line(doc *doc, ss *line) {
     ss_slice(line, 0, start_parameters);
     ss_concat_str(doc->func_name, line);
 }
+

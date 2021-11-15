@@ -5,7 +5,7 @@
 static int num_tests = 0;
 static int num_failed = 0;
 
-void _test_cond(const char *desc, const bool cond, const char *filename, const int line) {
+void t_test_cond(const char *desc, const bool cond, const char *filename, const int line) {
     num_tests++;
     printf("  %s\t%s\n", cond ? "✅" : "❌", desc);
     if (!cond) {
@@ -14,7 +14,7 @@ void _test_cond(const char *desc, const bool cond, const char *filename, const i
     }
 }
 
-void _test_equal(const char *desc, const int want, const int got, const char *filename, const int line) {
+void t_test_equal(const char *desc, const int want, const int got, const char *filename, const int line) {
     num_tests++;
     bool equal = want == got;
     printf("  %s\t%s\n", equal ? "✅" : "❌", desc);
@@ -25,7 +25,7 @@ void _test_equal(const char *desc, const int want, const int got, const char *fi
     }
 }
 
-void _test_strings(const char *desc, const char *want, const char *got, const char *filename, const int line) {
+void t_test_strings(const char *desc, const char *want, const char *got, const char *filename, const int line) {
     num_tests++;
     bool equal = strcmp(got, want) == 0;
     printf("  %s\t%s\n", equal ? "✅" : "❌", desc);
@@ -36,26 +36,26 @@ void _test_strings(const char *desc, const char *want, const char *got, const ch
     }
 }
 
-void _test_success(const char *desc, const char *filename, const int line) {
+void t_test_success(const char *desc, const char *filename, const int line) {
     num_tests++;
     printf("  %s\t%s\n", "✅", desc);
 }
 
-void _test_failure(const char *desc, const char *filename, const int line) {
+void t_test_failure(const char *desc, const char *filename, const int line) {
     num_tests++;
     num_failed++;
     printf("  %s\t%s\n", "❌", desc);
 }
 
-void _test_group(const char *desc) {
+void t_test_group(const char *desc) {
     printf("\n  ======= %s =======\n", desc);
 }
 
-void _test_subgroup(const char *desc) {
+void t_test_subgroup(const char *desc) {
     printf("\n\t--- %s --- \n", desc);
 }
 
-int _test_report(void) {
+int t_test_report(void) {
     printf("\n  ======= Tests Report =======\n\n");
     printf("  Tests: %d, passed: %d, failed: %d\n", num_tests, num_tests - num_failed, num_failed);
     if (num_failed)
@@ -64,8 +64,3 @@ int _test_report(void) {
         printf("  ✅ All tests passed.\n\n");
     return num_failed ? 1 : 0;
 }
-
-
-/*
- *
- */
