@@ -1,3 +1,4 @@
+# Library API
 ## Index
 [`ss_new_from_raw_len_cap`](#ss_new_from_raw_len_cap)  
 [`ss_new_from_raw_len`](#ss_new_from_raw_len)  

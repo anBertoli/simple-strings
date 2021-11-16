@@ -2,7 +2,7 @@
 #include <stdlib.h>
 #include "main.h"
 
-doc *generate_files_documentation(char **file_paths, int n_files, int *n_docs) {
+doc *parse_files_comments(char **file_paths, int n_files, int *n_docs) {
     doc *docs = NULL;
     int docs_n = 0;
 
@@ -18,7 +18,7 @@ doc *generate_files_documentation(char **file_paths, int n_files, int *n_docs) {
         doc *docs_file = parse_file_comments(file_contents, &docs_file_n);
         docs = realloc_docs(docs, docs_n + docs_file_n);
         if (docs == NULL) {
-            printf("realloc documentations failed\n");
+            printf("realloc func docs failed\n");
             exit(1);
         }
         for (int j = 0; j < docs_file_n; j++) docs[docs_n + j] = docs_file[j];
@@ -33,8 +33,8 @@ doc *generate_files_documentation(char **file_paths, int n_files, int *n_docs) {
 }
 
 doc *parse_file_comments(ss file_content, int *nd) {
-    doc *docs = NULL;
-    int n_docs = 0;
+    doc *func_docs = NULL;
+    int func_docs_n = 0;
 
     int n_lines = 0;
     ss *lines = ss_split_str(file_content, "\n", &n_lines);
@@ -45,28 +45,28 @@ doc *parse_file_comments(ss file_content, int *nd) {
         ss_trim(line, "\n\t\r ");
 
         // end comment
-        int pos_end = ss_index(line, "*/");
+        size_t pos_end = ss_index(line, "*/");
         if (pos_end == 0 && in_comment) {
-            parse_end_comment_line(&docs[n_docs], line);
-            parse_func_line(&docs[n_docs], lines[i+1]);
-            ss_trim(docs[n_docs].comment, "\t\n\r ");
+            parse_end_comment_line(&func_docs[func_docs_n], line);
+            parse_func_line(&func_docs[func_docs_n], lines[i + 1]);
+            ss_trim(func_docs[func_docs_n].comment, "\t\n\r ");
             in_comment = false;
-            n_docs++;
+            func_docs_n++;
             continue;
         }
 
         // in comment
         if (in_comment) {
-            parse_comment_line(&docs[n_docs], line);
+            parse_comment_line(&func_docs[func_docs_n], line);
             continue;
         }
 
         // start comment
-        int pos_start = ss_index(line, "/*");
+        size_t pos_start = ss_index(line, "/*");
         if (pos_start == 0) {
-            if (n_docs % 20 == 0) docs = realloc_docs(docs, n_docs + 20);
-            docs[n_docs] = new_doc();
-            parse_start_comment_line(&docs[n_docs], line);
+            if (func_docs_n % 20 == 0) func_docs = realloc_docs(func_docs, func_docs_n + 20);
+            func_docs[func_docs_n] = new_doc();
+            parse_start_comment_line(&func_docs[func_docs_n], line);
             in_comment = true;
             continue;
         }
@@ -74,8 +74,8 @@ doc *parse_file_comments(ss file_content, int *nd) {
 
     ss_list_free(lines, n_lines);
 
-    *nd = n_docs;
-    return docs;
+    *nd = func_docs_n;
+    return func_docs;
 }
 
 void parse_comment_line(doc *doc, ss line) {
