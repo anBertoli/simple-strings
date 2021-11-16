@@ -51,7 +51,7 @@ void write_docs_to_file(char * filepath, doc *docs, int docs_n) {
     write_check("## Index\n", 1, 9, file_pointer);
     for (int i = 0; i < docs_n; i++) {
         doc doc = docs[i];
-        ss index_line = ss_clone(doc.func_sign);
+        ss index_line = ss_clone(doc.func_name);
         ss_prepend_raw("[`", index_line);
         ss_concat_raw(index_line, "`](#");
         ss_concat_str(index_line, doc.func_name);
