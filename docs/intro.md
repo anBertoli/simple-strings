@@ -4,12 +4,9 @@ Simple Strings (SS) is a string library for C designed to augment the libc strin
 strings. Those strings are easier to use and resemble the dynamic string types of other programming languages (like the String type in
 Rust).
 
-# How dynamic strings work
-
-At the core of the SS strings library there is a string type represented as a struct
-as follows. This struct represents a heap allocated string handled by the SS library.
-Functions that instantiate strings returns pointers to those structs (the ss typedef 
-below).
+At the core of the SS strings library there is a string type represented as the struct `string`
+showed below. This struct represents a heap allocated string handled by the SS library. Functions
+that instantiate strings returns pointers to those structs (the `ss` typedef).
 
 ```c
 struct string {
