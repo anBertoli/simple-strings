@@ -17,6 +17,7 @@ void test_ss_set_free_space(void);
 void test_ss_reserve_free_space(void);
 
 void test_ss_index(void);
+void test_ss_index_last(void);
 
 void test_ss_concat_raw_len(void);
 void test_ss_concat_raw(void);

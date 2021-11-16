@@ -208,14 +208,35 @@ void ss_clear(ss s) {
 
 /*
  * Returns the position (0-indexed) of the starting position of the first occurrence of the substring
- * `needle` in the ss string `s` provided as first argument. Returns -1 if no occurrence is found. The
- * string `s` is not modified.
+ * `needle` in the ss string `haystack` provided as first argument. Returns -1 if no occurrence is
+ * found or if `needle` is NULL or an empty string. The string `haystack` is not modified.
  */
 size_t ss_index(ss s, const char *needle) {
+    if (needle == NULL || *needle == '\0') return -1;
     char *sub_ptr = strstr(s->buf, needle);
     return sub_ptr != NULL
         ? sub_ptr - s->buf
         : -1;
+}
+
+/*
+ * Returns the position (0-indexed) of the starting position of the last occurrence of the substring
+ * `needle` in the ss string `haystack` provided as first argument. Returns -1 if no occurrence is
+ * found or if `needle` is NULL or an empty string. The string `haystack` is not modified.
+ */
+size_t ss_index_last(ss haystack, const char *needle) {
+    if (needle == NULL || *needle == '\0') return -1;
+
+    char *str_ptr = haystack->buf;
+    char *result = NULL;
+    while (1) {
+        char *pos = strstr(str_ptr, needle);
+        if (pos == NULL) break;
+        result = pos;
+        str_ptr = pos + 1;
+    }
+
+    return result != NULL ? result - haystack->buf : -1;
 }
 
 /*

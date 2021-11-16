@@ -252,34 +252,64 @@ void test_ss_clear(void) {
     ss_free(s1);
 }
 
-
 void test_ss_index(void) {
     test_group("ss_index");
 
     test_subgroup("one char, match");
-    ss s1 = ss_new_from_raw("Ehy ehy ehY");
-    int i = ss_index(s1, "e");
+    ss s1 = ss_new_from_raw("Ehy ehy Ehy eHy");
+    size_t i = ss_index(s1, "e");
     test_equal("should have found first occurrence", 4, i);
 
     test_subgroup("one char, no match");
-    i = ss_index(s1, "z");
-    test_equal("should have found first occurrence", -1, i);
-
-    test_subgroup("multiple char, match");
-    i = ss_index(s1, "ehy");
-    test_equal("should have found first occurrence", 4, i);
+    i = ss_index(s1, "d");
+    test_equal("should have found no occurrence", -1, i);
 
     test_subgroup("multiple char, no match");
     i = ss_index(s1, "ehz");
-    test_equal("should have found first occurrence", -1, i);
+    test_equal("should have found no occurrence", -1, i);
 
     test_subgroup("multiple char, match at start");
     i = ss_index(s1, "Ehy");
     test_equal("should have found first occurrence", 0, i);
 
+    test_subgroup("multiple char, match at middle");
+    i = ss_index(s1, "ehy");
+    test_equal("should have found first occurrence in th middle", 4, i);
+
     test_subgroup("multiple char, match at end");
-    i = ss_index(s1, "ehY");
-    test_equal("should have found first occurrence", 8, i);
+    i = ss_index(s1, "eHy");
+    test_equal("should have found first occurrence at the end", 12, i);
+
+    ss_free(s1);
+}
+
+void test_ss_index_last(void) {
+    test_group("ss_index_last");
+
+    test_subgroup("one char, match");
+    ss s1 = ss_new_from_raw("Ehy ehy Ehy");
+    size_t i = ss_index_last(s1, "e");
+    test_equal("should have found first occurrence", 4, i);
+
+    test_subgroup("one char, no match");
+    i = ss_index_last(s1, "z");
+    test_equal("should have found no match", -1, i);
+
+    test_subgroup("multiple char, no match");
+    i = ss_index_last(s1, "ehz");
+    test_equal("should have found no match", -1, i);
+
+    test_subgroup("multiple char, match");
+    i = ss_index_last(s1, "ehy");
+    test_equal("should have found last occurrence", 4, i);
+
+    test_subgroup("multiple char, match at end");
+    i = ss_index_last(s1, "Ehy");
+    test_equal("should have found last occurrence", 8, i);
+
+    test_subgroup("multiple char, match in middle");
+    i = ss_index_last(s1, "ehy");
+    test_equal("should have found last occurrence in the middle", 4, i);
 
     ss_free(s1);
 }

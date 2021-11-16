@@ -48,6 +48,19 @@ void write_docs_to_file(char * filepath, doc *docs, int docs_n) {
         exit(1);
     }
 
+    write_check("## Index\n", 1, 9, file_pointer);
+    for (int i = 0; i < docs_n; i++) {
+        doc doc = docs[i];
+        ss index_line = ss_clone(doc.func_sign);
+        ss_prepend_raw("[`", index_line);
+        ss_concat_raw(index_line, "`](#");
+        ss_concat_str(index_line, doc.func_name);
+        ss_concat_raw(index_line, ")  \n");
+
+        write_check(index_line->buf, 1, index_line->len, file_pointer);
+        ss_free(index_line);
+    }
+
     for (int i = 0; i < docs_n; i++) {
         doc doc = docs[i];
 

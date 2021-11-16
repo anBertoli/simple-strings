@@ -1,3 +1,45 @@
+## Index
+[`ss ss_new_from_raw_len_cap(const char *init, size_t len, size_t cap);`](#ss_new_from_raw_len_cap)  
+[`ss ss_new_from_raw_len(const char *init, size_t len);`](#ss_new_from_raw_len)  
+[`ss ss_new_from_raw(const char *init);`](#ss_new_from_raw)  
+[`ss ss_new_empty_with_cap(size_t cap);`](#ss_new_empty_with_cap)  
+[`ss ss_new_empty(void);`](#ss_new_empty)  
+[`ss ss_clone(ss s);`](#ss_clone)  
+[`ss ss_set_free_space(ss s, size_t free_space);`](#ss_set_free_space)  
+[`ss ss_reserve_free_space(ss s, size_t free_space);`](#ss_reserve_free_space)  
+[`void ss_free(ss s);`](#ss_free)  
+[`ss ss_grow(ss s, size_t len);`](#ss_grow)  
+[`void ss_cut(ss s, size_t len);`](#ss_cut)  
+[`void ss_clear(ss s);`](#ss_clear)  
+[`size_t ss_index(ss s, const char *needle);`](#ss_index)  
+[`size_t ss_index_last(ss haystack, const char *needle);`](#ss_index_last)  
+[`ss ss_concat_raw_len(ss s1, const char *s2, size_t s2_len);`](#ss_concat_raw_len)  
+[`ss ss_concat_raw(ss s1, const char *s2);`](#ss_concat_raw)  
+[`ss ss_concat_str(ss s1, ss s2);`](#ss_concat_str)  
+[`ss ss_prepend_raw_len(const char *s1, ss s2, size_t s1_len);`](#ss_prepend_raw_len)  
+[`ss ss_prepend_raw(const char *s1, ss s2);`](#ss_prepend_raw)  
+[`ss ss_prepend_str(ss s1, ss s2);`](#ss_prepend_str)  
+[`void ss_slice(ss s, size_t str_index, size_t end_index);`](#ss_slice)  
+[`void ss_trim(ss s, const char *cutset);`](#ss_trim)  
+[`void ss_trim_left(ss s, const char *cutset);`](#ss_trim_left)  
+[`void ss_trim_right(ss s, const char *cutset);`](#ss_trim_right)  
+[`void ss_to_lower(ss s);`](#ss_to_lower)  
+[`void ss_to_upper(ss s);`](#ss_to_upper)  
+[`ss_iter ss_split_raw_to_iter(const char *s, const char *del);`](#ss_split_raw_to_iter)  
+[`ss_iter ss_split_str_to_iter(ss s, const char *del);`](#ss_split_str_to_iter)  
+[`ss ss_iter_next(ss_iter iter);`](#ss_iter_next)  
+[`ss *ss_iter_collect(ss_iter iter, int *n);`](#ss_iter_collect)  
+[`ss *ss_split_raw(const char *s, const char *del, int *n);`](#ss_split_raw)  
+[`ss *ss_split_str(ss s, const char *del, int *n);`](#ss_split_str)  
+[`ss ss_join_raw(char **s, int n, const char *sep);`](#ss_join_raw)  
+[`ss ss_join_str(ss *s, int n, const char *sep);`](#ss_join_str)  
+[`void ss_iter_free(ss_iter iter);`](#ss_iter_free)  
+[`void ss_list_free(ss *list, const int n);`](#ss_list_free)  
+[`ss ss_sprintf_va(const char *format, va_list arg_list);`](#ss_sprintf_va)  
+[`ss ss_sprintf(const char *format, ...);`](#ss_sprintf)  
+
+## Strings creation and memory management
+
 ### ss_new_from_raw_len_cap
 Build a new string copying the provided `init` string of length `len` (the length argument
 doesn't include the null terminator) and allocating total space for `cap` + 1 bytes (plus
@@ -118,6 +160,8 @@ since it will point to deallocated memory.
 void ss_free(ss s);
 ```
 
+## Strings manipulation
+
 ### ss_grow
 Grow the `s` string to have the specified length `len`. New bytes inserted will be set to
 zero. If the specified length `len` is smaller than the current length, the function is a
@@ -155,11 +199,20 @@ void ss_clear(ss s);
 
 ### ss_index
 Returns the position (0-indexed) of the starting position of the first occurrence of the substring
-`needle` in the ss string `s` provided as first argument. Returns -1 if no occurrence is found. The
-string `s` is not modified.
+`needle` in the ss string `haystack` provided as first argument. Returns -1 if no occurrence is
+found or if `needle` is NULL or an empty string. The string `haystack` is not modified.
 
 ```c
 size_t ss_index(ss s, const char *needle);
+```
+
+### ss_index_last
+Returns the position (0-indexed) of the starting position of the last occurrence of the substring
+`needle` in the ss string `haystack` provided as first argument. Returns -1 if no occurrence is
+found or if `needle` is NULL or an empty string. The string `haystack` is not modified.
+
+```c
+size_t ss_index_last(ss haystack, const char *needle);
 ```
 
 ### ss_concat_raw_len
@@ -304,6 +357,8 @@ Modifies the string in place.
 void ss_to_upper(ss s);
 ```
 
+## Strings splitting and iteration
+
 ### ss_split_raw_to_iter
 Build a new string iterator from a raw string `s` and a string delimiter `del`. The string
 iterator is used to split the string `s` into substrings, each of them separated from the
@@ -428,6 +483,8 @@ contained strings can't be used after being freed.
 ```c
 void ss_list_free(ss *list, const int n);
 ```
+
+## Strings formatting
 
 ### ss_sprintf_va
 Formats and returns a string using the usual C formatting directives. The function

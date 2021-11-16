@@ -23,15 +23,12 @@ ss ss_reserve_free_space(ss s, size_t free_space);
 
 void ss_free(ss s);
 
-/*
- * Strings manipulation functions.
- */
-
 ss ss_grow(ss s, size_t len);
 void ss_cut(ss s, size_t len);
 void ss_clear(ss s);
 
 size_t ss_index(ss s, const char *needle);
+size_t ss_index_last(ss s, const char *needle);
 
 ss ss_concat_raw_len(ss s1, const char *s2, size_t s2_len);
 ss ss_concat_raw(ss s1, const char *s2);

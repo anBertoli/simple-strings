@@ -21,6 +21,7 @@ int main(void) {
     test_ss_clear();
 
     test_ss_index();
+    test_ss_index_last();
 
     test_ss_concat_raw_len();
     test_ss_concat_raw();
