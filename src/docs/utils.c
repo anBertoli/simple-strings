@@ -30,7 +30,9 @@ ss read_file_to_string(char *path) {
     }
 
     ss s = ss_new_empty();
-    if (s == NULL) return NULL;
+    if (s == NULL) {
+        return NULL;
+    }
 
     size_t i = 0;
     while (1) {
@@ -38,20 +40,21 @@ ss read_file_to_string(char *path) {
         if (s == NULL) return NULL;
         size_t n_read = fread(&s->buf[i], 1, 1000 * sizeof(char), file_pointer);
         if (n_read == 0) {
+            ss_cut(s, i);
             break;
         }
 
         i += n_read;
         ss_cut(s, i);
     }
-    ss_cut(s, i);
 
     if (ferror(file_pointer)) {
         perror("error reading file");
         return NULL;
     }
 
-    if (fclose(file_pointer)) {
+    int err_close = fclose(file_pointer);
+    if (err_close) {
         perror("error closing file");
         return NULL;
     }
