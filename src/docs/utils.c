@@ -51,32 +51,38 @@ void write_docs_to_file(char * filepath, doc *docs, int docs_n) {
     write_check("## Index\n", 1, 9, file_pointer);
     for (int i = 0; i < docs_n; i++) {
         doc doc = docs[i];
-        ss index_line = ss_clone(doc.func_name);
-        ss_prepend_raw("[`", index_line);
-        ss_concat_raw(index_line, "`](#");
-        ss_concat_str(index_line, doc.func_name);
-        ss_concat_raw(index_line, ")  \n");
 
+        ss index_line = ss_sprintf("[`%s`](#%s)  \n", doc.func_name->buf, doc.func_name->buf);
         write_check(index_line->buf, 1, index_line->len, file_pointer);
         ss_free(index_line);
     }
+    write_check("\n", 1, 1, file_pointer);
 
     for (int i = 0; i < docs_n; i++) {
         doc doc = docs[i];
 
-        write_check("### ", 1, 4, file_pointer);
-        write_check(doc.func_name->buf, 1, doc.func_name->len, file_pointer);
-        write_check("\n", 1, 1, file_pointer);
-        write_check(doc.comment->buf, 1, doc.comment->len, file_pointer);
-        write_check("\n\n", 1, 2, file_pointer);
+        if (strcmp(doc.func_name->buf, "ss_new_from_raw_len_cap") == 0) {
+            write_check("## String creation and memory management\n\n", 1, 42, file_pointer);
+        }
+        if (strcmp(doc.func_name->buf, "ss_grow") == 0) {
+            write_check("## String manipulation\n\n", 1, 24, file_pointer);
+        }
+        if (strcmp(doc.func_name->buf, "ss_split_raw_to_iter") == 0) {
+            write_check("## String splitting, joining and iteration\n\n", 1, 44, file_pointer);
+        }
+        if (strcmp(doc.func_name->buf, "ss_sprintf_va") == 0) {
+            write_check("## String formatting\n\n", 1, 22, file_pointer);
+        }
 
-        write_check("```c\n", 1, 5, file_pointer);
-        write_check(doc.func_sign->buf, 1, doc.func_sign->len, file_pointer);
-        write_check("\n", 1, 1, file_pointer);
-        write_check("```", 1, 3, file_pointer);
+        ss title = ss_sprintf("### %s \n", doc.func_name->buf);
+        ss body = ss_sprintf("%s\n\n", doc.comment->buf);
+        ss signature = ss_sprintf("```c\n%s\n```\n\n", doc.func_sign->buf);
 
-        write_check("\n\n", 1, 2, file_pointer);
+        write_check(title->buf, 1, title->len, file_pointer);
+        write_check(body->buf, 1, body->len, file_pointer);
+        write_check(signature->buf, 1, signature->len, file_pointer);
 
+        ss_free(title); ss_free(body); ss_free(signature);
         ss_free(doc.func_name);
         ss_free(doc.func_sign);
         ss_free(doc.comment);
