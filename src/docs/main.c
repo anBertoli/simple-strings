@@ -10,7 +10,7 @@ int main(int argc, char* argv[]) {
 
     // Generate functions docs.
     int funcs_docs_n = 0;
-    doc *funcs_docs = parse_files_comments(&argv[1], argc - 1, &funcs_docs_n);
+    func_doc *funcs_docs = parse_files_comments(&argv[1], argc - 1, &funcs_docs_n);
     ss api_docs = gen_funcs_documentation(funcs_docs, funcs_docs_n);
     free(funcs_docs);
 
@@ -22,7 +22,8 @@ int main(int argc, char* argv[]) {
     write_string_to_file(api_docs, "docs/api.md");
     write_string_to_file(readme, "README.md");
 
+    // Free and exit.
+
     ss_free(api_docs);
     ss_free(readme);
-
 }
