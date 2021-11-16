@@ -31,4 +31,7 @@ needed operations and maintain the string state consistent. If you need to write
 sure the buffer it has enough space (or grow it with the dedicated `ss_grow` function).
 
 Both the string struct pointed to by an `ss` pointer and the string buffer are heap allocated. After
-use the strings must be freed with the `ss_free` function.
+use the strings must be freed with the `ss_free` function. All the docs of the functions of the library 
+specify if they modify the passed string in place or a new one is created, and also in this case the 
+strings must be freed after use. Similarly, also string iterators and list of strings must be freed 
+after use.
