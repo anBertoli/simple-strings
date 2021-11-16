@@ -487,7 +487,7 @@ contained strings can't be used after being freed.
 void ss_list_free(ss *list, const int n);
 ```
 
-### String formatting
+## String formatting
 
 ### ss_sprintf_va
 Formats and returns a string using the usual C formatting directives. The function
