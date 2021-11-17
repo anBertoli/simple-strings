@@ -10,7 +10,7 @@ if [ "docs" = $1 ]; then
 
   ./build/docs \
   "src/string.c" \
-  "src/string_iter.c" \
+  "src/string_split.c" \
   "src/string_fmt.c"
 fi
 

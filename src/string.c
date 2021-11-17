@@ -6,23 +6,22 @@
 
 /*
  * Build a new string copying the provided `init` string of length `len` (the length argument
- * doesn't include the null terminator) and allocating total space for `cap` + 1 bytes (plus
- * one for the null terminator). If the length of the initial string is greater than `len`,
- * the exceeding bytes are discarded. If `cap` < `len`, `cap` is adjusted to be equal to `len`.
- * The caller is responsible for providing the correct values of the three arguments. The new
- * ss string is heap allocated and a pointer to it is returned. The string must be freed after
- * use with the provided [`ss_free`](#ss_free) function. Useful shorthands are the
- * [`ss_new_from_raw_len`](#ss_new_from_raw_len) and [`ss_new_from_raw`](#ss_new_from_raw)
- * functions, which are more ergonomic and easier to use.
+ * doesn't include the null terminator) and allocating total space for `cap`. If the length of
+ * the initial string is greater than `len`, the exceeding bytes are discarded. The `cap` value must
+ * be strictly greater than `len`, if `cap` <= `len`, `cap` is adjusted to be equal to `len` + 1, indeed
+ * at least 1 more byte than `len` must be always be allocated (for the null terminator). The caller is
+ * responsible for providing the correct values of the three arguments. The new ss string is heap allocated
+ * and a pointer to it is returned. The string must be freed after use with the provided [`ss_free`](#ss_free)
+ * function. Useful shorthands are the [`ss_new_from_raw_len`](#ss_new_from_raw_len) and
+ * [`ss_new_from_raw`](#ss_new_from_raw) functions, which are more ergonomic and easier to use.
  *
  * Returns the newly generated string or NULL if the allocation fails.
  */
-ss ss_new_from_raw_len_cap(const char *init, size_t len, size_t cap) {
-    size_t _cap = cap;
-    if (_cap <= len) _cap = len;
-
-    char *buf = ss_malloc(sizeof(char) * _cap + 1);
-    if (buf == NULL) return NULL;
+ss ss_new_from_raw_len_free(const char *init, size_t len, size_t avail) {
+    char *buf = ss_malloc(sizeof(char) * (len + avail + 1));
+    if (buf == NULL) {
+        return NULL;
+    }
 
     memcpy(buf, init, len);
     buf[len] = END_STRING;
@@ -34,7 +33,7 @@ ss ss_new_from_raw_len_cap(const char *init, size_t len, size_t cap) {
     }
     *s = (struct s){
         .len = len,
-        .cap = _cap,
+        .free = avail,
         .buf = buf
     };
 
@@ -44,22 +43,22 @@ ss ss_new_from_raw_len_cap(const char *init, size_t len, size_t cap) {
 /*
  * Build a new string copying the provided `init` string of length `len` (the length argument
  * doesn't include the null terminator). If the length of the initial string is greater than
- * the provided length, the exceeding bytes are discarded. The caller is responsible for providing
+ * the provided `len`, the exceeding bytes are discarded. The caller is responsible for providing
  * valid values for the arguments. If the `init` string is NULL a new empty ss string is built.
- * The new ss string is heap allocated and a pointer to it is returned. The ss must be freed after
- * use with the provided [`ss_free`](#ss_free) function. This function is basically a shorthand for
- * [`ss_new_raw_len_cap(init, len, len * 2)`](#ss_new_raw_len_cap).
+ * The new ss string is heap allocated and a pointer to it is returned. The function is basically a
+ * shorthand for [`ss_new_raw_len_cap(init, len, len * 2)`](#ss_new_raw_len_cap). The string must
+ * be freed after use with the provided [`ss_free`](#ss_free) function.
  *
- * The returned string has length `len`, but (`len` * 2 + 1) bytes are allocated (the allocated space
- * is called `cap`), the +1 is added for the null terminator. This overallocation is often useful
- * because it's reduces the probability of future reallocations when the string is manipulated.
+ * The returned string has length `len`, but (`len` * 2) bytes are allocated (the allocated space
+ * is called `cap`). This overallocation is often useful because it's reduces the probability of
+ * future reallocations when the string is manipulated.
  *
  * Returns the newly generated string or NULL if the allocation fails.
  */
 ss ss_new_from_raw_len(const char *init, size_t len) {
     return (init == NULL)
         ? ss_new_empty()
-        : ss_new_from_raw_len_cap(init, len, len * 2);
+        : ss_new_from_raw_len_free(init, len, len);
 }
 
 /*
@@ -77,22 +76,23 @@ ss ss_new_from_raw(const char *init) {
 }
 
 /*
- * Build and returns a new empty ss string with length zero and the provided allocated space (`cap`).
- * In any case the string has an implicit null term, so 1 byte is allocated anyway. The ss must
+ * Build and returns a new empty ss string with length zero and `cap` bytes allocated. In any
+ * case the string has an implicit null term, so 1 byte is allocated anyway. The ss must
  * be freed after use with the provided [`ss_free`](#ss_free) function.
  *
  * Returns the newly generated string or NULL if the allocation fails.
  */
-ss ss_new_empty_with_cap(size_t cap) {
-    return ss_new_from_raw_len_cap("", 0, cap);
+ss ss_new_empty_with_free(size_t avail) {
+    return ss_new_from_raw_len_free("", 0, avail);
 }
 
 /*
- * Build and returns a new empty ss string with length and cap zero. Even in this case the
+ * Build and returns a new empty ss string with length and cap one. Even in this case the
  * string always has an implicit null term, so 1 byte is allocated anyway. The ss must be
- * freed after use with the provided ss_free function. Note that usually an empty string
- * is built to be filled, so it could be a better idea in several situations to directly
- * preallocate some space via the [`ss_new_empty_with_cap`](#ss_new_empty_with_cap) function.
+ * freed after use with the provided [`ss_free`](#ss_free) function. Note that usually an
+ * empty string is built to be filled, so it could be a better idea in several situations
+ * to directly preallocate some space via the [`ss_new_empty_with_cap`](#ss_new_empty_with_cap)
+ * function.
  *
  * Returns the newly generated string or NULL if the allocation fails.
  */
@@ -109,7 +109,7 @@ ss ss_new_empty(void) {
  * Returns the newly generated string or NULL if the allocation fails.
  */
 ss ss_clone(ss s) {
-    return ss_new_from_raw_len_cap(s->buf, s->len, s->cap);
+    return ss_new_from_raw_len_free(s->buf, s->len, s->free);
 }
 
 /*
@@ -122,30 +122,32 @@ ss ss_clone(ss s) {
  * Returns the ss string `s` if case of success or NULL if any reallocation fails. In case of
  * failure the ss string `s` is still valid and must be freed after use.
  */
-ss ss_set_free_space(ss s, size_t free_space) {
-    size_t new_cap = s->len + free_space;
+ss ss_set_free_space(ss s, size_t avail) {
+    size_t new_space = s->len + 1 + avail;
 
-    char *new_buf = ss_realloc(s->buf, sizeof(char) * new_cap + 1);
-    if (new_buf == NULL) return NULL;
+    char *new_buf = ss_realloc(s->buf, sizeof(char) * new_space);
+    if (new_buf == NULL) {
+        return NULL;
+    }
 
     s->buf = new_buf;
-    s->cap = new_cap;
+    s->free = avail;
     return s;
 }
 
 /*
  * Enlarge the allocated space not already used of the string `s` to be at least `free_space` bytes long
- * (the space not used is present after the string buffer itself). The operation doesn't change the stored
- * string, it only changes the available space beyond the string end. The function is useful to reserve
- * more space earlier in order to avoid frequent reallocations. If enough space is already present the
- * function is a no-op. The string `s` is modified in place.
+ * (the space not used is present after null terminator). The operation doesn't change the stored string,
+ * it only changes the available space beyond the string end. The function is useful to reserve more space
+ * earlier in order to avoid frequent reallocations. If enough space is already present the function is a
+ * no-op. The string `s` is modified in place.
  *
  * Returns the ss string `s` if case of success or NULL if any reallocation fails. In case of failure
  * the ss string `s` is still valid and must be freed after use.
  */
-ss ss_reserve_free_space(ss s, size_t free_space) {
-    if (s->cap - s->len >= free_space) return s;
-    return ss_set_free_space(s, free_space);
+ss ss_reserve_free_space(ss s, size_t avail) {
+    if (s->free >= avail) return s;
+    return ss_set_free_space(s, avail);
 }
 
 /*
@@ -157,7 +159,7 @@ void ss_free(ss s) {
     free(s->buf);
     s->buf = NULL,
     s->len = 0;
-    s->cap = 0;
+    s->free = 0;
     free(s);
 }
 
@@ -174,9 +176,12 @@ ss ss_grow(ss s, size_t len) {
     if (len <= s->len) return s;
 
     s = ss_reserve_free_space(s, len - s->len);
-    if (s == NULL) return NULL;
+    if (s == NULL) {
+        return NULL;
+    }
 
     memset(s->buf + s->len, 0, len - s->len);
+    s->free -= len - s->len;
     s->buf[len] = END_STRING;
     s->len = len;
     return s;
@@ -192,8 +197,9 @@ ss ss_grow(ss s, size_t len) {
  */
 void ss_cut(ss s, size_t len) {
     if (len >= s->len) return;
-    s->len = len;
+    s->free += s->len - len;
     s->buf[len] = END_STRING;
+    s->len = len;
 }
 
 /*
@@ -254,23 +260,26 @@ size_t ss_index_last(ss haystack, const char *needle) {
 ss ss_concat_raw_len(ss s1, const char *s2, size_t s2_len) {
     size_t new_len = s1->len + s2_len;
 
-    if (new_len > s1->cap) {
+    if (s2_len > s1->free) {
         // We need to alias the reallocated buffer to
         // avoid overwriting the original pointer in
         // case of failures.
-        size_t new_cap = (sizeof(char) * new_len) * 2;
-        char *new_buf = ss_realloc(s1->buf, new_cap + 1);
-        if (new_buf == NULL) return NULL;
+        size_t new_alloc = new_len * 2 + 1;
+        char *new_buf = ss_realloc(s1->buf, sizeof(char) * new_alloc);
+        if (new_buf == NULL) {
+            return NULL;
+        }
 
+        s1->free = new_alloc - 1 - s1->len;
         s1->buf = new_buf;
-        s1->cap = new_cap;
     }
 
-    // Copy the s2 string starting from the
-    // last position of the s1 string (/0).
+    // Copy the s2 string starting the copy in
+    // the last position of the s1 string (/0).
     memcpy(s1->buf + s1->len, s2, s2_len);
     s1->buf[new_len] = END_STRING;
     s1->len = new_len;
+    s1->free -= s2_len;
 
     return s1;
 }
@@ -318,16 +327,18 @@ ss ss_concat_str(ss s1, ss s2) {
 ss ss_prepend_raw_len(const char *s1, ss s2, size_t s1_len) {
     size_t new_len = s2->len + s1_len;
 
-    if (new_len > s2->cap) {
+    if (s1_len > s2->free) {
         // We need to alias the reallocated buffer to
         // avoid overwriting the original pointer in
         // case of failures.
-        size_t new_cap = (sizeof(char) * new_len) * 2;
-        char *new_buf = ss_realloc(s2->buf, new_cap + 1);
-        if (new_buf == NULL) return NULL;
+        size_t new_alloc = new_len * 2 + 1;
+        char *new_buf = ss_realloc(s2->buf, sizeof(char) * new_alloc);
+        if (new_buf == NULL) {
+            return NULL;
+        }
 
+        s2->free = new_alloc - 1 - s2->len;
         s2->buf = new_buf;
-        s2->cap = new_cap;
     }
 
     // Make space for the string to prepend, then
@@ -336,6 +347,7 @@ ss ss_prepend_raw_len(const char *s1, ss s2, size_t s1_len) {
     memcpy(s2->buf, s1, s1_len);
     s2->buf[new_len] = END_STRING;
     s2->len = new_len;
+    s2->free -= s1_len;
 
     return s2;
 }
@@ -387,6 +399,7 @@ void ss_slice(ss s, size_t str_index, size_t end_index) {
 
     size_t len = _end_index - str_index;
     memmove(s->buf, &s->buf[str_index], len);
+    s->free += s->len - len;
     s->buf[len] = END_STRING;
     s->len = len;
 }
@@ -414,6 +427,7 @@ void ss_trim(ss s, const char *cutset) {
     }
 
     s->buf[len] = END_STRING;
+    s->free += s->len - len;
     s->len = len;
 }
 
@@ -434,6 +448,7 @@ void ss_trim_left(ss s, const char *cutset) {
     }
 
     s->buf[len] = END_STRING;
+    s->free += s->len - len;
     s->len = len;
 }
 
@@ -453,6 +468,7 @@ void ss_trim_right(ss s, const char *cutset) {
     size_t len = last == 0 ? 0 : last + 1;
 
     s->buf[len] = END_STRING;
+    s->free += s->len - len;
     s->len = len;
 }
 

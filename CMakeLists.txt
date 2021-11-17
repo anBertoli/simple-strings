@@ -16,7 +16,7 @@ add_library(ss STATIC
     "src/alloc.c"
     "src/string.c"
     "src/string_fmt.c"
-    "src/string_iter.c"
+    "src/string_split.c"
 )
 
 # Include the /src/options in the searched include directories
@@ -33,7 +33,7 @@ file(READ src/string.h CONTENTS)
 file(APPEND tmp/ss.h "${CONTENTS}")
 file(READ src/string_fmt.h CONTENTS)
 file(APPEND tmp/ss.h "${CONTENTS}")
-file(READ src/string_iter.h CONTENTS)
+file(READ src/string_split.h CONTENTS)
 file(APPEND tmp/ss.h "${CONTENTS}")
 
 # Install the library (usually /usr/local/lib/libss.a)
@@ -49,14 +49,14 @@ add_executable(ss_tests
     "src/alloc.c"
     "src/string.c"
     "src/string_fmt.c"
-    "src/string_iter.c"
+    "src/string_split.c"
     "src/private/debug.c"
 
     "src/tests/main.c"
     "src/tests/framework/framework.c"
     "src/tests/string_test.c"
     "src/tests/string_fmt_test.c"
-    "src/tests/string_iter_test.c"
+    "src/tests/string_split_test.c"
 )
 
 # Include the /src/options in the searched include directories
@@ -79,7 +79,7 @@ add_executable(docs
     "src/alloc.c"
     "src/string.c"
     "src/string_fmt.c"
-    "src/string_iter.c"
+    "src/string_split.c"
     "src/private/debug.c"
 )
 

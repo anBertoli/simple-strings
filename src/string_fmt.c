@@ -56,7 +56,7 @@ ss ss_sprintf_va(const char *format, va_list arg_list) {
 
     // Finally, build the ss string with the
     // formatted C string and return it.
-    ss s = ss_new_from_raw_len_cap(buf, n_written, n_written);
+    ss s = ss_new_from_raw_len_free(buf, n_written, n_written);
     free(buf);
     return s;
 }

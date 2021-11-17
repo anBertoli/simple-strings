@@ -3,23 +3,23 @@
 #define SS_STRING_H
 
 #include <stdio.h>
-#define END_STRING '\0'
+#define END_STRING (char)'\0'
 
 typedef struct s {
     size_t len;
-    size_t cap;
+    size_t free;
     char *buf;
 } *ss;
 
-ss ss_new_from_raw_len_cap(const char *init, size_t len, size_t cap);
+ss ss_new_from_raw_len_free(const char *init, size_t len, size_t avail);
 ss ss_new_from_raw_len(const char *init, size_t len);
 ss ss_new_from_raw(const char *init);
-ss ss_new_empty_with_cap(size_t cap);
+ss ss_new_empty_with_free(size_t avail);
 ss ss_new_empty(void);
 ss ss_clone(ss s);
 
-ss ss_set_free_space(ss s, size_t free_space);
-ss ss_reserve_free_space(ss s, size_t free_space);
+ss ss_set_free_space(ss s, size_t avail);
+ss ss_reserve_free_space(ss s, size_t avail);
 
 void ss_free(ss s);
 

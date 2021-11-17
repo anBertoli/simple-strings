@@ -1,15 +1,15 @@
 #include "string_test.h"
 #include "string_fmt_test.h"
-#include "string_iter_test.h"
+#include "string_split_test.h"
 #include "framework/framework.h"
 #include "options.h"
 
 int main(void) {
     // string.c tests
-    test_ss_new_from_raw_len_cap();
+    test_ss_new_from_raw_len_free();
     test_ss_new_from_raw_len();
     test_ss_new_from_raw();
-    test_ss_new_empty_with_cap();
+    test_ss_new_empty_with_free();
     test_ss_new_empty();
     test_ss_clone();
 
@@ -43,15 +43,9 @@ int main(void) {
     test_ss_sprintf();
     test_ss_sprintf_va();
 
-    // string_iter.c
-    test_ss_split_raw_to_iter();
-    test_ss_split_str_to_iter();
-    test_ss_iter_next();
-
-    test_ss_iter_collect();
+    // string_split.c
     test_ss_split_raw();
     test_ss_split_str();
-
     test_ss_join_raw();
     test_ss_join_str();
 

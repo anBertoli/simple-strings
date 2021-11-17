@@ -3,9 +3,9 @@
 
 func_doc new_func_doc(void) {
     return (func_doc){
-        .comment = ss_new_empty_with_cap(200),
-        .func_name = ss_new_empty_with_cap(20),
-        .func_sign = ss_new_empty_with_cap(20)
+        .comment = ss_new_empty_with_free(200),
+        .func_name = ss_new_empty_with_free(20),
+        .func_sign = ss_new_empty_with_free(20)
     };
 }
 

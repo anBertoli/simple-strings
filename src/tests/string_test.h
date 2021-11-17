@@ -1,11 +1,11 @@
 
-#ifndef SS_TEST_STRING_TEST_H
-#define SS_TEST_STRING_TEST_H
+#ifndef SS_TESTS_STRING_TEST_H
+#define SS_TESTS_STRING_TEST_H
 
-void test_ss_new_from_raw_len_cap(void);
+void test_ss_new_from_raw_len_free(void);
 void test_ss_new_from_raw_len(void);
 void test_ss_new_from_raw(void);
-void test_ss_new_empty_with_cap(void);
+void test_ss_new_empty_with_free(void);
 void test_ss_new_empty(void);
 void test_ss_clone(void);
 

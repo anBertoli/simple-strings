@@ -1,10 +1,10 @@
 
-#ifndef DOCS_MAIN_H
-#define DOCS_MAIN_H
+#ifndef SS_DOCS_MAIN_H
+#define SS_DOCS_MAIN_H
 
 #include "../string.h"
 #include "../string_fmt.h"
-#include "../string_iter.h"
+#include "../string_split.h"
 #include "../private/debug.h"
 
 ss read_file_to_string(char *path);

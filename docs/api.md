@@ -1,9 +1,9 @@
 # Library API
 ## Index
-[`ss_new_from_raw_len_cap`](#ss_new_from_raw_len_cap)  
+[`ss_new_from_raw_len_free`](#ss_new_from_raw_len_free)  
 [`ss_new_from_raw_len`](#ss_new_from_raw_len)  
 [`ss_new_from_raw`](#ss_new_from_raw)  
-[`ss_new_empty_with_cap`](#ss_new_empty_with_cap)  
+[`ss_new_empty_with_free`](#ss_new_empty_with_free)  
 [`ss_new_empty`](#ss_new_empty)  
 [`ss_clone`](#ss_clone)  
 [`ss_set_free_space`](#ss_set_free_space)  
@@ -26,50 +26,43 @@
 [`ss_trim_right`](#ss_trim_right)  
 [`ss_to_lower`](#ss_to_lower)  
 [`ss_to_upper`](#ss_to_upper)  
-[`ss_split_raw_to_iter`](#ss_split_raw_to_iter)  
-[`ss_split_str_to_iter`](#ss_split_str_to_iter)  
-[`ss_iter_next`](#ss_iter_next)  
-[`ss_iter_collect`](#ss_iter_collect)  
 [`ss_split_raw`](#ss_split_raw)  
 [`ss_split_str`](#ss_split_str)  
 [`ss_join_raw`](#ss_join_raw)  
 [`ss_join_str`](#ss_join_str)  
-[`ss_iter_free`](#ss_iter_free)  
 [`ss_list_free`](#ss_list_free)  
 [`ss_sprintf_va`](#ss_sprintf_va)  
 [`ss_sprintf`](#ss_sprintf)  
 
-## String creation and memory management
-
-### ss_new_from_raw_len_cap 
+### ss_new_from_raw_len_free 
 Build a new string copying the provided `init` string of length `len` (the length argument
-doesn't include the null terminator) and allocating total space for `cap` + 1 bytes (plus
-one for the null terminator). If the length of the initial string is greater than `len`,
-the exceeding bytes are discarded. If `cap` < `len`, `cap` is adjusted to be equal to `len`.
-The caller is responsible for providing the correct values of the three arguments. The new
-ss string is heap allocated and a pointer to it is returned. The string must be freed after
-use with the provided [`ss_free`](#ss_free) function. Useful shorthands are the
-[`ss_new_from_raw_len`](#ss_new_from_raw_len) and [`ss_new_from_raw`](#ss_new_from_raw)
-functions, which are more ergonomic and easier to use.
+doesn't include the null terminator) and allocating total space for `cap`. If the length of
+the initial string is greater than `len`, the exceeding bytes are discarded. The `cap` value must
+be strictly greater than `len`, if `cap` <= `len`, `cap` is adjusted to be equal to `len` + 1, indeed
+at least 1 more byte than `len` must be always be allocated (for the null terminator). The caller is
+responsible for providing the correct values of the three arguments. The new ss string is heap allocated
+and a pointer to it is returned. The string must be freed after use with the provided [`ss_free`](#ss_free)
+function. Useful shorthands are the [`ss_new_from_raw_len`](#ss_new_from_raw_len) and
+[`ss_new_from_raw`](#ss_new_from_raw) functions, which are more ergonomic and easier to use.
 
 Returns the newly generated string or NULL if the allocation fails.
 
 ```c
-ss ss_new_from_raw_len_cap(const char *init, size_t len, size_t cap);
+ss ss_new_from_raw_len_free(const char *init, size_t len, size_t avail);
 ```
 
 ### ss_new_from_raw_len 
 Build a new string copying the provided `init` string of length `len` (the length argument
 doesn't include the null terminator). If the length of the initial string is greater than
-the provided length, the exceeding bytes are discarded. The caller is responsible for providing
+the provided `len`, the exceeding bytes are discarded. The caller is responsible for providing
 valid values for the arguments. If the `init` string is NULL a new empty ss string is built.
-The new ss string is heap allocated and a pointer to it is returned. The ss must be freed after
-use with the provided [`ss_free`](#ss_free) function. This function is basically a shorthand for
-[`ss_new_raw_len_cap(init, len, len * 2)`](#ss_new_raw_len_cap).
+The new ss string is heap allocated and a pointer to it is returned. The function is basically a
+shorthand for [`ss_new_raw_len_cap(init, len, len * 2)`](#ss_new_raw_len_cap). The string must
+be freed after use with the provided [`ss_free`](#ss_free) function.
 
-The returned string has length `len`, but (`len` * 2 + 1) bytes are allocated (the allocated space
-is called `cap`), the +1 is added for the null terminator. This overallocation is often useful
-because it's reduces the probability of future reallocations when the string is manipulated.
+The returned string has length `len`, but (`len` * 2) bytes are allocated (the allocated space
+is called `cap`). This overallocation is often useful because it's reduces the probability of
+future reallocations when the string is manipulated.
 
 Returns the newly generated string or NULL if the allocation fails.
 
@@ -89,23 +82,24 @@ Returns the newly generated string or NULL if the allocation fails.
 ss ss_new_from_raw(const char *init);
 ```
 
-### ss_new_empty_with_cap 
-Build and returns a new empty ss string with length zero and the provided allocated space (`cap`).
-In any case the string has an implicit null term, so 1 byte is allocated anyway. The ss must
+### ss_new_empty_with_free 
+Build and returns a new empty ss string with length zero and `cap` bytes allocated. In any
+case the string has an implicit null term, so 1 byte is allocated anyway. The ss must
 be freed after use with the provided [`ss_free`](#ss_free) function.
 
 Returns the newly generated string or NULL if the allocation fails.
 
 ```c
-ss ss_new_empty_with_cap(size_t cap);
+ss ss_new_empty_with_free(size_t avail);
 ```
 
 ### ss_new_empty 
-Build and returns a new empty ss string with length and cap zero. Even in this case the
+Build and returns a new empty ss string with length and cap one. Even in this case the
 string always has an implicit null term, so 1 byte is allocated anyway. The ss must be
-freed after use with the provided ss_free function. Note that usually an empty string
-is built to be filled, so it could be a better idea in several situations to directly
-preallocate some space via the [`ss_new_empty_with_cap`](#ss_new_empty_with_cap) function.
+freed after use with the provided [`ss_free`](#ss_free) function. Note that usually an
+empty string is built to be filled, so it could be a better idea in several situations
+to directly preallocate some space via the [`ss_new_empty_with_cap`](#ss_new_empty_with_cap)
+function.
 
 Returns the newly generated string or NULL if the allocation fails.
 
@@ -136,21 +130,21 @@ Returns the ss string `s` if case of success or NULL if any reallocation fails. 
 failure the ss string `s` is still valid and must be freed after use.
 
 ```c
-ss ss_set_free_space(ss s, size_t free_space);
+ss ss_set_free_space(ss s, size_t avail);
 ```
 
 ### ss_reserve_free_space 
 Enlarge the allocated space not already used of the string `s` to be at least `free_space` bytes long
-(the space not used is present after the string buffer itself). The operation doesn't change the stored
-string, it only changes the available space beyond the string end. The function is useful to reserve
-more space earlier in order to avoid frequent reallocations. If enough space is already present the
-function is a no-op. The string `s` is modified in place.
+(the space not used is present after null terminator). The operation doesn't change the stored string,
+it only changes the available space beyond the string end. The function is useful to reserve more space
+earlier in order to avoid frequent reallocations. If enough space is already present the function is a
+no-op. The string `s` is modified in place.
 
 Returns the ss string `s` if case of success or NULL if any reallocation fails. In case of failure
 the ss string `s` is still valid and must be freed after use.
 
 ```c
-ss ss_reserve_free_space(ss s, size_t free_space);
+ss ss_reserve_free_space(ss s, size_t avail);
 ```
 
 ### ss_free 
@@ -358,71 +352,6 @@ Modifies the string in place.
 void ss_to_upper(ss s);
 ```
 
-## String splitting, joining and iteration
-
-### ss_split_raw_to_iter 
-Build a new string iterator from a raw string `s` and a string delimiter `del`. The string
-iterator is used to split the string `s` into substrings, each of them separated from the
-others by the occurrences of the delimiter `del`. The string iterator should be used with
-the [`ss_iter_next`](#ss_iter_next) function to yield subsequent substring. The string
-iterator is heap allocated along with a copy of the passed string. The string iterator
-must be freed after use with the [`ss_iter_free`](#ss_iter_free) function.
-
-Returns a string iterator or NULL in case of allocation failures.
-
-```c
-ss_iter ss_split_raw_to_iter(const char *s, const char *del);
-```
-
-### ss_split_str_to_iter 
-Build a new string iterator from a raw string `s` and a string delimiter `del`. The string
-iterator is used to split the string `s` into substrings, each of them separated from the
-others by the occurrences of the delimiter `del`. The string iterator should be used with
-the [`ss_iter_next`](#ss_iter_next) function to yield subsequent substring. The string
-iterator is heap allocated along with a copy of the passed string. The string iterator
-must be freed after use with the [`ss_iter_free`](#ss_iter_free) function.
-
-Returns a string iterator or NULL in case of allocation failures.
-
-```c
-ss_iter ss_split_str_to_iter(ss s, const char *del);
-```
-
-### ss_iter_next 
-Advances the string iterator `iter` and returns the next substring. The returned substring
-starts at the end of the previous delimiter (or the start of the original string in the first
-iteration) and ends at the start of the next delimiter (or at the end of the original string
-in the last iteration). The returned ss substrings are heap allocated and must be freed after
-use as usual (with the [`ss_free`](#ss_free) function). If no delimiters are present in the
-string or the iterator contains an empty delimiter all the original string is returned. Multiple
-consecutive delimiters are treated as one delimiter, and in general no empty strings are returned
-from this function. When the iterator is exhausted the function returns END_ITER. The caller can
-test for this condition to stop the iteration and free it.
-
-Returns a ss string in case of success, NULL in case of allocation failures or END_ITER when
-the iterator is exhausted. In case of errors the iterator `iter` is partially (or totally) consumed
-but still valid. It could be used again from that point, but must be freed after use in any case.
-
-```c
-ss ss_iter_next(ss_iter iter);
-```
-
-### ss_iter_collect 
-Collect and return all the ss substrings that the ss_iter `iter` could produce. The function is
-useful when the caller doesn't want/need to iterate and collect substrings manually;
-[`ss_split_raw`](#ss_split_raw) and [`ss_split_str`](#ss_split_str) have similar goals but this
-function is more flexible since it could also accept iterators partially consumed. All returned
-substrings are heap allocated and returned as an array (`*ss`) of length `n`. The array of strings
-must be freed after use with the dedicated [`ss_list_free`](#ss_list_free) function.
-
-Returns an array of strings of length `n` in case of success or NULL in case of allocation failures.
-In case of errors the iterator `iter` is partially (or totally) consumed but still valid. It could be
-used again from that point, but must be freed after use in any case.
-
-```c
-ss *ss_iter_collect(ss_iter iter, int *n);
-```
-
 ### ss_split_raw 
 Return all the ss substrings generated from splitting the C string `s` with the delimiter string `del`.
 The function is useful when the caller doesn't want/need to create a string iterator and collect
@@ -467,14 +396,6 @@ Returns the joined string in case of success or NULL in case of allocation error
 
 ```c
 ss ss_join_str(ss *s, int n, const char *sep);
-```
-
-### ss_iter_free 
-Deallocate the memory used by a string iterator `iter`. The string iterator can't be
-used after being freed.
-
-```c
-void ss_iter_free(ss_iter iter);
 ```
 
 ### ss_list_free 
