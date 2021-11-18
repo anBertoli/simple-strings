@@ -5,15 +5,16 @@
 #include "alloc.h"
 
 /*
- * Formats and returns a string using the usual C formatting directives. The function
- * accepts a `va_list` to accommodate a variable number of arguments. In case of success
- * the returned string must be freed after use with the dedicated [`ss_free`](#ss_free)
- * function. The argument list should be started (`va_start`) before providing it to this
- * function and must be ended (`va_end`) after the function call.
+ * Formats the string and concatenates it to the `s` string. Formatting is performed using the usual
+ * C formatting directive. The function accepts a `va_list` to accommodate a variable number of arguments.
+ * The argument list should be started (`va_start`) before providing it to this function and must be ended
+ * (`va_end`) after the function call. The returned string is the modified `s` string. The `s` string is
+ * modified in place.
  *
- * Returns the formatted string in case of success or NULL in case of allocations errors.
+ * Returns the formatted string in case of success or NULL in case of allocations errors. In case of
+ * failure the ss string `s` is still valid and must be freed after use.
  */
-ss ss_sprintf_va(const char *format, va_list arg_list) {
+ss ss_sprintf_va_cat(ss s, const char *format, va_list arg_list) {
     size_t buf_len = sizeof(char) * strlen(format) * 2;
     char *buf = ss_malloc(buf_len);
     if (buf == NULL) {
@@ -54,23 +55,57 @@ ss ss_sprintf_va(const char *format, va_list arg_list) {
         buf = new_buf;
     }
 
-    // Finally, build the ss string with the
+    // Finally, concat the ss string with the
     // formatted C string and return it.
-    ss s = ss_new_from_raw_len_free(buf, n_written, n_written);
+    ss _s = ss_concat_raw_len(s, buf, n_written);
     free(buf);
-    return s;
+    return _s;
 }
 
 /*
- * Formats and returns a string using the usual C formatting directive. The returned string must
- * be freed after use as usual with the dedicated [`ss_free`](#ss_free) function.
+ * Formats and returns a string using the usual C formatting directives. The function accepts
+ * a `va_list` to accommodate a variable number of arguments. In case of success the returned
+ * string must be freed after use with the dedicated `ss_free` function. The argument list
+ * should be started (`va_start`) before providing it to this function and must be ended
+ * (`va_end`) after the function call.
+ *
+ * Returns the formatted string in case of success or NULL in case of allocations errors.
+ */
+ss ss_sprintf_va(const char *format, va_list arg_list) {
+    ss s = ss_new_empty();
+    if (s == NULL) return NULL;
+    return ss_sprintf_va_cat(s, format, arg_list);
+}
+
+/*
+ * Formats the string and concatenates it to the `s` string. Formatting is performed using the usual
+ * C formatting directive. The returned string is the modified `s` string. The `s` string is modified
+ * in place.
+ *
+ * Returns the formatted string in case of success or NULL in case of allocations errors. In case of
+ * failure the ss string `s` is still valid and must be freed after use.
+ */
+ss ss_sprintf_cat(ss s, const char *format, ...) {
+    va_list arg_list;
+    va_start(arg_list, format);
+    ss s1 = ss_sprintf_va_cat(s, format, arg_list);
+    va_end(arg_list);
+    return s1;
+}
+
+/*
+ * Formats and returns a new string using the usual C formatting directive. The returned string
+ * must be freed after use as usual with the dedicated `ss_free` function.
  *
  * Returns the formatted string in case of success or NULL in case of allocations errors.
  */
 ss ss_sprintf(const char *format, ...) {
+    ss s = ss_new_empty();
+    if (s == NULL) return NULL;
+
     va_list arg_list;
     va_start(arg_list, format);
-    ss s1 = ss_sprintf_va(format, arg_list);
+    ss s1 = ss_sprintf_va_cat(s, format, arg_list);
     va_end(arg_list);
     return s1;
 }

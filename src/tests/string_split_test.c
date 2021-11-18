@@ -69,29 +69,29 @@ void test_ss_join_raw(void) {
 
     ss s1 = ss_join_raw((char *[]){ "how", "are", "you?" }, 3, "___");
     test_strings("should have joined the strings", "how___are___you?", s1->buf);
-    test_equal("should have the correct len", 16, s1->len);
-    test_equal("should have the correct free", 2, s1->free);
+    test_equal("should have correct len", 16, s1->len);
+    test_equal("should have correct free", 2, s1->free);
     ss_free(s1);
 
     test_subgroup("empty separator");
     s1 = ss_join_raw((char *[]){ "how", "are", "you?" }, 3, "");
     test_strings("should have joined the strings", "howareyou?", s1->buf);
-    test_equal("should have the correct len", 10, s1->len);
-    test_equal("should have the correct free", 10, s1->free);
+    test_equal("should have correct len", 10, s1->len);
+    test_equal("should have correct free", 10, s1->free);
     ss_free(s1);
 
     test_subgroup("empty strings");
     s1 = ss_join_raw((char *[]){ "", "", "" }, 3, "___");
     test_strings("should have joined the strings", "______", s1->buf);
-    test_equal("should have the correct len", 6, s1->len);
-    test_equal("should have the correct free", 0, s1->free);
+    test_equal("should have correct len", 6, s1->len);
+    test_equal("should have correct free", 0, s1->free);
     ss_free(s1);
 
     test_subgroup("empty string and separator");
     s1 = ss_join_raw((char *[]){ "", "", "" }, 3, "");
     test_strings("should have joined the strings", "", s1->buf);
-    test_equal("should have the correct len", 0, s1->len);
-    test_equal("should have the correct free", 0, s1->free);
+    test_equal("should have correct len", 0, s1->len);
+    test_equal("should have correct free", 0, s1->free);
     ss_free(s1);
 }
 
@@ -105,15 +105,15 @@ void test_ss_join_str(void) {
 
     ss s4 = ss_join_str((ss []){ s1,s2,s3 }, 3, "___");
     test_strings("should have joined the strings", "how___are___you?", s4->buf);
-    test_equal("should have the correct len", 16, s4->len);
-    test_equal("should have the correct free", 2, s4->free);
+    test_equal("should have correct len", 16, s4->len);
+    test_equal("should have correct free", 2, s4->free);
     ss_free(s4);
 
     test_subgroup("empty separator");
     s4 = ss_join_str((ss []){ s1,s2,s3 }, 3, "");
     test_strings("should have joined the strings", "howareyou?", s4->buf);
-    test_equal("should have the correct len", 10, s4->len);
-    test_equal("should have the correct free", 10, s4->free);
+    test_equal("should have correct len", 10, s4->len);
+    test_equal("should have correct free", 10, s4->free);
     ss_free(s4);
 
     ss_free(s1);
@@ -127,15 +127,15 @@ void test_ss_join_str(void) {
 
     s4 = ss_join_str((ss []){ s1,s2,s3 }, 3, "___");
     test_strings("should have joined the strings", "______", s4->buf);
-    test_equal("should have the correct len", 6, s4->len);
-    test_equal("should have the correct free", 0, s4->free);
+    test_equal("should have correct len", 6, s4->len);
+    test_equal("should have correct free", 0, s4->free);
     ss_free(s4);
 
     test_subgroup("empty string and separator");
     s4 = ss_join_str((ss []){ s1,s2,s3 }, 3, "");
     test_strings("should have joined the strings", "", s4->buf);
-    test_equal("should have the correct len", 0, s4->len);
-    test_equal("should have the correct free", 0, s4->free);
+    test_equal("should have correct len", 0, s4->len);
+    test_equal("should have correct free", 0, s4->free);
     ss_free(s4);
 
     ss_free(s1);
@@ -147,7 +147,7 @@ void test_ss_join_str(void) {
 void test_tokens_from_list(ss *got_str_list, int got_num_str, char **want_strings, int want_num_strings) {
     if (got_num_str != want_num_strings) {
         ss s = ss_sprintf(
-                "should have the correct number of substrings: want '%d', got '%d'",
+                "should have correct number of substrings: want '%d', got '%d'",
                 want_num_strings, got_num_str
         );
         test_failure(s->buf);
@@ -171,7 +171,7 @@ void test_tokens_from_list(ss *got_str_list, int got_num_str, char **want_string
         }
     }
 
-    test_success("should have the correct number of words");
+    test_success("should have correct number of words");
     test_success("should have len = free = length of word");
 }
 

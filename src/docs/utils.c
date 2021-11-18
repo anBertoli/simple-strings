@@ -40,12 +40,12 @@ ss read_file_to_string(char *path) {
         if (s == NULL) return NULL;
         size_t n_read = fread(&s->buf[i], 1, 1000 * sizeof(char), file_pointer);
         if (n_read == 0) {
-            ss_cut(s, i);
+            ss_shrink(s, i);
             break;
         }
 
         i += n_read;
-        ss_cut(s, i);
+        ss_shrink(s, i);
     }
 
     if (ferror(file_pointer)) {

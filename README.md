@@ -48,7 +48,7 @@ after use.
 [`ss_reserve_free_space`](#ss_reserve_free_space)  
 [`ss_free`](#ss_free)  
 [`ss_grow`](#ss_grow)  
-[`ss_cut`](#ss_cut)  
+[`ss_shrink`](#ss_shrink)  
 [`ss_clear`](#ss_clear)  
 [`ss_index`](#ss_index)  
 [`ss_index_last`](#ss_index_last)  
@@ -69,19 +69,24 @@ after use.
 [`ss_join_raw`](#ss_join_raw)  
 [`ss_join_str`](#ss_join_str)  
 [`ss_list_free`](#ss_list_free)  
+[`ss_sprintf_va_cat`](#ss_sprintf_va_cat)  
 [`ss_sprintf_va`](#ss_sprintf_va)  
+[`ss_sprintf_cat`](#ss_sprintf_cat)  
 [`ss_sprintf`](#ss_sprintf)  
 
 ### ss_new_from_raw_len_free 
-Build a new string copying the provided `init` string of length `len` (the length argument
-doesn't include the null terminator) and allocating total space for `cap`. If the length of
-the initial string is greater than `len`, the exceeding bytes are discarded. The `cap` value must
-be strictly greater than `len`, if `cap` <= `len`, `cap` is adjusted to be equal to `len` + 1, indeed
-at least 1 more byte than `len` must be always be allocated (for the null terminator). The caller is
-responsible for providing the correct values of the three arguments. The new ss string is heap allocated
-and a pointer to it is returned. The string must be freed after use with the provided [`ss_free`](#ss_free)
-function. Useful shorthands are the [`ss_new_from_raw_len`](#ss_new_from_raw_len) and
-[`ss_new_from_raw`](#ss_new_from_raw) functions, which are more ergonomic and easier to use.
+Build a new string copying the provided `init` string of length `len` (the length argument doesn't
+include the null terminator) and allocating additional `avail` bytes. If the length of the initial
+string is greater than `len`, the exceeding bytes are discarded. Even with `len` and `avail` both
+equal to zero, one byte is allocated anyway (for the null terminator). The caller is responsible for
+providing the correct values of the three arguments. If the `init` string is NULL a new empty ss
+string is built. The newly created string is heap allocated and a pointer to it is returned. The
+string must be freed after use with the provided `ss_free` function. Useful shorthands are the
+`ss_new_from_raw_len` and `ss_new_from_raw` functions, which are more ergonomic and easier to use.
+
+The returned string has length `len`, but additional `avail` bytes are allocated. This overallocation
+is useful because it's reduces the probability of future reallocations when the string is
+manipulated.
 
 Returns the newly generated string or NULL if the allocation fails.
 
@@ -91,16 +96,16 @@ ss ss_new_from_raw_len_free(const char *init, size_t len, size_t avail);
 
 ### ss_new_from_raw_len 
 Build a new string copying the provided `init` string of length `len` (the length argument
-doesn't include the null terminator). If the length of the initial string is greater than
-the provided `len`, the exceeding bytes are discarded. The caller is responsible for providing
+doesn't include the null terminator). If the length of the initial string is greater than the
+provided `len`, the exceeding bytes are discarded. The caller is responsible for providing
 valid values for the arguments. If the `init` string is NULL a new empty ss string is built.
-The new ss string is heap allocated and a pointer to it is returned. The function is basically a
-shorthand for [`ss_new_raw_len_cap(init, len, len * 2)`](#ss_new_raw_len_cap). The string must
-be freed after use with the provided [`ss_free`](#ss_free) function.
+The new ss string is heap allocated and a pointer to it is returned. The function is basically
+a shorthand for `ss_new_raw_len_cap(init, len, len)`. The string must be freed after use with
+the provided `ss_free` function.
 
-The returned string has length `len`, but (`len` * 2) bytes are allocated (the allocated space
-is called `cap`). This overallocation is often useful because it's reduces the probability of
-future reallocations when the string is manipulated.
+The returned string has length `len`, but additional `len` bytes are allocated. This overallocation
+is useful because it's reduces the probability of future reallocations when the string is
+manipulated.
 
 Returns the newly generated string or NULL if the allocation fails.
 
@@ -109,10 +114,14 @@ ss ss_new_from_raw_len(const char *init, size_t len);
 ```
 
 ### ss_new_from_raw 
-Build a new string copying the provided null terminated `init` string. This function is a
-shorthand for [`str_new_raw_len(init, len)](#str_new_raw_len)`, where the length here is
-calculated with strlen. If the `init` string is NULL a new empty ss string is built. The
-returned string must be freed after use with the provided [`ss_free`](#ss_free) function.
+Build a new string copying the provided null terminated `init` C string. This function is a
+shorthand for `str_new_raw_len(init, strlen(init), strlen(init))`. If the `init` string is
+NULL a new empty ss string is built. The returned string must be freed after use with the
+provided `ss_free` function.
+
+The returned string has length `strlen(init)`, but additional `strlen(init)` bytes are allocated.
+This overallocation is useful because it's reduces the probability of future reallocations when
+the string is manipulated.
 
 Returns the newly generated string or NULL if the allocation fails.
 
@@ -121,9 +130,9 @@ ss ss_new_from_raw(const char *init);
 ```
 
 ### ss_new_empty_with_free 
-Build and returns a new empty ss string with length zero and `cap` bytes allocated. In any
-case the string has an implicit null term, so 1 byte is allocated anyway. The ss must
-be freed after use with the provided [`ss_free`](#ss_free) function.
+Build and returns a new empty ss string with length zero and `avail` bytes allocated (+ 1
+for the null terminator). In any case the string has an implicit null term, so 1 byte is
+allocated anyway. The ss must be freed after use with the provided `ss_free` function.
 
 Returns the newly generated string or NULL if the allocation fails.
 
@@ -132,12 +141,11 @@ ss ss_new_empty_with_free(size_t avail);
 ```
 
 ### ss_new_empty 
-Build and returns a new empty ss string with length and cap one. Even in this case the
-string always has an implicit null term, so 1 byte is allocated anyway. The ss must be
-freed after use with the provided [`ss_free`](#ss_free) function. Note that usually an
-empty string is built to be filled, so it could be a better idea in several situations
-to directly preallocate some space via the [`ss_new_empty_with_cap`](#ss_new_empty_with_cap)
-function.
+Build and returns a new empty ss string with length and no free space. Even in this case the
+string always has an implicit null term, so 1 byte is allocated anyway. The ss must be freed
+after use with the provided `ss_free` function. Note that usually an empty string is built to
+be filled, so it could be more convenient to directly preallocate some space via the
+`ss_new_empty_with_cap` function.
 
 Returns the newly generated string or NULL if the allocation fails.
 
@@ -147,24 +155,24 @@ ss ss_new_empty(void);
 
 ### ss_clone 
 Build and return a clone of the provided ss string `s`. The new string and the old one are
-independent and both of them must be freed after use with the [`ss_free`](#ss_free) function.
-Cloning a string is useful when, for example, we want to mutate a string while also retaining
-the original content. The string `s` is not modified.
+independent and both of them must be freed after use with the `ss_free` function. Cloning a
+string is useful when, for example, we want to mutate a string while also retaining the
+original content. The string `s` is not modified.
 
-Returns the newly generated string or NULL if the allocation fails.
+Returns the cloned string or NULL if the allocation fails.
 
 ```c
 ss ss_clone(ss s);
 ```
 
 ### ss_set_free_space 
-Sets the allocated space not already used for the string `s` to be equal to `free_space`
-bytes. The operation doesn't change the stored string itself, both in the content and the
-length. It only changes the available (allocated) space to be used for operations on the
-string itself. The function is useful for example to reserve more space earlier in order
-to avoid frequent reallocations later. The string `s` is modified in place.
+Sets the allocated space not already used for the string `s` to be equal to `avail` bytes. The
+operation doesn't change the stored string itself, both in the content and the length. It only
+changes the allocated available space to be used for future operations on the string. The function
+is useful for example to reserve more space earlier in order to avoid frequent reallocations later.
+The string `s` is modified in place.
 
-Returns the ss string `s` if case of success or NULL if any reallocation fails. In case of
+Returns the modified string `s` if case of success or NULL if any reallocation fails. In case of
 failure the ss string `s` is still valid and must be freed after use.
 
 ```c
@@ -172,13 +180,12 @@ ss ss_set_free_space(ss s, size_t avail);
 ```
 
 ### ss_reserve_free_space 
-Enlarge the allocated space not already used of the string `s` to be at least `free_space` bytes long
-(the space not used is present after null terminator). The operation doesn't change the stored string,
-it only changes the available space beyond the string end. The function is useful to reserve more space
-earlier in order to avoid frequent reallocations. If enough space is already present the function is a
-no-op. The string `s` is modified in place.
+Enlarge the allocated space not already used by the string `s` to be at least `avail` bytes long. The
+operation doesn't change the stored string, it only changes the available space beyond the string end.
+The function is useful to reserve more space earlier in order to avoid frequent reallocations in the
+future. If enough space is already present the function is a no-op. The string `s` is modified in place.
 
-Returns the ss string `s` if case of success or NULL if any reallocation fails. In case of failure
+Returns the modified string `s` if case of success or NULL if any reallocation fails. In case of failure
 the ss string `s` is still valid and must be freed after use.
 
 ```c
@@ -196,35 +203,34 @@ void ss_free(ss s);
 ## String manipulation
 
 ### ss_grow 
-Grow the `s` string to have the specified length `len`. New bytes inserted will be set to
-zero. If the specified length `len` is smaller than the current length, the function is a
-no-op. The bytes inserted are safe to be written with new content. The string `s` is
-modified in place.
+Grow the `s` string to have the specified length `len`. Note that here the function enlarges
+the string buffer itself, and eventually the allocates space. New bytes inserted will be set
+to zero and they will be safe to be written. If the specified length `len` is smaller than the
+current length, the function is a no-op. The string `s` is modified in place.
 
-Returns the ss string `s` if case of success or NULL if any reallocation fails. In case of
-failure the ss string `s` is still valid and must be freed after use.
+Returns the modified ss string `s` if case of success or NULL if any reallocation fails. In
+case of failure the ss string `s` is still valid and must be freed after use.
 
 ```c
 ss ss_grow(ss s, size_t len);
 ```
 
-### ss_cut 
-Cut the string `s` at the provided length `len`. The string is shortened to contain only the first
-`len` bytes and a null termination character is written at the position `len` of the string buffer.
-The total allocated space (`cap`) is left untouched, so future string manipulations can be performed
-with fewer reallocations. The bytes in the string buffer after the `len`-th one are not cleaned, they
-are just considered unused. If the length `len` is greater than the string length the function is a
-no-op. The string `s` is modified in place.
+### ss_shrink 
+Shrink the string `s` to have the provided length `len`. The string is shortened to contain only the
+first `len` bytes and a null termination character is written at the position `len` of the string buffer.
+The total allocated space is left untouched, while the free space grows. The bytes in the string buffer
+after the `len`-th one are not cleaned, they are just considered unused. If the length `len` is greater
+than the current string length the function is a no-op. The string `s` is modified in place.
 
 ```c
-void ss_cut(ss s, size_t len);
+void ss_shrink(ss s, size_t len);
 ```
 
 ### ss_clear 
 Erase the content of the string `s`. The length of the string is set to 0 and a null termination
-character is written in the first position of the string buffer. The total allocation space (`cap`)
-is left untouched, so future string manipulations can be performed with fewer reallocations. The
-old bytes are not cleaned, they are just considered unused. The string `s` is modified in place.
+character is written in the first position of the string buffer. The total allocation space is
+left untouched, while the free space grows. The old bytes are not cleaned, they are just considered
+unused. It is a shorthand for `ss_shrink(s, 0)`. The string `s` is modified in place.
 
 ```c
 void ss_clear(ss s);
@@ -249,13 +255,14 @@ size_t ss_index_last(ss haystack, const char *needle);
 ```
 
 ### ss_concat_raw_len 
-Concatenate the string `s1` with a C string `s2` of length `s2_len`. If the length of the C
-string is greater than `s2_len`, exceeding bytes are discarded. The `s2` C string is appended
-to the string `s1`, eventually growing the allocated space for `s1`. The strategy used in concat
-functions is the following: if the string `s1` has enough allocated space to contain also the string
-`s2` the content of the latter is simply appended, otherwise the `s1` string will be grown in order
-to have allocated space (`cap`) of (2*n + 1) bytes, where n is the resulting (concatenated) string
-length. The string `s1` is modified in place. The string `s1` is modified in-place.
+Concatenate the string `s1` with a C string `s2` of length `s2_len`. If the length of the C string
+is greater than `s2_len`, exceeding bytes are discarded. The `s2` C string is appended to the string
+`s1`, eventually growing the allocated space for `s1`. The strategy used in concat functions is the
+following: if the string `s1` has enough allocated space to contain also the string `s2` the content
+of the latter is simply appended, otherwise the `s1` string will be grown in order to have total
+allocated space equal to (2*n + 1) bytes, where n is the resulting (concatenated) string length. In
+this case, both the final `len` and the free space `free` will be equal to n. The string `s1` is
+modified in place.
 
 Returns the string `s1` concatenated with the C string `s2` if case of success or NULL if eventual
 reallocations fail. In case of failure the string `s1` is still valid and must be freed after use.
@@ -268,7 +275,8 @@ ss ss_concat_raw_len(ss s1, const char *s2, size_t s2_len);
 Concatenate the string `s1` with a null terminated C string `s2`. The `s2` string is appended to
 s1, eventually growing the allocated space for `s1`. If the `s2` string is NULL the function
 simply returns `s1`. The string `s1` is modified in-place. Basically, it is a shorthand for
-[`str_concat_raw_len(s1, s1, strlen(s2))`](#str_concat_raw_len).
+`str_concat_raw_len(s1, s1, strlen(s2))` (see that function to have more info about the concat
+mechanism).
 
 Returns the string `s1` concatenated with the C string `s2` if case of success or NULL if eventual
 reallocations fail. In case of failure the string `s1` is still valid and must be freed after use.
@@ -280,8 +288,9 @@ ss ss_concat_raw(ss s1, const char *s2);
 ### ss_concat_str 
 Concatenate the string `s1` with a second ss string `s2`. The `s2` string is appended to s1,
 eventually growing the allocated space for `s1`. The string `s1` is modified in-place. Basically
-it is a shorthand for [`ss_concat_raw_len(s1, s2->buf, s2->len)`](#ss_concat_raw_len). Both strings
-are still valid after the function call and must be freed separately.
+it is a shorthand for `ss_concat_raw_len(s1, s2->buf, s2->len)` (see that function to have more
+info about the concat mechanism).Both strings are still valid after the function call and must
+be freed separately.
 
 Returns the string `s1` concatenated with the C string `s2` if case of success or NULL if eventual
 reallocations fail. In case of failure both strings are still valid and must be freed after use.
@@ -296,10 +305,10 @@ greater than `s1_len`, exceeding bytes are discarded. The `s1` C string is prepe
 string `s2`, eventually growing the allocated space for the latter. The strategy used in prepend
 functions is the following: if the string `s2` has enough allocated space to contain also the string
 `s1` the content is simply prepended, otherwise the `s2` string will be grown in order to have
-allocated space (`cap`) of (2*n + 1) bytes, where n is the resulting string length. The string `s2`
-is modified in place.
+allocated space of (2*n + 1) bytes, where n is the resulting string length. In this case, both the
+final `len` and the free space `free` will be equal to n. The string `s2` is modified in place.
 
-Returns the string `s2` concatenated with the C string `s1` if case of success or NULL if eventual
+Returns the string `s2` with the C string `s1` prepended in case of success or NULL if eventual
 reallocations fail. In case of failure the string `s2` is still valid and must be freed after use.
 
 ```c
@@ -307,12 +316,12 @@ ss ss_prepend_raw_len(const char *s1, ss s2, size_t s1_len);
 ```
 
 ### ss_prepend_raw 
-Prepend the null terminated C string `s1` to a ss string `s2`. The `s1` string is prepended to
-`s2`, eventually growing the allocated space of `s2`. The string `s2` is modified in-place. Basically,
-it is a shorthand for [`ss_prepend_raw_len(s1, s2, strlen(s1))`](#ss_prepend_raw_len). If the `s1`
-string is NULL the function simply returns `s2`.
+Prepend the null terminated C string `s1` to a ss string `s2`. The `s1` string is prepended to `s2`,
+eventually growing the allocated space of `s2`. The string `s2` is modified in-place. Basically, it
+is a shorthand for `ss_prepend_raw_len(s1, s2, strlen(s1))` (see that function to have more info
+about the concat mechanism). If the `s1` string is NULL the function simply returns `s2`.
 
-Returns the string `s2` concatenated with the C string `s1` if case of success or NULL if eventual
+Returns the string `s2` prepended with the C string `s1` if case of success or NULL if eventual
 reallocations fail. In case of failure the string `s2` is still valid and must be freed after use.
 
 ```c
@@ -323,22 +332,23 @@ ss ss_prepend_raw(const char *s1, ss s2);
 Prepend the ss string `s1` to another ss string `s2`. The `s1` string is appended to `s2`, eventually
 growing the allocated space of `s2`. Both strings are still valid after the function call and must be
 freed separately. The string `s2` is modified in-place. Basically, it is a shorthand for
-[`ss_prepend_raw_len(s1->buf, s2, s1->len)`](#ss_prepend_raw_len).
+`ss_prepend_raw_len(s1->buf, s2, s1->len)` (see that function to have more info about the concat
+mechanism).
 
-Returns the string `s2` concatenated with the C string `s1` if case of success or NULL if eventual
-reallocations fail. In case of failure the string `s2` is still valid and must be freed after use.
+Returns the string `s2` prepended with the C string `s1` if case of success or NULL if eventual
+reallocations fail. In case of failure both strings are still valid and must be freed after use.
 
 ```c
 ss ss_prepend_str(ss s1, ss s2);
 ```
 
 ### ss_slice 
-Reduces the original ss string `s` slicing it with the provided indexes. The slicing boundaries must
-be provided via the `str_index` and `end_index` indexes (0-indexed) and the resulting substring starts
-from the position `str_index` (inclusive) and ends at `end_index` (not inclusive). If the `str_index`
-is >= of the original string length no changes are made. If the end index is < of `str_index` no
-changes are made. If `end_index` > of the original string length, `end_index` is reduced to be equal to
-the original string length before slicing the string. The string `s` is modified in place.
+Obtain a substring of the ss string `s` slicing it with the provided indexes. The slicing boundaries
+are provided via the `str_index` and `end_index` arguments (0-indexed) and the resulting substring
+starts from the position `str_index` (inclusive) and ends at `end_index` (not inclusive). If the
+`str_index` is >= of the original string length no changes are made. If the end index is < of `str_index`
+no changes are made. If `end_index` > of the original string length, `end_index` is reduced to be equal
+to the original string length before slicing the string. The string `s` is modified in place.
 
 ```c
 void ss_slice(ss s, size_t str_index, size_t end_index);
@@ -347,8 +357,8 @@ void ss_slice(ss s, size_t str_index, size_t end_index);
 ### ss_trim 
 Removes characters contained in the `cutset` string from both the start and the end of the
 ss string `s`. After the trimming operation, the string length is reduced while the allocation
-size is left untouched. If all characters are trimmed the result is a valid but empty string.
-The string is modified in place.
+size is left untouched, but more free space will be available. If all characters are trimmed
+the result is a valid but empty string. The string `s` is modified in place.
 
 ```c
 void ss_trim(ss s, const char *cutset);
@@ -357,8 +367,8 @@ void ss_trim(ss s, const char *cutset);
 ### ss_trim_left 
 Removes characters contained in the `cutset` string from the start of the ss string `s`.
 After the trimming operation, the string length is reduced while the allocation size
-is left untouched. If all characters are trimmed the result is a valid but empty string.
-The string is modified in place.
+is left untouched, but more free space will be available. If all characters are trimmed
+the result is a valid but empty string. The string `s` is modified in place.
 
 ```c
 void ss_trim_left(ss s, const char *cutset);
@@ -367,8 +377,8 @@ void ss_trim_left(ss s, const char *cutset);
 ### ss_trim_right 
 Removes characters contained in the `cutset` string from the end of the ss string `s`.
 After the trimming operation, the string length is reduced while the allocation size
-is left untouched. If all characters are trimmed the result is a valid but empty ss string.
-The string is modified in place.
+is left untouched, but more free space will be available. If all characters are trimmed
+the result is a valid but empty string. The string `s` is modified in place.
 
 ```c
 void ss_trim_right(ss s, const char *cutset);
@@ -444,14 +454,28 @@ contained strings can't be used after being freed.
 void ss_list_free(ss *list, const int n);
 ```
 
+### ss_sprintf_va_cat 
+Formats the string and concatenates it to the `s` string. Formatting is performed using the usual
+C formatting directive. The function accepts a `va_list` to accommodate a variable number of arguments.
+The argument list should be started (`va_start`) before providing it to this function and must be ended
+(`va_end`) after the function call. The returned string is the modified `s` string. The `s` string is
+modified in place.
+
+Returns the formatted string in case of success or NULL in case of allocations errors. In case of
+failure the ss string `s` is still valid and must be freed after use.
+
+```c
+ss ss_sprintf_va_cat(ss s, const char *format, va_list arg_list);
+```
+
 ## String formatting
 
 ### ss_sprintf_va 
-Formats and returns a string using the usual C formatting directives. The function
-accepts a `va_list` to accommodate a variable number of arguments. In case of success
-the returned string must be freed after use with the dedicated [`ss_free`](#ss_free)
-function. The argument list should be started (`va_start`) before providing it to this
-function and must be ended (`va_end`) after the function call.
+Formats and returns a string using the usual C formatting directives. The function accepts
+a `va_list` to accommodate a variable number of arguments. In case of success the returned
+string must be freed after use with the dedicated `ss_free` function. The argument list
+should be started (`va_start`) before providing it to this function and must be ended
+(`va_end`) after the function call.
 
 Returns the formatted string in case of success or NULL in case of allocations errors.
 
@@ -459,9 +483,21 @@ Returns the formatted string in case of success or NULL in case of allocations e
 ss ss_sprintf_va(const char *format, va_list arg_list);
 ```
 
+### ss_sprintf_cat 
+Formats the string and concatenates it to the `s` string. Formatting is performed using the usual
+C formatting directive. The returned string is the modified `s` string. The `s` string is modified
+in place.
+
+Returns the formatted string in case of success or NULL in case of allocations errors. In case of
+failure the ss string `s` is still valid and must be freed after use.
+
+```c
+ss ss_sprintf_cat(ss s, const char *format, ...);
+```
+
 ### ss_sprintf 
-Formats and returns a string using the usual C formatting directive. The returned string must
-be freed after use as usual with the dedicated [`ss_free`](#ss_free) function.
+Formats and returns a new string using the usual C formatting directive. The returned string
+must be freed after use as usual with the dedicated `ss_free` function.
 
 Returns the formatted string in case of success or NULL in case of allocations errors.
 

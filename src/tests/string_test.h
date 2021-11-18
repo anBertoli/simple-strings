@@ -10,7 +10,7 @@ void test_ss_new_empty(void);
 void test_ss_clone(void);
 
 void test_ss_grow(void);
-void test_ss_cut(void);
+void test_ss_shrink(void);
 void test_ss_clear(void);
 
 void test_ss_set_free_space(void);

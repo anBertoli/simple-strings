@@ -24,7 +24,7 @@ ss ss_reserve_free_space(ss s, size_t avail);
 void ss_free(ss s);
 
 ss ss_grow(ss s, size_t len);
-void ss_cut(ss s, size_t len);
+void ss_shrink(ss s, size_t len);
 void ss_clear(ss s);
 
 size_t ss_index(ss s, const char *needle);
