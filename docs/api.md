@@ -416,6 +416,8 @@ contained strings can't be used after being freed.
 void ss_list_free(ss *list, const int n);
 ```
 
+## String formatting
+
 ### ss_sprintf_va_cat 
 Formats the string and concatenates it to the `s` string. Formatting is performed using the usual
 C formatting directive. The function accepts a `va_list` to accommodate a variable number of arguments.
@@ -429,8 +431,6 @@ failure the ss string `s` is still valid and must be freed after use.
 ```c
 ss ss_sprintf_va_cat(ss s, const char *format, va_list arg_list);
 ```
-
-## String formatting
 
 ### ss_sprintf_va 
 Formats and returns a string using the usual C formatting directives. The function accepts

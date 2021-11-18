@@ -77,7 +77,6 @@ ss *ss_split_raw(const char *s, const char *del, int *n) {
             *n = 0;
             return NULL;
         }
-
         ss_list = append_to_ss_list(ss_list, n, str);
         if (ss_list == NULL) {
             return NULL;
