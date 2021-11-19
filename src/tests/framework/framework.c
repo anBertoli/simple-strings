@@ -5,6 +5,14 @@
 static int num_tests = 0;
 static int num_failed = 0;
 
+void t_test_group(const char *desc) {
+    printf("\n  ======= %s =======\n", desc);
+}
+
+void t_test_subgroup(const char *desc) {
+    printf("\n\t--- %s --- \n", desc);
+}
+
 void t_test_cond(const char *desc, const bool cond, const char *filename, const int line) {
     num_tests++;
     printf("  %s\t%s\n", cond ? "✅" : "❌", desc);
@@ -45,14 +53,6 @@ void t_test_failure(const char *desc, const char *filename, const int line) {
     num_tests++;
     num_failed++;
     printf("  %s\t%s\n", "❌", desc);
-}
-
-void t_test_group(const char *desc) {
-    printf("\n  ======= %s =======\n", desc);
-}
-
-void t_test_subgroup(const char *desc) {
-    printf("\n\t--- %s --- \n", desc);
 }
 
 int t_test_report(void) {
