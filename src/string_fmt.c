@@ -15,7 +15,7 @@
  * failure the ss string `s` is still valid and must be freed after use.
  */
 ss_err ss_sprintf_va_cat(ss s, const char *format, va_list arg_list) {
-    size_t buf_len = sizeof(char) * strlen(format) * 2;
+    size_t buf_len = sizeof(char) * strlen(format) * 2 + 1;
     char *buf = ss_malloc(buf_len);
     if (buf == NULL) {
         return err_alloc;
@@ -33,7 +33,7 @@ ss_err ss_sprintf_va_cat(ss s, const char *format, va_list arg_list) {
         va_copy(arg_list_copy, arg_list);
 
         n_written = vsnprintf(buf, buf_len, format, arg_list_copy);
-        if (n_written < 0 ) {
+        if (n_written < 0) {
             // vsnprintf encoding error
             free(buf);
             return err_format;
