@@ -16,8 +16,8 @@ void ss_debug(ss s, int mem) {
     if (!mem) return;
 
     for (int i = 0; i < s->len + 1 + s->free; i++) {
-        if (i == s->len + 1 + s->free) {
-            printf("%p --> %c   (<-- ends here) \n",  s->buf+i,  s->buf[i]);
+        if (i == s->len + s->free) {
+            printf("%p --> %c   (<-- ends here, last alloc) \n",  s->buf+i,  s->buf[i]);
         } else {
             printf("%p --> %c\n",  s->buf+i,  s->buf[i]);
         }

@@ -4,6 +4,6 @@
 
 #include "../string.h"
 
-void ss_debug(ss *s, int mem);
+void ss_debug(ss s, int mem);
 
 #endif

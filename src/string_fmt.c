@@ -101,7 +101,9 @@ ss ss_sprintf_cat(ss s, const char *format, ...) {
  */
 ss ss_sprintf(const char *format, ...) {
     ss s = ss_new_empty();
-    if (s == NULL) return NULL;
+    if (s == NULL) {
+        return NULL;
+    }
 
     va_list arg_list;
     va_start(arg_list, format);

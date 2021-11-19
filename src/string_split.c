@@ -4,70 +4,53 @@
 #include "string_split.h"
 #include "alloc.h"
 
+static ss *concat_to_ss_list(ss *ss_list, int *ss_list_n, ss str);
+
 /*
  * Return all the ss substrings generated from splitting the C string `s` with the delimiter string `del`.
- * The function is useful when the caller doesn't want/need to create a string iterator and collect
- * substrings manually. All returned substrings are heap allocated and returned as an array (`*ss`) of
- * length `n`. The array of strings must be freed after use with the dedicated
- * [`ss_list_free`](#ss_list_free) function.
+ * All the returned substrings are heap allocated and returned as an array (`*ss`) of length `n`. The array
+ * of strings must be freed after use with the dedicated `ss_list_free` function. If the delimiter `del` is
+ * empty or it didn't match anywhere in the string `s`, the function returns all the original string (in the
+ * form of a ss string). Consecutive matches of the delimiter are treated as a single delimiter so no empty
+ * strings are returned in this case. Also, if the delimiter matches at the end of the string `s` no empty
+ * string is returned. The value pointed to by the `n` pointer will be the number of strings present in the
+ * returned array.
  *
  * Returns an array of strings of length `n` in case of success or NULL in case of allocation failures.
  */
 ss *ss_split_raw(const char *s, const char *del, int *n) {
+    const int empty_del = strcmp(del, "") == 0;
+    const char *curr_ptr = s;
     ss *ss_list = NULL;
     *n = 0;
 
-    // Guard against empty delimiters. Return all
-    // the original string and flag the iterator.
-    if (strcmp(del, "") == 0) {
-        size_t len = strlen(s);
-        ss str = ss_new_from_raw_len_free(s, len, len);
-        if (str == NULL) return NULL;
-
-        ss_list = ss_malloc(sizeof(ss));
-        if (ss_list == NULL) {
-            ss_free(str);
-            return NULL;
-        }
-        ss_list[0] = str;
-        *n = 1;
-
-        return ss_list;
-    }
-
-    // Main loop, split the original string and
-    // collect a substring at each iteration.
-    const char *curr_ptr = s;
-
     while (1) {
-        char *end = strstr(curr_ptr, del);
-        if (end == NULL) {
+        char *match_start = strstr(curr_ptr, del);
+        if (match_start == NULL || empty_del) {
+            // No more matches or empty delimiter.
+
+            // If the curr_ptr points to the end of the string
+            // len == 0. No strings returned and we are done.
             size_t len = strlen(curr_ptr);
             if (len == 0) {
-                // The ptr points to the end of the string, flag
-                // the iterator as exhausted and return END_ITER.
                 return ss_list;
             }
 
-            // Return the last substring and flag the iterator
-            // as exhausted (next call will return END_ITER).
             ss str = ss_new_from_raw_len_free(curr_ptr, len, len);
             if (str == NULL) {
                 ss_list_free(ss_list, *n);
                 *n = 0;
                 return NULL;
             }
-
-            ss_list = append_to_ss_list(ss_list, n, str);
+            ss_list = concat_to_ss_list(ss_list, n, str);
             return ss_list;
         }
 
-        size_t len = end - curr_ptr;
+        size_t len = match_start - curr_ptr;
         if (len == 0) {
-            // Consecutive delimiters, avoid returning empty strings.
-            // Update the pointer to point to the first char after
-            // the delimiter and loop again.
-            curr_ptr = end + strlen(del);
+            // Consecutive delimiters, avoid returning empty
+            // strings, update the pointer and loop again.
+            curr_ptr = match_start + strlen(del);
             continue;
         }
 
@@ -77,18 +60,21 @@ ss *ss_split_raw(const char *s, const char *del, int *n) {
             *n = 0;
             return NULL;
         }
-        ss_list = append_to_ss_list(ss_list, n, str);
+        ss_list = concat_to_ss_list(ss_list, n, str);
         if (ss_list == NULL) {
             return NULL;
         }
 
-        curr_ptr = end + strlen(del);
+        // Update the pointer to point to the first
+        // char after the matched delimiter.
+        curr_ptr = match_start + strlen(del);
     }
 }
 
-static ss *append_to_ss_list(ss *ss_list, int *ss_list_n, ss str) {
-    // The allocated string list memory is enlarged with steps of length 10.
-    // If th reallocation fails the list is freed and n set to zero.
+// Handle the string list memory. The list allocated memory is enlarged with steps
+// of length 10 and the count is updated, then the provided string is appended to
+// the list. If the reallocation fails the list is freed and n is set to zero.
+static ss *concat_to_ss_list(ss *ss_list, int *ss_list_n, ss str) {
     if (*ss_list_n % 10 == 0) {
         ss *new_str_list = ss_realloc(ss_list, sizeof(ss) * (*ss_list_n + 10));
         if (new_str_list == NULL) {
@@ -102,17 +88,18 @@ static ss *append_to_ss_list(ss *ss_list, int *ss_list_n, ss str) {
     // Append the new substring to the list.
     ss_list[*ss_list_n] = str;
     (*ss_list_n)++;
-
     return ss_list;
 }
 
-
 /*
  * Return all the ss substrings generated from splitting the ss string `s` with the delimiter string `del`.
- * The function is useful when the caller doesn't want/need to create a string iterator and collect
- * substrings manually. All returned substrings are heap allocated and returned as an array (`*ss`) of
- * length `n`. The array of strings must be freed after use with the dedicated
- * [`ss_list_free`](#ss_list_free) function.
+ * All the returned substrings are heap allocated and returned as an array (`*ss`) of length `n`. The array
+ * of strings must be freed after use with the dedicated `ss_list_free` function. If the delimiter `del` is
+ * empty or it didn't match anywhere in the string `s`, the function returns all the original string (in the
+ * form of a ss string). Consecutive matches of the delimiter are treated as a single delimiter so no empty
+ * strings are returned in this case. Also, if the delimiter matches at the end of the string `s` no empty
+ * string is returned. The value pointed to by the `n` pointer will be the number of strings present in the
+ * returned array. The `s` string is not modified.
  *
  * Returns an array of strings of length `n` in case of success or NULL in case of allocation failures.
  */
@@ -121,65 +108,91 @@ ss *ss_split_str(ss s, const char *del, int *n) {
 }
 
 /*
- * Join an array of C strings `s` of length `n` using the provided string separator `sep` between them.
- * The returned string must be freed after use with the [`ss_free`](#ss_free) function.
+ * Join an array of C strings `str` of length `n` using the provided string separator `sep` between them.
+ * The resulting string is concatenated at the end of the provided `s` string. The `s` string is modified
+ * in place and returned.
  *
- * Returns the joined string in case of success or NULL in case of allocation errors.
+ * Returns the modified string `s` if case of success or NULL if any reallocation fails. In case of
+ * failure the ss string `s` is still valid and must be freed after use.
  */
-ss ss_join_raw(char **s, int n, const char *sep) {
-    ss join = ss_new_empty();
-    ss join_alias = join;
-    if (join == NULL) {
-        return NULL;
-    }
-
+ss ss_join_raw_cat(ss s, const char **str, int n, const char *sep) {
     for (int i = 0; i < n; i++) {
-        join = ss_concat_raw(join, s[i]);
-        if (join == NULL) {
-            ss_free(join_alias);
+        s = ss_concat_raw(s, str[i]);
+        if (s == NULL) {
             return NULL;
         }
 
         if (i != n-1) {
-            join = ss_concat_raw(join, sep);
-            if (join == NULL) {
-                ss_free(join_alias);
+            s = ss_concat_raw(s, sep);
+            if (s == NULL) {
                 return NULL;
             }
         }
     }
-
-    return join;
+    return s;
 }
 
 /*
- * Join an array of ss strings `s` of length `n` using the provided string separator `sep` between them.
- * The returned string must be freed after use with the [`ss_free`](#ss_free) function.
+ * Join an array of C strings `str` of length `n` using the provided string separator `sep` between them.
+ * The resulting (joined) string is then returned as a new ss string. The returned string must be freed
+ * after use with the provided `ss_free` function.
  *
  * Returns the joined string in case of success or NULL in case of allocation errors.
  */
-ss ss_join_str(ss *s, int n, const char *sep) {
-    ss join = ss_new_empty();
-    ss join_alias = join;
-    if (join == NULL) return NULL;
+ss ss_join_raw(const char **str, int n, const char *sep) {
+    ss s1 = ss_new_empty();
+    if (s1 == NULL) return NULL;
 
+    ss s2 = ss_join_raw_cat(s1, str, n, sep);
+    if (s2 == NULL) {
+        ss_free(s1);
+        return NULL;
+    }
+    return s2;
+}
+
+/*
+ * Join an array of ss strings `str` of length `n` using the provided string separator `sep` between them.
+ * The resulting string is concatenated at the end of the provided `s` string. The `s` string is modified
+ * in place and returned.
+ *
+ * Returns the modified string `s` if case of success or NULL if any reallocation fails. In case of
+ * failure the ss string `s` is still valid and must be freed after use.
+ */
+ss ss_join_str_cat(ss s, ss *str, int n, const char *sep) {
     for (int i = 0; i < n; i++) {
-        join = ss_concat_str(join, s[i]);
-        if (join == NULL) {
-            ss_free(join_alias);
+        s = ss_concat_str(s, str[i]);
+        if (s == NULL) {
             return NULL;
         }
 
         if (i != n-1) {
-            join = ss_concat_raw(join, sep);
-            if (join == NULL) {
-                ss_free(join_alias);
+            s = ss_concat_raw(s, sep);
+            if (s == NULL) {
                 return NULL;
             }
         }
     }
+    return s;
+}
 
-    return join;
+/*
+ * Join an array of ss strings `str` of length `n` using the provided string separator `sep` between them.
+ * The resulting (joined) string is then returned as a new ss string. The returned string must be freed
+ * after use with the provided `ss_free` function.
+ *
+ * Returns the joined string in case of success or NULL in case of allocation errors.
+ */
+ss ss_join_str(ss *str, int n, const char *sep) {
+    ss s1 = ss_new_empty();
+    if (s1 == NULL) return NULL;
+
+    ss s2 = ss_join_str_cat(s1, str, n, sep);
+    if (s2 == NULL) {
+        ss_free(s1);
+        return NULL;
+    }
+    return s2;
 }
 
 /*
