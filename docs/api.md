@@ -140,7 +140,7 @@ Returns the modified string `s` if case of success or NULL if any reallocation f
 failure the ss string `s` is still valid and must be freed after use.
 
 ```c
-ss ss_set_free_space(ss s, size_t avail);
+ss_err ss_set_free_space(ss s, size_t avail);
 ```
 
 ### ss_reserve_free_space 
@@ -153,7 +153,7 @@ Returns the modified string `s` if case of success or NULL if any reallocation f
 the ss string `s` is still valid and must be freed after use.
 
 ```c
-ss ss_reserve_free_space(ss s, size_t avail);
+ss_err ss_reserve_free_space(ss s, size_t avail);
 ```
 
 ### ss_free 
@@ -176,7 +176,7 @@ Returns the modified ss string `s` if case of success or NULL if any reallocatio
 case of failure the ss string `s` is still valid and must be freed after use.
 
 ```c
-ss ss_grow(ss s, size_t len);
+ss_err ss_grow(ss s, size_t len);
 ```
 
 ### ss_shrink 
@@ -232,7 +232,7 @@ Returns the string `s1` concatenated with the C string `s2` if case of success o
 reallocations fail. In case of failure the string `s1` is still valid and must be freed after use.
 
 ```c
-ss ss_concat_raw_len(ss s1, const char *s2, size_t s2_len);
+ss_err ss_concat_raw_len(ss s1, const char *s2, size_t s2_len);
 ```
 
 ### ss_concat_raw 
@@ -246,7 +246,7 @@ Returns the string `s1` concatenated with the C string `s2` if case of success o
 reallocations fail. In case of failure the string `s1` is still valid and must be freed after use.
 
 ```c
-ss ss_concat_raw(ss s1, const char *s2);
+ss_err ss_concat_raw(ss s1, const char *s2);
 ```
 
 ### ss_concat_str 
@@ -260,7 +260,7 @@ Returns the string `s1` concatenated with the C string `s2` if case of success o
 reallocations fail. In case of failure both strings are still valid and must be freed after use.
 
 ```c
-ss ss_concat_str(ss s1, ss s2);
+ss_err ss_concat_str(ss s1, ss s2);
 ```
 
 ### ss_prepend_raw_len 
@@ -276,7 +276,7 @@ Returns the string `s2` with the C string `s1` prepended in case of success or N
 reallocations fail. In case of failure the string `s2` is still valid and must be freed after use.
 
 ```c
-ss ss_prepend_raw_len(const char *s1, ss s2, size_t s1_len);
+ss_err ss_prepend_raw_len(const char *s1, ss s2, size_t s1_len);
 ```
 
 ### ss_prepend_raw 
@@ -289,7 +289,7 @@ Returns the string `s2` prepended with the C string `s1` if case of success or N
 reallocations fail. In case of failure the string `s2` is still valid and must be freed after use.
 
 ```c
-ss ss_prepend_raw(const char *s1, ss s2);
+ss_err ss_prepend_raw(const char *s1, ss s2);
 ```
 
 ### ss_prepend_str 
@@ -303,7 +303,7 @@ Returns the string `s2` prepended with the C string `s1` if case of success or N
 reallocations fail. In case of failure both strings are still valid and must be freed after use.
 
 ```c
-ss ss_prepend_str(ss s1, ss s2);
+ss_err ss_prepend_str(ss s1, ss s2);
 ```
 
 ### ss_slice 
@@ -364,7 +364,7 @@ Modifies the string in place.
 void ss_to_upper(ss s);
 ```
 
-## String splitting, joining and iteration
+## String splitting and joining
 
 ### ss_split_raw 
 Return all the ss substrings generated from splitting the C string `s` with the delimiter string `del`.
@@ -407,7 +407,7 @@ Returns the modified string `s` if case of success or NULL if any reallocation f
 failure the ss string `s` is still valid and must be freed after use.
 
 ```c
-ss ss_join_raw_cat(ss s, const char **str, int n, const char *sep);
+ss_err ss_join_raw_cat(ss s, const char **str, int n, const char *sep);
 ```
 
 ### ss_join_raw 
@@ -430,7 +430,7 @@ Returns the modified string `s` if case of success or NULL if any reallocation f
 failure the ss string `s` is still valid and must be freed after use.
 
 ```c
-ss ss_join_str_cat(ss s, ss *str, int n, const char *sep);
+ss_err ss_join_str_cat(ss s, ss *str, int n, const char *sep);
 ```
 
 ### ss_join_str 
@@ -465,7 +465,7 @@ Returns the formatted string in case of success or NULL in case of allocations e
 failure the ss string `s` is still valid and must be freed after use.
 
 ```c
-ss ss_sprintf_va_cat(ss s, const char *format, va_list arg_list);
+ss_err ss_sprintf_va_cat(ss s, const char *format, va_list arg_list);
 ```
 
 ### ss_sprintf_va 
@@ -490,7 +490,7 @@ Returns the formatted string in case of success or NULL in case of allocations e
 failure the ss string `s` is still valid and must be freed after use.
 
 ```c
-ss ss_sprintf_cat(ss s, const char *format, ...);
+ss_err ss_sprintf_cat(ss s, const char *format, ...);
 ```
 
 ### ss_sprintf 

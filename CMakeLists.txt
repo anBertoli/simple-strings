@@ -15,9 +15,9 @@ configure_file("src/options/options.h.in" "src/options/options.h")
 add_library(ss STATIC
     "src/alloc.c"
     "src/string.c"
+    "src/string_err.c"
     "src/string_fmt.c"
     "src/string_split.c"
-    "src/string_err.c"
 )
 
 # Include the /src/options in the searched include directories
@@ -51,14 +51,15 @@ install(FILES tmp/ss.h DESTINATION include)
 add_executable(ss_tests
     "src/alloc.c"
     "src/string.c"
+    "src/string_err.c"
     "src/string_fmt.c"
     "src/string_split.c"
-    "src/string_err.c"
     "src/private/debug.c"
 
     "src/tests/main.c"
     "src/tests/framework/framework.c"
     "src/tests/string_test.c"
+    "src/tests/string_err_test.c"
     "src/tests/string_fmt_test.c"
     "src/tests/string_split_test.c"
 )

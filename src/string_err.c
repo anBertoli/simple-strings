@@ -3,7 +3,7 @@
 static const char err_str_nil[] = "";
 static const char err_str_alloc[] = "allocation error";
 static const char err_str_fmt[] = "formatting error";
-static const char err_str_unknown[] = "unknown err code";
+static const char err_str_unknown[] = "unknown error";
 
 /*
  * Return a pointer to a static read only string containing a textual

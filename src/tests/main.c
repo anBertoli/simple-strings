@@ -1,4 +1,5 @@
 #include "string_test.h"
+#include "string_err_test.h"
 #include "string_fmt_test.h"
 #include "string_split_test.h"
 #include "framework/framework.h"
@@ -31,6 +32,9 @@ int main(void) {
     test_ss_trim_left();
     test_ss_to_lower();
     test_ss_to_upper();
+
+    // string_err.c
+    test_ss_error();
 
     // string_fmt.c
     test_ss_sprintf_va_cat();
