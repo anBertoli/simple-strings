@@ -72,7 +72,7 @@ target_include_directories(ss_tests PUBLIC
 ################################################
 add_executable(docs
     "src/docs/main.c"
-    "src/docs/utils.c"
+    "src/docs/writer.c"
     "src/docs/parser.c"
     "src/docs/docs.c"
 

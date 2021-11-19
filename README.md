@@ -66,7 +66,9 @@ after use.
 [`ss_to_upper`](#ss_to_upper)  
 [`ss_split_raw`](#ss_split_raw)  
 [`ss_split_str`](#ss_split_str)  
+[`ss_join_raw_cat`](#ss_join_raw_cat)  
 [`ss_join_raw`](#ss_join_raw)  
+[`ss_join_str_cat`](#ss_join_str_cat)  
 [`ss_join_str`](#ss_join_str)  
 [`ss_list_free`](#ss_list_free)  
 [`ss_sprintf_va_cat`](#ss_sprintf_va_cat)  
@@ -400,12 +402,17 @@ Modifies the string in place.
 void ss_to_upper(ss s);
 ```
 
+## String splitting, joining and iteration
+
 ### ss_split_raw 
 Return all the ss substrings generated from splitting the C string `s` with the delimiter string `del`.
-The function is useful when the caller doesn't want/need to create a string iterator and collect
-substrings manually. All returned substrings are heap allocated and returned as an array (`*ss`) of
-length `n`. The array of strings must be freed after use with the dedicated
-[`ss_list_free`](#ss_list_free) function.
+All the returned substrings are heap allocated and returned as an array (`*ss`) of length `n`. The array
+of strings must be freed after use with the dedicated `ss_list_free` function. If the delimiter `del` is
+empty or it didn't match anywhere in the string `s`, the function returns all the original string (in the
+form of a ss string). Consecutive matches of the delimiter are treated as a single delimiter so no empty
+strings are returned in this case. Also, if the delimiter matches at the end of the string `s` no empty
+string is returned. The value pointed to by the `n` pointer will be the number of strings present in the
+returned array.
 
 Returns an array of strings of length `n` in case of success or NULL in case of allocation failures.
 
@@ -415,10 +422,13 @@ ss *ss_split_raw(const char *s, const char *del, int *n);
 
 ### ss_split_str 
 Return all the ss substrings generated from splitting the ss string `s` with the delimiter string `del`.
-The function is useful when the caller doesn't want/need to create a string iterator and collect
-substrings manually. All returned substrings are heap allocated and returned as an array (`*ss`) of
-length `n`. The array of strings must be freed after use with the dedicated
-[`ss_list_free`](#ss_list_free) function.
+All the returned substrings are heap allocated and returned as an array (`*ss`) of length `n`. The array
+of strings must be freed after use with the dedicated `ss_list_free` function. If the delimiter `del` is
+empty or it didn't match anywhere in the string `s`, the function returns all the original string (in the
+form of a ss string). Consecutive matches of the delimiter are treated as a single delimiter so no empty
+strings are returned in this case. Also, if the delimiter matches at the end of the string `s` no empty
+string is returned. The value pointed to by the `n` pointer will be the number of strings present in the
+returned array. The `s` string is not modified.
 
 Returns an array of strings of length `n` in case of success or NULL in case of allocation failures.
 
@@ -426,24 +436,50 @@ Returns an array of strings of length `n` in case of success or NULL in case of 
 ss *ss_split_str(ss s, const char *del, int *n);
 ```
 
+### ss_join_raw_cat 
+Join an array of C strings `str` of length `n` using the provided string separator `sep` between them.
+The resulting string is concatenated at the end of the provided `s` string. The `s` string is modified
+in place and returned.
+
+Returns the modified string `s` if case of success or NULL if any reallocation fails. In case of
+failure the ss string `s` is still valid and must be freed after use.
+
+```c
+ss ss_join_raw_cat(ss s, const char **str, int n, const char *sep);
+```
+
 ### ss_join_raw 
-Join an array of C strings `s` of length `n` using the provided string separator `sep` between them.
-The returned string must be freed after use with the [`ss_free`](#ss_free) function.
+Join an array of C strings `str` of length `n` using the provided string separator `sep` between them.
+The resulting (joined) string is then returned as a new ss string. The returned string must be freed
+after use with the provided `ss_free` function.
 
 Returns the joined string in case of success or NULL in case of allocation errors.
 
 ```c
-ss ss_join_raw(char **s, int n, const char *sep);
+ss ss_join_raw(const char **str, int n, const char *sep);
+```
+
+### ss_join_str_cat 
+Join an array of ss strings `str` of length `n` using the provided string separator `sep` between them.
+The resulting string is concatenated at the end of the provided `s` string. The `s` string is modified
+in place and returned.
+
+Returns the modified string `s` if case of success or NULL if any reallocation fails. In case of
+failure the ss string `s` is still valid and must be freed after use.
+
+```c
+ss ss_join_str_cat(ss s, ss *str, int n, const char *sep);
 ```
 
 ### ss_join_str 
-Join an array of ss strings `s` of length `n` using the provided string separator `sep` between them.
-The returned string must be freed after use with the [`ss_free`](#ss_free) function.
+Join an array of ss strings `str` of length `n` using the provided string separator `sep` between them.
+The resulting (joined) string is then returned as a new ss string. The returned string must be freed
+after use with the provided `ss_free` function.
 
 Returns the joined string in case of success or NULL in case of allocation errors.
 
 ```c
-ss ss_join_str(ss *s, int n, const char *sep);
+ss ss_join_str(ss *str, int n, const char *sep);
 ```
 
 ### ss_list_free 

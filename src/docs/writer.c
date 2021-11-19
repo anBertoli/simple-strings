@@ -85,7 +85,7 @@ ss gen_funcs_documentation(func_doc *funcs, int funcs_n) {
         if (strcmp(doc.func_name->buf, "ss_grow") == 0) {
             ss_concat_raw(api_docs, "## String manipulation\n\n");
         }
-        if (strcmp(doc.func_name->buf, "ss_split_raw_to_iter") == 0) {
+        if (strcmp(doc.func_name->buf, "ss_split_raw") == 0) {
             ss_concat_raw(api_docs, "## String splitting, joining and iteration\n\n");
         }
         if (strcmp(doc.func_name->buf, "ss_sprintf_va_cat") == 0) {
