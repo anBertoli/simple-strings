@@ -115,21 +115,17 @@ ss *ss_split_str(ss s, const char *del, int *n) {
  * Returns the modified string `s` if case of success or NULL if any reallocation fails. In case of
  * failure the ss string `s` is still valid and must be freed after use.
  */
-ss ss_join_raw_cat(ss s, const char **str, int n, const char *sep) {
+ss_err ss_join_raw_cat(ss s, const char **str, int n, const char *sep) {
     for (int i = 0; i < n; i++) {
-        s = ss_concat_raw(s, str[i]);
-        if (s == NULL) {
-            return NULL;
-        }
+        ss_err err = ss_concat_raw(s, str[i]);
+        if (err) return err;
 
         if (i != n-1) {
-            s = ss_concat_raw(s, sep);
-            if (s == NULL) {
-                return NULL;
-            }
+            err = ss_concat_raw(s, sep);
+            if (err) return err;
         }
     }
-    return s;
+    return err_none;
 }
 
 /*
@@ -143,12 +139,12 @@ ss ss_join_raw(const char **str, int n, const char *sep) {
     ss s1 = ss_new_empty();
     if (s1 == NULL) return NULL;
 
-    ss s2 = ss_join_raw_cat(s1, str, n, sep);
-    if (s2 == NULL) {
+    ss_err err = ss_join_raw_cat(s1, str, n, sep);
+    if (err) {
         ss_free(s1);
         return NULL;
     }
-    return s2;
+    return s1;
 }
 
 /*
@@ -159,21 +155,17 @@ ss ss_join_raw(const char **str, int n, const char *sep) {
  * Returns the modified string `s` if case of success or NULL if any reallocation fails. In case of
  * failure the ss string `s` is still valid and must be freed after use.
  */
-ss ss_join_str_cat(ss s, ss *str, int n, const char *sep) {
+ss_err ss_join_str_cat(ss s, ss *str, int n, const char *sep) {
     for (int i = 0; i < n; i++) {
-        s = ss_concat_str(s, str[i]);
-        if (s == NULL) {
-            return NULL;
-        }
+        ss_err err = ss_concat_str(s, str[i]);
+        if (err) return err;
 
         if (i != n-1) {
-            s = ss_concat_raw(s, sep);
-            if (s == NULL) {
-                return NULL;
-            }
+            err = ss_concat_raw(s, sep);
+            if (err) return err;
         }
     }
-    return s;
+    return err_none;
 }
 
 /*
@@ -187,12 +179,12 @@ ss ss_join_str(ss *str, int n, const char *sep) {
     ss s1 = ss_new_empty();
     if (s1 == NULL) return NULL;
 
-    ss s2 = ss_join_str_cat(s1, str, n, sep);
-    if (s2 == NULL) {
+    ss_err err = ss_join_str_cat(s1, str, n, sep);
+    if (err) {
         ss_free(s1);
         return NULL;
     }
-    return s2;
+    return s1;
 }
 
 /*

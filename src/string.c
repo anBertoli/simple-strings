@@ -31,12 +31,12 @@ ss ss_new_from_raw_len_free(const char *init, size_t len, size_t avail) {
     memcpy(buf, init, len);
     buf[len] = END_STRING;
 
-    ss s = ss_malloc(sizeof(struct s));
+    ss s = ss_malloc(sizeof(struct ss));
     if (s == NULL) {
         free(buf);
         return NULL;
     }
-    *s = (struct s){
+    *s = (struct ss){
         .len = len,
         .free = avail,
         .buf = buf
@@ -129,17 +129,17 @@ ss ss_clone(ss s) {
  * Returns the modified string `s` if case of success or NULL if any reallocation fails. In case of
  * failure the ss string `s` is still valid and must be freed after use.
  */
-ss ss_set_free_space(ss s, size_t avail) {
+ss_err ss_set_free_space(ss s, size_t avail) {
     size_t new_space = s->len + 1 + avail;
 
     char *new_buf = ss_realloc(s->buf, sizeof(char) * new_space);
     if (new_buf == NULL) {
-        return NULL;
+        return err_alloc;
     }
 
     s->buf = new_buf;
     s->free = avail;
-    return s;
+    return err_none;
 }
 
 /*
@@ -151,8 +151,8 @@ ss ss_set_free_space(ss s, size_t avail) {
  * Returns the modified string `s` if case of success or NULL if any reallocation fails. In case of failure
  * the ss string `s` is still valid and must be freed after use.
  */
-ss ss_reserve_free_space(ss s, size_t avail) {
-    if (s->free >= avail) return s;
+ss_err ss_reserve_free_space(ss s, size_t avail) {
+    if (s->free >= avail) return err_none;
     return ss_set_free_space(s, avail);
 }
 
@@ -178,19 +178,19 @@ void ss_free(ss s) {
  * Returns the modified ss string `s` if case of success or NULL if any reallocation fails. In
  * case of failure the ss string `s` is still valid and must be freed after use.
  */
-ss ss_grow(ss s, size_t len) {
-    if (len <= s->len) return s;
+ss_err ss_grow(ss s, size_t len) {
+    if (len <= s->len) return err_none;
 
-    s = ss_reserve_free_space(s, len - s->len);
-    if (s == NULL) {
-        return NULL;
+    ss_err err = ss_reserve_free_space(s, len - s->len);
+    if (err) {
+        return err;
     }
 
     memset(s->buf + s->len, 0, len - s->len);
     s->free -= len - s->len;
     s->buf[len] = END_STRING;
     s->len = len;
-    return s;
+    return err_none;
 }
 
 /*
@@ -269,7 +269,7 @@ size_t ss_index_last(ss haystack, const char *needle) {
  * Returns the string `s1` concatenated with the C string `s2` if case of success or NULL if eventual
  * reallocations fail. In case of failure the string `s1` is still valid and must be freed after use.
  */
-ss ss_concat_raw_len(ss s1, const char *s2, size_t s2_len) {
+ss_err ss_concat_raw_len(ss s1, const char *s2, size_t s2_len) {
     size_t new_len = s1->len + s2_len;
 
     if (s2_len > s1->free) {
@@ -279,7 +279,7 @@ ss ss_concat_raw_len(ss s1, const char *s2, size_t s2_len) {
         size_t new_alloc = new_len * 2 + 1;
         char *new_buf = ss_realloc(s1->buf, sizeof(char) * new_alloc);
         if (new_buf == NULL) {
-            return NULL;
+            return err_alloc;
         }
 
         s1->free = new_alloc - 1 - s1->len;
@@ -293,7 +293,7 @@ ss ss_concat_raw_len(ss s1, const char *s2, size_t s2_len) {
     s1->len = new_len;
     s1->free -= s2_len;
 
-    return s1;
+    return err_none;
 }
 
 /*
@@ -306,8 +306,8 @@ ss ss_concat_raw_len(ss s1, const char *s2, size_t s2_len) {
  * Returns the string `s1` concatenated with the C string `s2` if case of success or NULL if eventual
  * reallocations fail. In case of failure the string `s1` is still valid and must be freed after use.
  */
-ss ss_concat_raw(ss s1, const char *s2) {
-    if (s2 == NULL) return s1;
+ss_err ss_concat_raw(ss s1, const char *s2) {
+    if (s2 == NULL) return err_none;
     return ss_concat_raw_len(s1, s2, strlen(s2));
 }
 
@@ -321,7 +321,7 @@ ss ss_concat_raw(ss s1, const char *s2) {
  * Returns the string `s1` concatenated with the C string `s2` if case of success or NULL if eventual
  * reallocations fail. In case of failure both strings are still valid and must be freed after use.
  */
-ss ss_concat_str(ss s1, ss s2) {
+ss_err ss_concat_str(ss s1, ss s2) {
     return ss_concat_raw_len(s1, s2->buf, s2->len);
 }
 
@@ -337,7 +337,7 @@ ss ss_concat_str(ss s1, ss s2) {
  * Returns the string `s2` with the C string `s1` prepended in case of success or NULL if eventual
  * reallocations fail. In case of failure the string `s2` is still valid and must be freed after use.
  */
-ss ss_prepend_raw_len(const char *s1, ss s2, size_t s1_len) {
+ss_err ss_prepend_raw_len(const char *s1, ss s2, size_t s1_len) {
     size_t new_len = s2->len + s1_len;
 
     if (s1_len > s2->free) {
@@ -347,7 +347,7 @@ ss ss_prepend_raw_len(const char *s1, ss s2, size_t s1_len) {
         size_t new_alloc = new_len * 2 + 1;
         char *new_buf = ss_realloc(s2->buf, sizeof(char) * new_alloc);
         if (new_buf == NULL) {
-            return NULL;
+            return err_alloc;
         }
 
         s2->free = new_alloc - 1 - s2->len;
@@ -362,7 +362,7 @@ ss ss_prepend_raw_len(const char *s1, ss s2, size_t s1_len) {
     s2->len = new_len;
     s2->free -= s1_len;
 
-    return s2;
+    return err_none;
 }
 
 /*
@@ -374,8 +374,8 @@ ss ss_prepend_raw_len(const char *s1, ss s2, size_t s1_len) {
  * Returns the string `s2` prepended with the C string `s1` if case of success or NULL if eventual
  * reallocations fail. In case of failure the string `s2` is still valid and must be freed after use.
  */
-ss ss_prepend_raw(const char *s1, ss s2) {
-    if (s1 == NULL) return s2;
+ss_err ss_prepend_raw(const char *s1, ss s2) {
+    if (s1 == NULL) return err_none;
     return ss_prepend_raw_len(s1, s2, strlen(s1));
 }
 
@@ -389,7 +389,7 @@ ss ss_prepend_raw(const char *s1, ss s2) {
  * Returns the string `s2` prepended with the C string `s1` if case of success or NULL if eventual
  * reallocations fail. In case of failure both strings are still valid and must be freed after use.
  */
-ss ss_prepend_str(ss s1, ss s2) {
+ss_err ss_prepend_str(ss s1, ss s2) {
     return ss_prepend_raw_len(s1->buf, s2, s1->len);
 }
 

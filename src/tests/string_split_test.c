@@ -105,48 +105,52 @@ void test_ss_join_raw_cat(void) {
     test_group("ss_join_raw_cat");
 
     test_subgroup("empty separator");
-    ss s = ss_join_raw_cat(ss_new_empty(), (const char **)(char *[]){"how", "are", "you?" }, 3, "");
+    ss s = ss_new_empty();
+    ss_join_raw_cat(s, (const char **)(char *[]){"how", "are", "you?" }, 3, "");
     test_strings("should have joined strings", "howareyou?", s->buf);
     test_equal("should have correct len", 10, s->len);
     test_equal("should have correct free", 10, s->free);
     ss_free(s);
 
     test_subgroup("empty strings");
-    s = ss_join_raw_cat(ss_new_empty(), (const char **)(char *[]){"", "", ""}, 3, "___");
+    s = ss_new_empty();
+    ss_join_raw_cat(s, (const char **)(char *[]){"", "", ""}, 3, "___");
     test_strings("should have joined strings", "______", s->buf);
     test_equal("should have correct len", 6, s->len);
     test_equal("should have correct free", 0, s->free);
     ss_free(s);
 
     test_subgroup("no strings");
-    s = ss_join_raw_cat(ss_new_empty(), (const char **)(char *[]){}, 0, "_");
+    s = ss_new_empty();
+    ss_join_raw_cat(s, (const char **)(char *[]){}, 0, "_");
     test_strings("should return empty string", "", s->buf);
     test_equal("should have correct len", 0, s->len);
     test_equal("should have correct free", 0, s->free);
     ss_free(s);
 
     test_subgroup("empty string and separator");
-    s = ss_join_raw_cat(ss_new_empty(), (const char **)(char *[]){"", "", ""}, 3, "");
+    s = ss_new_empty();
+    ss_join_raw_cat(s, (const char **)(char *[]){"", "", ""}, 3, "");
     test_strings("should have joined strings", "", s->buf);
     test_equal("should have correct len", 0, s->len);
     test_equal("should have correct free", 0, s->free);
     ss_free(s);
 
     test_subgroup("simple join");
-    s = ss_join_raw_cat(ss_new_empty(), (const char **)(char *[]){"how", "are", "you?" }, 3, "___");
+    s = ss_new_empty();
+    ss_join_raw_cat(s, (const char **)(char *[]){"how", "are", "you?" }, 3, "___");
     test_strings("should have joined strings", "how___are___you?", s->buf);
     test_equal("should have correct len", 16, s->len);
     test_equal("should have correct free", 2, s->free);
     ss_free(s);
 
     test_subgroup("simple join with concat");
-    ss sc = ss_new_from_raw("prefix_");
-    s = ss_join_raw_cat(sc, (const char **)(char *[]){"how", "are", "you?" }, 3, "___");
+    s = ss_new_from_raw("prefix_");
+    ss_join_raw_cat(s, (const char **)(char *[]){"how", "are", "you?" }, 3, "___");
     test_strings("should have joined strings", "prefix_how___are___you?", s->buf);
     test_equal("should have correct len", 23, s->len);
     test_equal("should have correct free", 9, s->free);
     ss_free(s);
-    ss_free(sc);
 }
 
 void test_ss_join_raw(void) {
@@ -195,7 +199,8 @@ void test_ss_join_str_cat(void) {
     ss s1 = ss_new_from_raw("how");
     ss s2 = ss_new_from_raw("are");
     ss s3 = ss_new_from_raw("you?");
-    ss s = ss_join_str_cat(ss_new_empty(), (ss []){s1, s2, s3}, 3, "");
+    ss s = ss_new_empty();
+    ss_join_str_cat(s, (ss []){s1, s2, s3}, 3, "");
     test_strings("should have joined strings", "howareyou?", s->buf);
     test_equal("should have correct len", 10, s->len);
     test_equal("should have correct free", 10, s->free);
@@ -208,21 +213,24 @@ void test_ss_join_str_cat(void) {
     s1 = ss_new_from_raw("");
     s2 = ss_new_from_raw("");
     s3 = ss_new_from_raw("");
-    s = ss_join_str_cat(ss_new_empty(), (ss []){s1, s2, s3}, 3, "___");
+    s = ss_new_empty();
+    ss_join_str_cat(s, (ss []){s1, s2, s3}, 3, "___");
     test_strings("should have joined strings", "______", s->buf);
     test_equal("should have correct len", 6, s->len);
     test_equal("should have correct free", 0, s->free);
     ss_free(s);
 
     test_subgroup("no strings");
-    s = ss_join_str_cat(ss_new_empty(), (ss []){}, 0, "_");
+    s = ss_new_empty();
+    ss_join_str_cat(s, (ss []){}, 0, "_");
     test_strings("should return empty string", "", s->buf);
     test_equal("should have correct len", 0, s->len);
     test_equal("should have correct free", 0, s->free);
     ss_free(s);
 
     test_subgroup("empty string and separator");
-    s = ss_join_str_cat(ss_new_empty(), (ss []){s1, s2, s3 }, 3, "");
+    s = ss_new_empty();
+    ss_join_str_cat(s, (ss []){s1, s2, s3 }, 3, "");
     test_strings("should have joined strings", "", s->buf);
     test_equal("should have correct len", 0, s->len);
     test_equal("should have correct free", 0, s->free);
@@ -235,15 +243,16 @@ void test_ss_join_str_cat(void) {
     s1 = ss_new_from_raw("how");
     s2 = ss_new_from_raw("are");
     s3 = ss_new_from_raw("you?");
-    s = ss_join_str_cat(ss_new_empty(), (ss []){s1, s2, s3 }, 3, "___");
+    s = ss_new_empty();
+    ss_join_str_cat(s, (ss []){s1, s2, s3 }, 3, "___");
     test_strings("should have joined the strings", "how___are___you?", s->buf);
     test_equal("should have correct len", 16, s->len);
     test_equal("should have correct free", 2, s->free);
     ss_free(s);
 
     test_subgroup("simple join with concat");
-    ss sc = ss_new_from_raw("prefix_");
-    s = ss_join_str_cat(sc, (ss []){s1, s2, s3 }, 3, "___");
+    s = ss_new_from_raw("prefix_");
+    ss_join_str_cat(s, (ss []){s1, s2, s3 }, 3, "___");
     test_strings("should have joined the strings", "prefix_how___are___you?", s->buf);
     test_equal("should have correct len", 23, s->len);
     test_equal("should have correct free", 9, s->free);

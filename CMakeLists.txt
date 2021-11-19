@@ -17,6 +17,7 @@ add_library(ss STATIC
     "src/string.c"
     "src/string_fmt.c"
     "src/string_split.c"
+    "src/string_err.c"
 )
 
 # Include the /src/options in the searched include directories
@@ -35,6 +36,8 @@ file(READ src/string_fmt.h CONTENTS)
 file(APPEND tmp/ss.h "${CONTENTS}")
 file(READ src/string_split.h CONTENTS)
 file(APPEND tmp/ss.h "${CONTENTS}")
+file(READ src/string_err.h CONTENTS)
+file(APPEND tmp/ss.h "${CONTENTS}")
 
 # Install the library (usually /usr/local/lib/libss.a)
 # and the header file (usually /usr/local/include/ss.h).
@@ -50,6 +53,7 @@ add_executable(ss_tests
     "src/string.c"
     "src/string_fmt.c"
     "src/string_split.c"
+    "src/string_err.c"
     "src/private/debug.c"
 
     "src/tests/main.c"

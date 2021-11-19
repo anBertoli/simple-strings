@@ -14,11 +14,11 @@
  * Returns the formatted string in case of success or NULL in case of allocations errors. In case of
  * failure the ss string `s` is still valid and must be freed after use.
  */
-ss ss_sprintf_va_cat(ss s, const char *format, va_list arg_list) {
+ss_err ss_sprintf_va_cat(ss s, const char *format, va_list arg_list) {
     size_t buf_len = sizeof(char) * strlen(format) * 2;
     char *buf = ss_malloc(buf_len);
     if (buf == NULL) {
-        return NULL;
+        return err_alloc;
     }
 
     // The buffer to write the formatted string initially is two times
@@ -34,9 +34,9 @@ ss ss_sprintf_va_cat(ss s, const char *format, va_list arg_list) {
 
         n_written = vsnprintf(buf, buf_len, format, arg_list_copy);
         if (n_written < 0 ) {
-            printf("ss_lib: vsnprintf() encoding error");
+            // vsnprintf encoding error
             free(buf);
-            return NULL;
+            return err_format;
         }
 
         va_end(arg_list_copy);
@@ -50,16 +50,16 @@ ss ss_sprintf_va_cat(ss s, const char *format, va_list arg_list) {
         char *new_buf = ss_realloc(buf, buf_len);
         if (new_buf == NULL) {
             free(buf);
-            return NULL;
+            return err_alloc;
         }
         buf = new_buf;
     }
 
     // Finally, concat the ss string with the
     // formatted C string and return it.
-    ss _s = ss_concat_raw_len(s, buf, n_written);
+    ss_err err = ss_concat_raw_len(s, buf, n_written);
     free(buf);
-    return _s;
+    return err;
 }
 
 /*
@@ -74,7 +74,12 @@ ss ss_sprintf_va_cat(ss s, const char *format, va_list arg_list) {
 ss ss_sprintf_va(const char *format, va_list arg_list) {
     ss s = ss_new_empty();
     if (s == NULL) return NULL;
-    return ss_sprintf_va_cat(s, format, arg_list);
+    ss_err err = ss_sprintf_va_cat(s, format, arg_list);
+    if (err) {
+        ss_free(s);
+        return NULL;
+    }
+    return s;
 }
 
 /*
@@ -85,12 +90,12 @@ ss ss_sprintf_va(const char *format, va_list arg_list) {
  * Returns the formatted string in case of success or NULL in case of allocations errors. In case of
  * failure the ss string `s` is still valid and must be freed after use.
  */
-ss ss_sprintf_cat(ss s, const char *format, ...) {
+ss_err ss_sprintf_cat(ss s, const char *format, ...) {
     va_list arg_list;
     va_start(arg_list, format);
-    ss s1 = ss_sprintf_va_cat(s, format, arg_list);
+    ss_err err = ss_sprintf_va_cat(s, format, arg_list);
     va_end(arg_list);
-    return s1;
+    return err;
 }
 
 /*
@@ -101,13 +106,15 @@ ss ss_sprintf_cat(ss s, const char *format, ...) {
  */
 ss ss_sprintf(const char *format, ...) {
     ss s = ss_new_empty();
-    if (s == NULL) {
-        return NULL;
-    }
+    if (s == NULL) return NULL;
 
     va_list arg_list;
     va_start(arg_list, format);
-    ss s1 = ss_sprintf_va_cat(s, format, arg_list);
+    ss_err err = ss_sprintf_va_cat(s, format, arg_list);
     va_end(arg_list);
-    return s1;
+    if (err) {
+        ss_free(s);
+        return NULL;
+    }
+    return s;
 }

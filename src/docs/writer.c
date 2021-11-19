@@ -36,8 +36,8 @@ ss read_file_to_string(char *path) {
 
     size_t i = 0;
     while (1) {
-        s = ss_grow(s, i + 1000);
-        if (s == NULL) return NULL;
+        ss_err err = ss_grow(s, i + 1000);
+        if (err) return NULL;
         size_t n_read = fread(&s->buf[i], 1, 1000 * sizeof(char), file_pointer);
         if (n_read == 0) {
             ss_shrink(s, i);
@@ -86,7 +86,7 @@ ss gen_funcs_documentation(func_doc *funcs, int funcs_n) {
             ss_concat_raw(api_docs, "## String manipulation\n\n");
         }
         if (strcmp(doc.func_name->buf, "ss_split_raw") == 0) {
-            ss_concat_raw(api_docs, "## String splitting, joining and iteration\n\n");
+            ss_concat_raw(api_docs, "## String splitting and joining\n\n");
         }
         if (strcmp(doc.func_name->buf, "ss_sprintf_va_cat") == 0) {
             ss_concat_raw(api_docs, "## String formatting\n\n");

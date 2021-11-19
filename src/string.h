@@ -3,9 +3,11 @@
 #define SS_STRING_H
 
 #include <stdio.h>
+#include "string_err.h"
+
 #define END_STRING (char)'\0'
 
-typedef struct s {
+typedef struct ss {
     size_t len;
     size_t free;
     char *buf;
@@ -18,24 +20,23 @@ ss ss_new_empty_with_free(size_t avail);
 ss ss_new_empty(void);
 ss ss_clone(ss s);
 
-ss ss_set_free_space(ss s, size_t avail);
-ss ss_reserve_free_space(ss s, size_t avail);
-
+ss_err ss_set_free_space(ss s, size_t avail);
+ss_err ss_reserve_free_space(ss s, size_t avail);
 void ss_free(ss s);
 
-ss ss_grow(ss s, size_t len);
+ss_err ss_grow(ss s, size_t len);
 void ss_shrink(ss s, size_t len);
 void ss_clear(ss s);
 
 size_t ss_index(ss s, const char *needle);
 size_t ss_index_last(ss s, const char *needle);
 
-ss ss_concat_raw_len(ss s1, const char *s2, size_t s2_len);
-ss ss_concat_raw(ss s1, const char *s2);
-ss ss_concat_str(ss s1, ss s2);
-ss ss_prepend_raw_len(const char *s1, ss s2, size_t s1_len);
-ss ss_prepend_raw(const char *s1, ss s2);
-ss ss_prepend_str(ss s1, ss s2);
+ss_err ss_concat_raw_len(ss s1, const char *s2, size_t s2_len);
+ss_err ss_concat_raw(ss s1, const char *s2);
+ss_err ss_concat_str(ss s1, ss s2);
+ss_err ss_prepend_raw_len(const char *s1, ss s2, size_t s1_len);
+ss_err ss_prepend_raw(const char *s1, ss s2);
+ss_err ss_prepend_str(ss s1, ss s2);
 
 void ss_slice(ss s, size_t str_index, size_t end_index);
 
