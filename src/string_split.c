@@ -10,10 +10,10 @@ static ss *concat_to_ss_list(ss *ss_list, int *ss_list_n, ss str);
  * Return all the ss substrings generated from splitting the C string `s` with the delimiter string `del`.
  * All the returned substrings are heap allocated and returned as an array (`*ss`) of length `n`. The array
  * of strings must be freed after use with the dedicated `ss_list_free` function. If the delimiter `del` is
- * empty or it didn't match anywhere in the string `s`, the function returns all the original string (in the
- * form of a ss string). Consecutive matches of the delimiter are treated as a single delimiter so no empty
- * strings are returned in this case. Also, if the delimiter matches at the end of the string `s` no empty
- * string is returned. The value pointed to by the `n` pointer will be the number of strings present in the
+ * empty or it didn't match anywhere in the string `s`, the function returns only the original string.
+ * Consecutive matches of the delimiter are treated as a single delimiter so no empty strings "in-between"
+ * are returned in this case. Similarly, if the delimiter matches at the end of the string `s` no empty
+ * strings are returned. The value pointed to by the `n` pointer will be the number of strings in the
  * returned array.
  *
  * Returns an array of strings of length `n` in case of success or NULL in case of allocation failures.
@@ -71,7 +71,7 @@ ss *ss_split_raw(const char *s, const char *del, int *n) {
     }
 }
 
-// Handle the string list memory. The list allocated memory is enlarged with steps
+// Handles the string list memory. The list allocated memory is enlarged with steps
 // of length 10 and the count is updated, then the provided string is appended to
 // the list. If the reallocation fails the list is freed and n is set to zero.
 static ss *concat_to_ss_list(ss *ss_list, int *ss_list_n, ss str) {
@@ -95,11 +95,11 @@ static ss *concat_to_ss_list(ss *ss_list, int *ss_list_n, ss str) {
  * Return all the ss substrings generated from splitting the ss string `s` with the delimiter string `del`.
  * All the returned substrings are heap allocated and returned as an array (`*ss`) of length `n`. The array
  * of strings must be freed after use with the dedicated `ss_list_free` function. If the delimiter `del` is
- * empty or it didn't match anywhere in the string `s`, the function returns all the original string (in the
- * form of a ss string). Consecutive matches of the delimiter are treated as a single delimiter so no empty
- * strings are returned in this case. Also, if the delimiter matches at the end of the string `s` no empty
- * string is returned. The value pointed to by the `n` pointer will be the number of strings present in the
- * returned array. The `s` string is not modified.
+ * empty or it didn't match anywhere in the string `s`, the function returns only the original string.
+ * Consecutive matches of the delimiter are treated as a single delimiter so no empty strings are returned
+ * in this case. Also, if the delimiter matches at the end of the string `s` no empty strings are returned.
+ * The value pointed to by the `n` pointer will be the number of strings in the returned array. The `s`
+ * string is not modified.
  *
  * Returns an array of strings of length `n` in case of success or NULL in case of allocation failures.
  */
@@ -108,12 +108,11 @@ ss *ss_split_str(ss s, const char *del, int *n) {
 }
 
 /*
- * Join an array of C strings `str` of length `n` using the provided string separator `sep` between them.
- * The resulting string is concatenated at the end of the provided `s` string. The `s` string is modified
- * in place and returned.
+ * Join an array of C strings `str` of length `n` using the provided string separator `sep` between them
+ * then concatenate this string to the provided `s` string. The `s` string is modified in place.
  *
- * Returns the modified string `s` if case of success or NULL if any reallocation fails. In case of
- * failure the ss string `s` is still valid and must be freed after use.
+ * Returns `err_none` (zero) in case of success or an error if any reallocation fails. In case of failure
+ * the `s` string is still valid and must be freed after use.
  */
 ss_err ss_join_raw_cat(ss s, const char **str, int n, const char *sep) {
     for (int i = 0; i < n; i++) {
@@ -148,12 +147,11 @@ ss ss_join_raw(const char **str, int n, const char *sep) {
 }
 
 /*
- * Join an array of ss strings `str` of length `n` using the provided string separator `sep` between them.
- * The resulting string is concatenated at the end of the provided `s` string. The `s` string is modified
- * in place and returned.
+ * Join an array of ss strings `str` of length `n` using the provided string separator `sep` between them
+ * then concatenate this string to the provided `s` string. The `s` string is modified in place.
  *
- * Returns the modified string `s` if case of success or NULL if any reallocation fails. In case of
- * failure the ss string `s` is still valid and must be freed after use.
+ * Returns `err_none` (zero) in case of success or an error if any reallocation fails. In case of failure
+ * the `s` string is still valid and must be freed after use.
  */
 ss_err ss_join_str_cat(ss s, ss *str, int n, const char *sep) {
     for (int i = 0; i < n; i++) {

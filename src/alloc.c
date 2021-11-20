@@ -5,7 +5,7 @@
 /*
  * If SS_ALLOC_EXIT is defined (through the CMake options at compile time), failures
  * in memory allocation will abort the program. In this case the user doesn't need
- * to check returned string pointers for NULL values. Otherwise, the default behaviour
+ * to check returned string pointers or string errors. Otherwise, the default behaviour
  * is the same as the standard library malloc and realloc functions.
  */
 

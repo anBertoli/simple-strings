@@ -8,11 +8,10 @@
  * Formats the string and concatenates it to the `s` string. Formatting is performed using the usual
  * C formatting directive. The function accepts a `va_list` to accommodate a variable number of arguments.
  * The argument list should be started (`va_start`) before providing it to this function and must be ended
- * (`va_end`) after the function call. The returned string is the modified `s` string. The `s` string is
- * modified in place.
+ * (`va_end`) after the function call. The `s` string is modified in place.
  *
- * Returns the formatted string in case of success or NULL in case of allocations errors. In case of
- * failure the ss string `s` is still valid and must be freed after use.
+ * Returns `err_none` (zero) in case of success or an error if case of reallocation or formatting errors.
+ * In case of failure the `s` is still valid and must be freed after use.
  */
 ss_err ss_sprintf_va_cat(ss s, const char *format, va_list arg_list) {
     size_t buf_len = sizeof(char) * strlen(format) * 2 + 1;
@@ -56,7 +55,7 @@ ss_err ss_sprintf_va_cat(ss s, const char *format, va_list arg_list) {
     }
 
     // Finally, concat the ss string with the
-    // formatted C string and return it.
+    // formatted C string and return any error.
     ss_err err = ss_concat_raw_len(s, buf, n_written);
     free(buf);
     return err;
@@ -84,11 +83,10 @@ ss ss_sprintf_va(const char *format, va_list arg_list) {
 
 /*
  * Formats the string and concatenates it to the `s` string. Formatting is performed using the usual
- * C formatting directive. The returned string is the modified `s` string. The `s` string is modified
- * in place.
+ * C formatting directive. The `s` string is modified in place.
  *
- * Returns the formatted string in case of success or NULL in case of allocations errors. In case of
- * failure the ss string `s` is still valid and must be freed after use.
+ * Returns `err_none` (zero) in case of success or an error in case of reallocation or formatting errors.
+ * In case of failure the `s` string is still valid and must be freed after use.
  */
 ss_err ss_sprintf_cat(ss s, const char *format, ...) {
     va_list arg_list;
