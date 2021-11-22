@@ -1,5 +1,6 @@
 # Library API
 ## Index
+### String creation and memory management
 [`ss_new_from_raw_len_free`](#ss_new_from_raw_len_free)  
 [`ss_new_from_raw_len`](#ss_new_from_raw_len)  
 [`ss_new_from_raw`](#ss_new_from_raw)  
@@ -9,6 +10,7 @@
 [`ss_set_free_space`](#ss_set_free_space)  
 [`ss_reserve_free_space`](#ss_reserve_free_space)  
 [`ss_free`](#ss_free)  
+### String manipulation
 [`ss_grow`](#ss_grow)  
 [`ss_shrink`](#ss_shrink)  
 [`ss_clear`](#ss_clear)  
@@ -26,6 +28,7 @@
 [`ss_trim_right`](#ss_trim_right)  
 [`ss_to_lower`](#ss_to_lower)  
 [`ss_to_upper`](#ss_to_upper)  
+### String splitting and joining
 [`ss_split_raw`](#ss_split_raw)  
 [`ss_split_str`](#ss_split_str)  
 [`ss_join_raw_cat`](#ss_join_raw_cat)  
@@ -33,10 +36,12 @@
 [`ss_join_str_cat`](#ss_join_str_cat)  
 [`ss_join_str`](#ss_join_str)  
 [`ss_list_free`](#ss_list_free)  
+### String formatting
 [`ss_sprintf_va_cat`](#ss_sprintf_va_cat)  
 [`ss_sprintf_va`](#ss_sprintf_va)  
 [`ss_sprintf_cat`](#ss_sprintf_cat)  
 [`ss_sprintf`](#ss_sprintf)  
+### Error handling
 [`ss_err_str`](#ss_err_str)  
 
 ## String creation and memory management

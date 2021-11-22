@@ -69,6 +69,21 @@ ss gen_funcs_documentation(func_doc *funcs, int funcs_n) {
     // Index
     ss_concat_raw(api_docs, "## Index\n");
     for (int i = 0; i < funcs_n; i++) {
+        if (strcmp(funcs[i].func_name->buf, "ss_new_from_raw_len_free") == 0) {
+            ss_concat_raw(api_docs, "### String creation and memory management\n");
+        }
+        if (strcmp(funcs[i].func_name->buf, "ss_grow") == 0) {
+            ss_concat_raw(api_docs, "### String manipulation\n");
+        }
+        if (strcmp(funcs[i].func_name->buf, "ss_split_raw") == 0) {
+            ss_concat_raw(api_docs, "### String splitting and joining\n");
+        }
+        if (strcmp(funcs[i].func_name->buf, "ss_sprintf_va_cat") == 0) {
+            ss_concat_raw(api_docs, "### String formatting\n");
+        }
+        if (strcmp(funcs[i].func_name->buf, "ss_err_str") == 0) {
+            ss_concat_raw(api_docs, "### Error handling\n");
+        }
         ss index_line = ss_sprintf("[`%s`](#%s)  \n", funcs[i].func_name->buf, funcs[i].func_name->buf);
         ss_concat_str(api_docs, index_line);
         ss_free(index_line);
