@@ -134,6 +134,8 @@ the following command.
 [`ss_sprintf`](#ss_sprintf)  
 [`ss_err_str`](#ss_err_str)  
 
+## String creation and memory management
+
 ### ss_new_from_raw_len_free 
 Build a new string copying the provided `init` C string of length `len` (the length argument doesn't
 include the null terminator) and allocating additional `avail` bytes. If the length of the initial

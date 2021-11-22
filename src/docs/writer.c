@@ -79,7 +79,7 @@ ss gen_funcs_documentation(func_doc *funcs, int funcs_n) {
     for (int i = 0; i < funcs_n; i++) {
         func_doc doc = funcs[i];
 
-        if (strcmp(doc.func_name->buf, "ss_new_from_raw_len_cap") == 0) {
+        if (strcmp(doc.func_name->buf, "ss_new_from_raw_len_free") == 0) {
             ss_concat_raw(api_docs, "## String creation and memory management\n\n");
         }
         if (strcmp(doc.func_name->buf, "ss_grow") == 0) {
