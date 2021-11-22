@@ -42,14 +42,8 @@ if (!name) {
     // ... handle error
 }
 
-ss_err err = ss_concat_raw(name, " Dover");
-if (err) {
-    // ... handle error
-}
-err = ss_prepend_raw("My name is: ", name);
-if (err) {
-    // ... handle error
-}
+ss_concat_raw(name, " Dover");
+ss_prepend_raw("My name is: ", name);
 
 printf("len: %d buf: %s\n", name->len, name->buf);
 ss_free(name);
