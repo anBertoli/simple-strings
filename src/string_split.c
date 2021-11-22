@@ -29,8 +29,8 @@ ss *ss_split_raw(const char *s, const char *del, int *n) {
         if (match_start == NULL || empty_del) {
             // No more matches or empty delimiter.
 
-            // If the curr_ptr points to the end of the string
-            // len == 0. No strings returned and we are done.
+            // If the curr_ptr points to the end of the string len
+            // is equal to 0. No strings returned and we are done.
             size_t len = strlen(curr_ptr);
             if (len == 0) {
                 return ss_list;
@@ -71,9 +71,9 @@ ss *ss_split_raw(const char *s, const char *del, int *n) {
     }
 }
 
-// Handles the string list memory. The list allocated memory is enlarged with steps
-// of length 10 and the count is updated, then the provided string is appended to
-// the list. If the reallocation fails the list is freed and n is set to zero.
+// Concatenate a string to a string array and updates the length (passed as a pointer).
+// Automatically handles memory allocation, specifically enlarges the array with steps
+// of 10. If an error happens the memory is automatically freed.
 static ss *concat_to_ss_list(ss *ss_list, int *ss_list_n, ss str) {
     if (*ss_list_n % 10 == 0) {
         ss *new_str_list = ss_realloc(ss_list, sizeof(ss) * (*ss_list_n + 10));
@@ -85,7 +85,6 @@ static ss *concat_to_ss_list(ss *ss_list, int *ss_list_n, ss str) {
         ss_list = new_str_list;
     }
 
-    // Append the new substring to the list.
     ss_list[*ss_list_n] = str;
     (*ss_list_n)++;
     return ss_list;
