@@ -14,13 +14,11 @@ strings return pointers to them (the `ss` type defined below). Both the struct a
 are heap allocated.
 
 ```c
-struct string {
+typedef struct ss {
     size_t len;
     size_t free;
     char *buf;
-};
-
-typedef struct string *ss;
+} *ss;
 ```
 
 The _ss_ strings are generated and returned via dedicated constructor functions and they are usually 
@@ -53,46 +51,18 @@ ss_free(name);
 ## Error handling
 
 Some operations on strings can fail due to allocations errors. Those functions could return an error in
-the form of a `ss_err` type, defined similarly the enum below. If the function is successful it returns 
-`err_none`, which has value zero in the enum and could be conveniently tested with a `if (err)` statement. 
-Note that if the library is compiled with the `--with-exit` flag, memory allocations errors will abort 
-the program and there's no need to check errors.
+the form of a `ss_err` type, defined as the enum below. If the function is successful it returns `err_none`,
+which has value zero and could be conveniently tested with a `if (err)` statement. Note that if the library
+is compiled with the `--with-exit` flag, memory allocations errors will abort the program and there's no need 
+to check errors or to check for NULL values in string constructors. The `ss_err_str` function could be used 
+to get a static read-only string containing a textual representation of an error code.
 
 ```c
 typedef enum ss_err {
     err_none = 0,
-    ...
+    err_alloc = 1,
+    err_format = 2
 } ss_err;
-```
-
-This is a simple example of string manipulations and errors checking:
-```c
-ss first_name = ss_new_from_raw("John");
-if (!name) {
-    // ... handle error
-}
-ss_err err = ss_concat_raw(first_name, " Dover");
-if (err) {
-    printf("error: %s\n", ss_err_str(err))
-    return;
-}
-
-printf("len: %d buf: %s\n", name->len, name->buf);
-ss_free(name);
-
-// Output: len 10, buf: John Dover
-```
-
-If you don't need/want to check the returned errors or the library is compiled with the `--with-exit` 
-flag, the example will simplify to:
-```c
-ss first_name = ss_new_from_raw("John");
-ss_concat_raw(first_name, " Dover");
-
-printf("len: %d buf: %s\n", name->len, name->buf);
-ss_free(name);
-
-// Output: len 10, buf: John Dover
 ```
 
 ## Installation
