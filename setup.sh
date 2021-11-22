@@ -20,7 +20,8 @@ if [ "docs" = $1 ]; then
   ./build/docs \
   "src/string.c" \
   "src/string_split.c" \
-  "src/string_fmt.c"
+  "src/string_fmt.c" \
+  "src/string_err.c"
 
   rm tmp/ss.h
   rmdir tmp

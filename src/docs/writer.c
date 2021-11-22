@@ -91,6 +91,9 @@ ss gen_funcs_documentation(func_doc *funcs, int funcs_n) {
         if (strcmp(doc.func_name->buf, "ss_sprintf_va_cat") == 0) {
             ss_concat_raw(api_docs, "## String formatting\n\n");
         }
+        if (strcmp(doc.func_name->buf, "ss_err_str") == 0) {
+            ss_concat_raw(api_docs, "## Error handling\n\n");
+        }
 
         ss title = ss_sprintf("### %s \n", doc.func_name->buf);
         ss body = ss_sprintf("%s\n\n", doc.comment->buf);

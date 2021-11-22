@@ -37,6 +37,7 @@
 [`ss_sprintf_va`](#ss_sprintf_va)  
 [`ss_sprintf_cat`](#ss_sprintf_cat)  
 [`ss_sprintf`](#ss_sprintf)  
+[`ss_err_str`](#ss_err_str)  
 
 ### ss_new_from_raw_len_free 
 Build a new string copying the provided `init` C string of length `len` (the length argument doesn't
@@ -499,5 +500,15 @@ Returns the formatted string in case of success or NULL in case of allocations e
 
 ```c
 ss ss_sprintf(const char *format, ...);
+```
+
+## Error handling
+
+### ss_err_str 
+Return a pointer to a static read-only string containing a textual
+representation of the error code `err` passed in.
+
+```c
+const char *ss_err_str(ss_err err);
 ```
 

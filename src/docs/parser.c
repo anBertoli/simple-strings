@@ -115,11 +115,13 @@ void parse_func_line(func_doc *doc, ss line) {
     ss_concat_raw(line, ";");
     ss_concat_str(doc->func_sign, line);
 
-    size_t after_first_word = ss_index(line, " ");
-    ss_slice(line, after_first_word, line->len);
-    ss_trim_left(line, " *");
     size_t start_parameters = ss_index(line, "(");
     ss_slice(line, 0, start_parameters);
+    ss_trim(line, "\n\t\r ");
+    size_t before_last_word = ss_index_last(line, " ");
+    ss_slice(line, before_last_word, line->len);
+    ss_trim(line, "* ");
+
     ss_concat_str(doc->func_name, line);
 }
 
