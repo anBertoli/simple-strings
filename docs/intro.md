@@ -44,10 +44,10 @@ if (!name) {
     // ... handle error
 }
 
-printf("len: %d, free: %d, buf: %s\n", name->len, name->free, name->buf);
+printf("len: %d buf: %s\n", name->len, name->buf);
 ss_free(name);
 
-// Output: len 4, free: 4, buf: John
+// Output: len 4, buf: John
 ```
 
 ## Error handling
@@ -61,8 +61,7 @@ the program and there's no need to check errors.
 ```c
 typedef enum ss_err {
     err_none = 0,
-    err_alloc = 1,
-    err_format = 2
+    ...
 } ss_err;
 ```
 
@@ -78,10 +77,10 @@ if (err) {
     return;
 }
 
-printf("len: %d, free: %d, buf: %s\n", name->len, name->free, name->buf);
+printf("len: %d buf: %s\n", name->len, name->buf);
 ss_free(name);
 
-// Output: len 10, free: 10, buf: John Dover
+// Output: len 10, buf: John Dover
 ```
 
 If you don't need/want to check the returned errors or the library is compiled with the `--with-exit` 
@@ -90,10 +89,10 @@ flag, the example will simplify to:
 ss first_name = ss_new_from_raw("John");
 ss_concat_raw(first_name, " Dover");
 
-printf("len: %d, free: %d, buf: %s\n", name->len, name->free, name->buf);
+printf("len: %d buf: %s\n", name->len, name->buf);
 ss_free(name);
 
-// Output: len 10, free: 10, buf: John Dover
+// Output: len 10, buf: John Dover
 ```
 
 ## Installation
