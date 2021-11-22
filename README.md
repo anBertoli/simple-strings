@@ -154,7 +154,7 @@ the following command.
 #### Error handling
 [`ss_err_str`](#ss_err_str)  
 
-### String creation and memory management
+## String creation and memory management
 
 #### ss_new_from_raw_len_free 
 Build a new string copying the provided `init` C string of length `len` (the length argument doesn't
@@ -283,7 +283,7 @@ since it will point to deallocated memory.
 void ss_free(ss s);
 ```
 
-### String manipulation
+## String manipulation
 
 #### ss_grow 
 Grow the `s` string to have the specified length `len`. Note that here the function enlarges
@@ -484,7 +484,7 @@ The string `s` is modified in place.
 void ss_to_upper(ss s);
 ```
 
-### String splitting and joining
+## String splitting and joining
 
 #### ss_split_raw 
 Return all the ss substrings generated from splitting the C string `s` with the delimiter string `del`.
@@ -570,7 +570,7 @@ contained strings can't be used after being freed.
 void ss_list_free(ss *list, const int n);
 ```
 
-### String formatting
+## String formatting
 
 #### ss_sprintf_va_cat 
 Formats the string and concatenates it to the `s` string. Formatting is performed using the usual
@@ -619,7 +619,7 @@ Returns the formatted string in case of success or NULL in case of allocations e
 ss ss_sprintf(const char *format, ...);
 ```
 
-### Error handling
+## Error handling
 
 #### ss_err_str 
 Return a pointer to a static read-only string containing a textual
