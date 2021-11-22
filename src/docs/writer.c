@@ -67,7 +67,6 @@ ss gen_funcs_documentation(func_doc *funcs, int funcs_n) {
     ss_concat_raw(api_docs, "## Library API\n");
 
     // Index
-    ss_concat_raw(api_docs, "### Index\n");
     for (int i = 0; i < funcs_n; i++) {
         if (strcmp(funcs[i].func_name->buf, "ss_new_from_raw_len_free") == 0) {
             ss_concat_raw(api_docs, "#### String creation and memory management\n");

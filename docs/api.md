@@ -1,5 +1,4 @@
 ## Library API
-### Index
 #### String creation and memory management
 [`ss_new_from_raw_len_free`](#ss_new_from_raw_len_free)  
 [`ss_new_from_raw_len`](#ss_new_from_raw_len)  
