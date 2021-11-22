@@ -1,6 +1,6 @@
-# Library API
-## Index
-### String creation and memory management
+## Library API
+### Index
+#### String creation and memory management
 [`ss_new_from_raw_len_free`](#ss_new_from_raw_len_free)  
 [`ss_new_from_raw_len`](#ss_new_from_raw_len)  
 [`ss_new_from_raw`](#ss_new_from_raw)  
@@ -10,7 +10,7 @@
 [`ss_set_free_space`](#ss_set_free_space)  
 [`ss_reserve_free_space`](#ss_reserve_free_space)  
 [`ss_free`](#ss_free)  
-### String manipulation
+#### String manipulation
 [`ss_grow`](#ss_grow)  
 [`ss_shrink`](#ss_shrink)  
 [`ss_clear`](#ss_clear)  
@@ -28,7 +28,7 @@
 [`ss_trim_right`](#ss_trim_right)  
 [`ss_to_lower`](#ss_to_lower)  
 [`ss_to_upper`](#ss_to_upper)  
-### String splitting and joining
+#### String splitting and joining
 [`ss_split_raw`](#ss_split_raw)  
 [`ss_split_str`](#ss_split_str)  
 [`ss_join_raw_cat`](#ss_join_raw_cat)  
@@ -36,17 +36,17 @@
 [`ss_join_str_cat`](#ss_join_str_cat)  
 [`ss_join_str`](#ss_join_str)  
 [`ss_list_free`](#ss_list_free)  
-### String formatting
+#### String formatting
 [`ss_sprintf_va_cat`](#ss_sprintf_va_cat)  
 [`ss_sprintf_va`](#ss_sprintf_va)  
 [`ss_sprintf_cat`](#ss_sprintf_cat)  
 [`ss_sprintf`](#ss_sprintf)  
-### Error handling
+#### Error handling
 [`ss_err_str`](#ss_err_str)  
 
-## String creation and memory management
+### String creation and memory management
 
-### ss_new_from_raw_len_free 
+#### ss_new_from_raw_len_free 
 Build a new string copying the provided `init` C string of length `len` (the length argument doesn't
 include the null terminator) and allocating additional `avail` bytes. If the length of the initial
 string is greater than `len`, the exceeding bytes are discarded. Even if `len` and `avail` are both
@@ -66,7 +66,7 @@ Returns the newly generated string or NULL if the allocation fails.
 ss ss_new_from_raw_len_free(const char *init, size_t len, size_t avail);
 ```
 
-### ss_new_from_raw_len 
+#### ss_new_from_raw_len 
 Build a new string copying the provided `init` C string of length `len` (the length argument
 doesn't include the null terminator). If the length of the initial string is greater than the
 provided `len`, the exceeding bytes are discarded. The caller is responsible for providing
@@ -85,7 +85,7 @@ Returns the newly generated string or NULL if the allocation fails.
 ss ss_new_from_raw_len(const char *init, size_t len);
 ```
 
-### ss_new_from_raw 
+#### ss_new_from_raw 
 Build a new string copying the provided null terminated `init` C string. This function is a
 shorthand for `str_new_raw_len(init, strlen(init), strlen(init))`. If the `init` string is
 NULL a new empty ss string is returned. The returned string must be freed after use with the
@@ -101,7 +101,7 @@ Returns the newly generated string or NULL if the allocation fails.
 ss ss_new_from_raw(const char *init);
 ```
 
-### ss_new_empty_with_free 
+#### ss_new_empty_with_free 
 Build and returns a new empty ss string with length zero and `avail` bytes available. In any
 case the string has an implicit null term, so 1 byte is allocated anyway. The ss must be freed
 after use with the provided `ss_free` function.
@@ -112,7 +112,7 @@ Returns the newly generated string or NULL if the allocation fails.
 ss ss_new_empty_with_free(size_t avail);
 ```
 
-### ss_new_empty 
+#### ss_new_empty 
 Build and returns a new empty ss string with length zero and no further available space. Even in
 this case the string always has an implicit null term, so 1 byte is allocated anyway. The ss must
 be freed after use with the provided `ss_free` function. Note that usually an empty string is built
@@ -125,7 +125,7 @@ Returns the newly generated string or NULL if the allocation fails.
 ss ss_new_empty(void);
 ```
 
-### ss_clone 
+#### ss_clone 
 Build and return a clone of the provided ss string `s`. The new string and the old one are
 independent and both of them must be freed after use with the `ss_free` function. Cloning a
 string is useful when, for example, we want to mutate a string while also retaining the
@@ -137,7 +137,7 @@ Returns the cloned string or NULL if the allocation fails.
 ss ss_clone(ss s);
 ```
 
-### ss_set_free_space 
+#### ss_set_free_space 
 Enlarge or shrink the allocated and available space not already used by the string `s` to be equal
 to `avail` bytes. The operation doesn't change the stored string itself, both in the content and the
 length. It only changes the allocated available space to be used for future operations on the string.
@@ -151,7 +151,7 @@ of failure the ss string `s` is still valid and must be freed after use.
 ss_err ss_set_free_space(ss s, size_t avail);
 ```
 
-### ss_reserve_free_space 
+#### ss_reserve_free_space 
 Enlarge the allocated and available space not already used by the string `s` to be at least `avail`
 bytes long. The operation doesn't change the stored string, it only changes the available space beyond
 the string end. The function is useful to reserve more space earlier in order to avoid frequent
@@ -165,7 +165,7 @@ failure the ss string `s` is still valid and must be freed after use.
 ss_err ss_reserve_free_space(ss s, size_t avail);
 ```
 
-### ss_free 
+#### ss_free 
 Deallocate the memory used by the ss string `s`. The string can't be used after being freed
 since it will point to deallocated memory.
 
@@ -173,9 +173,9 @@ since it will point to deallocated memory.
 void ss_free(ss s);
 ```
 
-## String manipulation
+### String manipulation
 
-### ss_grow 
+#### ss_grow 
 Grow the `s` string to have the specified length `len`. Note that here the function enlarges
 the string buffer itself, eventually allocates more space. New bytes inserted will be set
 to zero and they will be safe to be written. If the specified length `len` is smaller than the
@@ -188,7 +188,7 @@ failure the ss string `s` is still valid and must be freed after use.
 ss_err ss_grow(ss s, size_t len);
 ```
 
-### ss_shrink 
+#### ss_shrink 
 Shrink the string `s` to have the provided length `len`. The string is shortened to contain only the
 first `len` bytes and a null termination character is written at the position `len` of the string buffer.
 The total allocated space is left untouched, while the free space grows. The bytes in the string buffer
@@ -200,7 +200,7 @@ The string `s` is modified in place.
 void ss_shrink(ss s, size_t len);
 ```
 
-### ss_clear 
+#### ss_clear 
 Erase the content of the string `s`. The length of the string is set to 0 and a null termination
 character is written in the first position of the string buffer. The total allocation space is
 left untouched, while the free space grows. The old bytes are not cleaned, they are just considered
@@ -211,7 +211,7 @@ modified in place.
 void ss_clear(ss s);
 ```
 
-### ss_index 
+#### ss_index 
 Returns the position (0-indexed) of the starting position of the first occurrence of the substring
 `needle` in the ss string `haystack` provided as first argument. Returns -1 if no occurrence is
 found or if `needle` is NULL or an empty string. The string `haystack` is not modified.
@@ -220,7 +220,7 @@ found or if `needle` is NULL or an empty string. The string `haystack` is not mo
 size_t ss_index(ss haystack, const char *needle);
 ```
 
-### ss_index_last 
+#### ss_index_last 
 Returns the position (0-indexed) of the starting position of the last occurrence of the substring
 `needle` in the ss string `haystack` provided as first argument. Returns -1 if no occurrence is
 found or if `needle` is NULL or an empty string. The string `haystack` is not modified.
@@ -229,7 +229,7 @@ found or if `needle` is NULL or an empty string. The string `haystack` is not mo
 size_t ss_index_last(ss haystack, const char *needle);
 ```
 
-### ss_concat_raw_len 
+#### ss_concat_raw_len 
 Concatenate the ss string `s1` with a C string `s2` of length `s2_len`. If the length of the C string
 is greater than `s2_len`, exceeding bytes are discarded. The `s2` C string is appended to the string
 `s1`, eventually growing the allocated space for `s1`. The strategy used in concat functions is the
@@ -246,7 +246,7 @@ failure the ss string `s1` is still valid and must be freed after use.
 ss_err ss_concat_raw_len(ss s1, const char *s2, size_t s2_len);
 ```
 
-### ss_concat_raw 
+#### ss_concat_raw 
 Concatenate the ss string `s1` with a null terminated C string `s2`. The `s2` string is appended
 to `s1`, eventually growing the allocated space for `s1`. If the `s2` string is NULL the function
 is a no-op. Basically, it is a shorthand for `str_concat_raw_len(s1, s1, strlen(s2))` (see that
@@ -259,7 +259,7 @@ failure the ss string `s1` is still valid and must be freed after use.
 ss_err ss_concat_raw(ss s1, const char *s2);
 ```
 
-### ss_concat_str 
+#### ss_concat_str 
 Concatenate the ss string `s1` with a second ss string `s2`. The `s2` string is appended to `s1`,
 eventually growing the allocated space for `s1`. The string `s1` is modified in-place. Basically
 it is a shorthand for `ss_concat_raw_len(s1, s2->buf, s2->len)` (see that function to have more
@@ -273,7 +273,7 @@ failure both strings are still valid and must be freed after use.
 ss_err ss_concat_str(ss s1, ss s2);
 ```
 
-### ss_prepend_raw_len 
+#### ss_prepend_raw_len 
 Prepend a C string `s1` of length `s1_len` to a ss string `s2`. If the length of the C string is
 greater than `s1_len`, exceeding bytes are discarded. The `s1` C string is prepended to the ss
 string `s2`, eventually growing the allocated space for the latter. The strategy used in prepend
@@ -290,7 +290,7 @@ failure the string `s2` is still valid and must be freed after use.
 ss_err ss_prepend_raw_len(const char *s1, ss s2, size_t s1_len);
 ```
 
-### ss_prepend_raw 
+#### ss_prepend_raw 
 Prepend the null terminated C string `s1` to a ss string `s2`. The `s1` string is prepended to `s2`,
 eventually growing the allocated space of `s2`. The string `s2` is modified in-place. Basically, it
 is a shorthand for `ss_prepend_raw_len(s1, s2, strlen(s1))` (see that function to have more info
@@ -303,7 +303,7 @@ the string `s2` is still valid and must be freed after use.
 ss_err ss_prepend_raw(const char *s1, ss s2);
 ```
 
-### ss_prepend_str 
+#### ss_prepend_str 
 Prepend the ss string `s1` to another ss string `s2`. The `s1` string is appended to `s2`, eventually
 growing the allocated space of `s2`. The string `s2` is modified in-place. Basically, it is a shorthand
 for `ss_prepend_raw_len(s1->buf, s2, s1->len)` (see that function to have more info about the concat
@@ -316,7 +316,7 @@ both strings are still valid and must be freed after use.
 ss_err ss_prepend_str(ss s1, ss s2);
 ```
 
-### ss_slice 
+#### ss_slice 
 Obtain a substring of the ss string `s` slicing it with the provided indexes. The slicing boundaries
 are provided via the `str_index` and `end_index` arguments (0-indexed) and the resulting substring
 starts from the position `str_index` (inclusive) and ends at `end_index` (not inclusive). If the
@@ -328,7 +328,7 @@ string length before slicing the string. The string `s` is modified in place.
 void ss_slice(ss s, size_t str_index, size_t end_index);
 ```
 
-### ss_trim 
+#### ss_trim 
 Removes characters contained in the `cutset` string from both the start and the end of the
 ss string `s`. After the trimming operation, the string length is reduced while the allocation
 size is left untouched, but more free space will be available. If all characters are trimmed
@@ -338,7 +338,7 @@ the result is a valid but empty string. The string `s` is modified in place.
 void ss_trim(ss s, const char *cutset);
 ```
 
-### ss_trim_left 
+#### ss_trim_left 
 Removes characters contained in the `cutset` string from the start of the ss string `s`.
 After the trimming operation, the string length is reduced while the allocation size
 is left untouched, but more free space will be available. If all characters are trimmed
@@ -348,7 +348,7 @@ the result is a valid but empty string. The string `s` is modified in place.
 void ss_trim_left(ss s, const char *cutset);
 ```
 
-### ss_trim_right 
+#### ss_trim_right 
 Removes characters contained in the `cutset` string from the end of the ss string `s`.
 After the trimming operation, the string length is reduced while the allocation size
 is left untouched, but more free space will be available. If all characters are trimmed
@@ -358,7 +358,7 @@ the result is a valid but empty string. The string `s` is modified in place.
 void ss_trim_right(ss s, const char *cutset);
 ```
 
-### ss_to_lower 
+#### ss_to_lower 
 Modify the ss string `s` by turning each character into its lowercase version.
 The string `s` is modified in place.
 
@@ -366,7 +366,7 @@ The string `s` is modified in place.
 void ss_to_lower(ss s);
 ```
 
-### ss_to_upper 
+#### ss_to_upper 
 Modify the ss string `s` by turning each character into its uppercase version.
 The string `s` is modified in place.
 
@@ -374,9 +374,9 @@ The string `s` is modified in place.
 void ss_to_upper(ss s);
 ```
 
-## String splitting and joining
+### String splitting and joining
 
-### ss_split_raw 
+#### ss_split_raw 
 Return all the ss substrings generated from splitting the C string `s` with the delimiter string `del`.
 All the returned substrings are heap allocated and returned as an array (`*ss`) of length `n`. The array
 of strings must be freed after use with the dedicated `ss_list_free` function. If the delimiter `del` is
@@ -392,7 +392,7 @@ Returns an array of strings of length `n` in case of success or NULL in case of 
 ss *ss_split_raw(const char *s, const char *del, int *n);
 ```
 
-### ss_split_str 
+#### ss_split_str 
 Return all the ss substrings generated from splitting the ss string `s` with the delimiter string `del`.
 All the returned substrings are heap allocated and returned as an array (`*ss`) of length `n`. The array
 of strings must be freed after use with the dedicated `ss_list_free` function. If the delimiter `del` is
@@ -408,7 +408,7 @@ Returns an array of strings of length `n` in case of success or NULL in case of 
 ss *ss_split_str(ss s, const char *del, int *n);
 ```
 
-### ss_join_raw_cat 
+#### ss_join_raw_cat 
 Join an array of C strings `str` of length `n` using the provided string separator `sep` between them
 then concatenate this string to the provided `s` string. The `s` string is modified in place.
 
@@ -419,7 +419,7 @@ the `s` string is still valid and must be freed after use.
 ss_err ss_join_raw_cat(ss s, const char **str, int n, const char *sep);
 ```
 
-### ss_join_raw 
+#### ss_join_raw 
 Join an array of C strings `str` of length `n` using the provided string separator `sep` between them.
 The resulting (joined) string is then returned as a new ss string. The returned string must be freed
 after use with the provided `ss_free` function.
@@ -430,7 +430,7 @@ Returns the joined string in case of success or NULL in case of allocation error
 ss ss_join_raw(const char **str, int n, const char *sep);
 ```
 
-### ss_join_str_cat 
+#### ss_join_str_cat 
 Join an array of ss strings `str` of length `n` using the provided string separator `sep` between them
 then concatenate this string to the provided `s` string. The `s` string is modified in place.
 
@@ -441,7 +441,7 @@ the `s` string is still valid and must be freed after use.
 ss_err ss_join_str_cat(ss s, ss *str, int n, const char *sep);
 ```
 
-### ss_join_str 
+#### ss_join_str 
 Join an array of ss strings `str` of length `n` using the provided string separator `sep` between them.
 The resulting (joined) string is then returned as a new ss string. The returned string must be freed
 after use with the provided `ss_free` function.
@@ -452,7 +452,7 @@ Returns the joined string in case of success or NULL in case of allocation error
 ss ss_join_str(ss *str, int n, const char *sep);
 ```
 
-### ss_list_free 
+#### ss_list_free 
 Deallocate the memory used by a ss string array `list`. The string array and all the
 contained strings can't be used after being freed.
 
@@ -460,9 +460,9 @@ contained strings can't be used after being freed.
 void ss_list_free(ss *list, const int n);
 ```
 
-## String formatting
+### String formatting
 
-### ss_sprintf_va_cat 
+#### ss_sprintf_va_cat 
 Formats the string and concatenates it to the `s` string. Formatting is performed using the usual
 C formatting directive. The function accepts a `va_list` to accommodate a variable number of arguments.
 The argument list should be started (`va_start`) before providing it to this function and must be ended
@@ -475,7 +475,7 @@ In case of failure the `s` is still valid and must be freed after use.
 ss_err ss_sprintf_va_cat(ss s, const char *format, va_list arg_list);
 ```
 
-### ss_sprintf_va 
+#### ss_sprintf_va 
 Formats and returns a string using the usual C formatting directives. The function accepts
 a `va_list` to accommodate a variable number of arguments. In case of success the returned
 string must be freed after use with the dedicated `ss_free` function. The argument list
@@ -488,7 +488,7 @@ Returns the formatted string in case of success or NULL in case of allocations e
 ss ss_sprintf_va(const char *format, va_list arg_list);
 ```
 
-### ss_sprintf_cat 
+#### ss_sprintf_cat 
 Formats the string and concatenates it to the `s` string. Formatting is performed using the usual
 C formatting directive. The `s` string is modified in place.
 
@@ -499,7 +499,7 @@ In case of failure the `s` string is still valid and must be freed after use.
 ss_err ss_sprintf_cat(ss s, const char *format, ...);
 ```
 
-### ss_sprintf 
+#### ss_sprintf 
 Formats and returns a new string using the usual C formatting directive. The returned string
 must be freed after use as usual with the dedicated `ss_free` function.
 
@@ -509,9 +509,9 @@ Returns the formatted string in case of success or NULL in case of allocations e
 ss ss_sprintf(const char *format, ...);
 ```
 
-## Error handling
+### Error handling
 
-### ss_err_str 
+#### ss_err_str 
 Return a pointer to a static read-only string containing a textual
 representation of the error code `err` passed in.
 
