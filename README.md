@@ -6,14 +6,15 @@ string types of other programming languages.
 
 ## How the library works
 
-At the core of the _ss_ strings library there is the string type defined as the struct showed below. 
-This struct represents a dynamic and heap allocated string. The string buffer itself is pointed to by 
-the `buf` pointer, has length `len` (the `len`-th char is the null terminator) and has additional `free` 
-bytes allocated and ready to be used in further string manipulation. Functions that instantiate strings
-return pointers to them (the `ss` type). Both the struct and the string buffer are heap allocated.
+At the core of the _ss_ strings library there is the struct showed below. This struct represents a dynamic
+and heap allocated string. The string buffer itself is pointed to by the `buf` pointer, has length `len` 
+(the `len`-th char is the null terminator) and has additional `free` bytes allocated and ready to be used 
+in further string manipulation. Functions that instantiate strings return pointers to them (the `ss` type). 
+Both the struct and the string buffer are heap allocated. From now, we will use the term string to define
+the `ss` pointer type.  
 
 ```c
-typedef struct {
+typedef struct ss {
     size_t len;
     size_t free;
     char *buf;
@@ -22,39 +23,48 @@ typedef struct {
 
 The _ss_ strings are generated and returned via dedicated constructor functions and they are usually 
 manipulated using the functions of the library. As a unique and obvious exception, the `buf` field is 
-safer to be read and write until the position `len-1`, i.e. one can write to the string buffer starting
-at the position `ss->buf[0]` until `ss->buf[ss->len-1]`. If you need to write directly into the string 
-buffer make sure the buffer itself has enough space (otherwise grow it with the dedicated `ss_grow`
-function). The functions of the library automatically handle the allocated space and the fields mentioned
-above to both perform the needed operations and maintain the string state consistent. In any case, 
-**the `len` and `free` fields must be considered read-only**. 
+safer to be read and write until the position `len-1`, i.e. one can write in the string buffer starting
+at the position `ss->buf[0]` until the position `ss->buf[ss->len-1]`. If you need to write directly 
+into the string buffer make sure the buffer itself has enough space (otherwise grow it with the dedicated 
+`ss_grow` function). The functions of the library automatically handle the allocated space and the mentioned 
+fields to both perform the needed operations and maintain the string state consistent. In any case, **the
+`len` and `free` fields must be considered read-only**. 
 
-Both the string struct pointed to by an `ss` pointer and the string buffer itself are heap allocated. 
-After use, they must be freed passing the `ss` string to the `ss_free` function. If a library function 
-creates a new string, also that new string must be freed after use. Similarly, string lists must be 
-freed after use with the dedicated `ss_list_free` function.
+Both the string struct pointed to by the `ss` pointer and the string buffer itself are heap allocated. After
+use, they must be freed passing the `ss` string to the `ss_free` function. If a function of the library 
+creates a new string, also the new string must be freed after use. Similarly, string lists must be freed
+after use with the dedicated `ss_list_free` function.
 
-This is a basic example using _ss_ strings: 
+This is the most basic example using _ss_ strings: 
 ```c
 ss name = ss_new_from_raw("John");
 if (!name) {
     // ... handle error
 }
 
+ss_err err = ss_concat_raw(name, " Dover");
+if (err) {
+    // ... handle error
+}
+err = ss_prepend_raw("My name is: ", name);
+if (err) {
+    // ... handle error
+}
+
 printf("len: %d buf: %s\n", name->len, name->buf);
 ss_free(name);
 
-// Output: len 4, buf: John
+// Output: len 22, buf: My name is: John Dover
 ```
 
 ## Error handling
 
-Some operations on strings can fail due to allocations errors. Those functions could return an error in
+Some operations on strings can fail due to allocations errors. These functions could return an error in
 the form of a `ss_err` type, defined as the enum below. If the function is successful it returns `err_none`,
 which has value zero and could be conveniently tested with a `if (err)` statement. Note that if the library
-is compiled with the `--with-exit` flag, memory allocations errors will abort the program and there's no need 
-to check errors or to check for NULL values in string constructors. The `ss_err_str` function could be used 
-to get a static read-only string containing a textual representation of an error code.
+is compiled with the `--with-exit` flag, memory allocation errors abort the program and there's no need 
+to check these errors and to check for NULL values returned from string constructors. The `ss_err_str` function 
+could be used to get a static read-only string containing a textual representation of an error code.
 
 ```c
 typedef enum ss_err {
