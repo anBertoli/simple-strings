@@ -1,20 +1,19 @@
 # Simple Strings
 
-## How the library works
-
-Simple Strings (_ss_) is a string library for C designed to augment the libc string functionalities by 
-adding dynamic and heap allocated strings. Those strings are easier to use and resemble the dynamic 
+Simple Strings (_ss_) is a string library for C designed to augment the libc string functionalities by
+adding dynamic and heap allocated strings. Those strings are easier to use and resemble the dynamic
 string types of other programming languages.
+
+## How the library works
 
 At the core of the _ss_ strings library there is the string type defined as the struct showed below. 
 This struct represents a dynamic and heap allocated string. The string buffer itself is pointed to by 
-the `buf`pointer, has length `len` (the `len`-th char is the null terminator) and has additional `free` 
-bytes allocated and ready to be used in further string manipulation. Functions that instantiate the 
-strings return pointers to them (the `ss` type defined below). Both the struct and the string buffer 
-are heap allocated.
+the `buf` pointer, has length `len` (the `len`-th char is the null terminator) and has additional `free` 
+bytes allocated and ready to be used in further string manipulation. Functions that instantiate strings
+return pointers to them (the `ss` type). Both the struct and the string buffer are heap allocated.
 
 ```c
-typedef struct ss {
+typedef struct {
     size_t len;
     size_t free;
     char *buf;
@@ -22,9 +21,9 @@ typedef struct ss {
 ```
 
 The _ss_ strings are generated and returned via dedicated constructor functions and they are usually 
-manipulated with the library functions. As a unique and obvious exception, the `buf` field is safer 
-to be read and write until the position `len-1`, i.e. one can write to the string buffer starting at 
-the position `ss->buf[0]` until `ss->buf[ss->len-1]`. If you need to write directly into the string 
+manipulated using the functions of the library. As a unique and obvious exception, the `buf` field is 
+safer to be read and write until the position `len-1`, i.e. one can write to the string buffer starting
+at the position `ss->buf[0]` until `ss->buf[ss->len-1]`. If you need to write directly into the string 
 buffer make sure the buffer itself has enough space (otherwise grow it with the dedicated `ss_grow`
 function). The functions of the library automatically handle the allocated space and the fields mentioned
 above to both perform the needed operations and maintain the string state consistent. In any case, 
