@@ -55,12 +55,13 @@ The library offers a wide range of functions, both higher level functions for ea
 but also a set of low level utilities that make possible to optimize code for high performance and
 reduce drastically the penalty for using a higher level string library. In general, the functions of
 the library preallocate additional memory to reduce the probability of future reallocations when the 
-strings are manipulated. These low level details can be tuned using specific functions. The 
-`ss_new_from_raw_len_free` constructor, as an example, allows to specify the amount of available but 
-still unused memory, while `ss_reserve_free_space` controls the same parameter but for strings already 
-created. The general line followed is to reduce the number of allocations not the quantity of memory 
-allocated for performance reasons. Still, programs that need a minimal memory footprint can use those 
-low-level functions to control the memory usage in very detail.
+strings are manipulated. 
+
+The low level details can be tuned using specific functions. The `ss_new_from_raw_len_free` constructor,
+as an example, allows to specify the amount of available but still unused memory, while `ss_reserve_free_space` 
+controls the same parameter but for strings already created. The general line followed is to reduce the 
+number of allocations not the quantity of memory allocated for performance reasons. Still, programs that
+need a minimal memory footprint can use those low-level functions to control the memory usage in very detail.
 
 ## Error handling
 
