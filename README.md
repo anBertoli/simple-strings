@@ -76,18 +76,18 @@ typedef enum ss_err {
 
 ## Installation
 
-Library installation requires CMake version 3.10 or higher. A convenient setup script is provided to
-install the library. The script is the `setup.sh` file at the root of the project. The script could
-also be used to test the library before installing it (recommended). To install the library run the
-following command in the root of the directory.
+Library installation requires CMake version 3.10 or higher. A convenient setup script could be used to 
+easily install the library. The script is the `setup.sh` file in project root. The script could also
+be used to test the library before installing it (recommended). To install the library run the following
+command in the root of the project.
 
 ```shell
 ./setup.sh install
 ```
 
-The options `--with-exit` could be used to customize the installation. If used, the library functions
-will abort the program in case of allocation errors (if malloc/realloc fail). In this case there's no
-need to check for `ss_err` errors returned from several functions of the library.
+The options `--with-exit` could be used to customize the installation. If used, the functions of the 
+library abort the program in case of allocation errors (mainly malloc/realloc failures). In this case 
+there's no need to check for `ss_err` errors or NULL values returned from the library functions.
 
 ```shell
 ./setup.sh install --with-exit
