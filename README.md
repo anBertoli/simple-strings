@@ -37,25 +37,17 @@ After use, they must be freed passing the `ss` string to the `ss_free` function.
 creates a new string, also that new string must be freed after use. Similarly, string lists must be 
 freed after use with the dedicated `ss_list_free` function.
 
-This is a simple example of using _ss_ strings: 
+This is a basic example using _ss_ strings: 
 ```c
 ss name = ss_new_from_raw("John");
 if (!name) {
     // ... handle error
 }
 
-printf("len: %d, %s\n", name->len, name->buf);
-// Output: 4, John
-
-ss_err err = ss_concat_raw(name, " Dover");
-if (err) {
-    // ... handle error
-}
-
-printf("len: %d, %s\n", name->len, name->buf);
-// Output: 10, John Dover
-
+printf("len: %d, free: %d, buf: %s\n", name->len, name->free, name->buf);
 ss_free(name);
+
+// Output: len 4, free: 4, buf: John
 ```
 
 ## Error handling
@@ -63,6 +55,8 @@ ss_free(name);
 Some operations on strings can fail due to allocations errors. Those functions could return an error in
 the form of a `ss_err` type, defined similarly the enum below. If the function is successful it returns 
 `err_none`, which has value zero in the enum and could be conveniently tested with a `if (err)` statement. 
+Note that if the library is compiled with the `--with-exit` flag, memory allocations errors will abort the 
+program and there's no need to check errors.
 
 ```c
 typedef enum ss_err {
@@ -70,6 +64,36 @@ typedef enum ss_err {
     err_alloc = 1,
     err_format = 2
 } ss_err;
+```
+
+This is a simple example of string manipulations and errors checking:
+```c
+ss first_name = ss_new_from_raw("John");
+if (!name) {
+    // ... handle error
+}
+ss_err err = ss_concat_raw(first_name, " Dover");
+if (err) {
+    printf("error: %s\n", ss_err_str(err))
+    return;
+}
+
+printf("len: %d, free: %d, buf: %s\n", name->len, name->free, name->buf);
+ss_free(name);
+
+// Output: len 10, free: 10, buf: John Dover
+```
+
+If you don't need/want to check the returned errors or the library is compiled with the `--with-exit` 
+flag, the example will simplify to:
+```c
+ss first_name = ss_new_from_raw("John");
+ss_concat_raw(first_name, " Dover");
+
+printf("len: %d, free: %d, buf: %s\n", name->len, name->free, name->buf);
+ss_free(name);
+
+// Output: len 10, free: 10, buf: John Dover
 ```
 
 ## Installation
