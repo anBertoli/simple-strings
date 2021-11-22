@@ -55,8 +55,8 @@ ss_free(name);
 Some operations on strings can fail due to allocations errors. Those functions could return an error in
 the form of a `ss_err` type, defined similarly the enum below. If the function is successful it returns 
 `err_none`, which has value zero in the enum and could be conveniently tested with a `if (err)` statement. 
-Note that if the library is compiled with the `--with-exit` flag, memory allocations errors will abort the 
-program and there's no need to check errors.
+Note that if the library is compiled with the `--with-exit` flag, memory allocations errors will abort 
+the program and there's no need to check errors.
 
 ```c
 typedef enum ss_err {
@@ -97,6 +97,33 @@ ss_free(name);
 ```
 
 ## Installation
+
+Library installation requires CMake version 3.10 or higher. A convenient setup script is provided to
+install the library. The script is the `setup.sh` file at the root of the project. The script could
+also be used to test the library before installing it (recommended). To install the library run the
+following command in the root of the directory.
+
+```shell
+./setup.sh install
+```
+
+The options `--with-exit` could be used to customize the installation. If used, the library functions
+will abort the program in case of allocation errors (if malloc/realloc fail). In this case there's no
+need to check for `ss_err` errors returned from several functions of the library.
+
+```shell
+./setup.sh install --with-exit
+```
+
+Finally, it is recommended to run the unit tests before installing the library. This can be done with
+the following command.
+
+```shell
+./setup.sh test --with-exit
+```
+
+
+
 # Library API
 ## Index
 [`ss_new_from_raw_len_free`](#ss_new_from_raw_len_free)  
