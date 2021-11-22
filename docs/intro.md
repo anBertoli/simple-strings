@@ -48,7 +48,7 @@ ss_prepend_raw("My name is: ", name);
 printf("len: %d buf: %s\n", name->len, name->buf);
 ss_free(name);
 
-// Output: len 22, buf: My name is: John Dover
+// Output: len: 22 buf: 'My name is: John Dover'
 ```
 
 ## Error handling
