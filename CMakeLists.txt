@@ -30,14 +30,24 @@ target_include_directories(ss PUBLIC
 # a unique file header file, which is more ergonomic.
 file(WRITE tmp/ss.h "")
 
+file(READ src/string_err.h CONTENTS)
+file(APPEND tmp/ss.h "${CONTENTS}")
 file(READ src/string.h CONTENTS)
 file(APPEND tmp/ss.h "${CONTENTS}")
 file(READ src/string_fmt.h CONTENTS)
 file(APPEND tmp/ss.h "${CONTENTS}")
 file(READ src/string_split.h CONTENTS)
 file(APPEND tmp/ss.h "${CONTENTS}")
-file(READ src/string_err.h CONTENTS)
-file(APPEND tmp/ss.h "${CONTENTS}")
+
+
+file (STRINGS tmp/ss.h LINES)
+file(WRITE tmp/ss.h "")
+
+foreach(LINE ${LINES})
+    string(REGEX REPLACE "#include \"string.h\"" "" CLEANED "${LINE}")
+    string(REGEX REPLACE "#include \"string_err.h\"" "" CLEANED "${CLEANED}")
+    file(APPEND tmp/ss.h "${CLEANED}\n")
+endforeach()
 
 # Install the library (usually /usr/local/lib/libss.a)
 # and the header file (usually /usr/local/include/ss.h).
