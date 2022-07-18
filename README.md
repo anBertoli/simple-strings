@@ -1,14 +1,14 @@
 # Simple Strings
 
-## Index
+Simple Strings (_ss_) is a string library for C designed to augment the libc string functionalities by
+adding dynamic and heap allocated strings. Those strings are easier to use and resemble the dynamic
+string types of other programming languages.
+
+### Index
 - [how the library works](<#How-the-library-works>)
 - [error handling](<#Error-handling>)
 - [installation](<#Installation>)
 - [library API](<#Library-API>)
-
-Simple Strings (_ss_) is a string library for C designed to augment the libc string functionalities by
-adding dynamic and heap allocated strings. Those strings are easier to use and resemble the dynamic
-string types of other programming languages.
 
 ## How the library works
 
